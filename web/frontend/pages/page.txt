@@ -1,0 +1,33 @@
+12/3/24
+
+status change api 
+star rating display (on dashboard and details page)
+unpublished and spam status display
+loading spinner and loading skeleton
+
+
+13/3/24
+
+* bulk actions api on dashboard : 
+( unpublish , publish , unspam , delete reviews)
+*created metafield api for product
+*display rating and reviews from metafield
+*product page table
+
+
+14/3/24
+
+*product page design
+*product page table data
+*product review api 
+
+
+15/3/24
+
+* product page bulk actions ( publish review , unpublish , delete review)
+* pulished and unpublished review count on product page 
+* average rating on product page 
+*product details api for details page 
+*product description detail on details page
+
+
