@@ -5,7 +5,8 @@ import {
   , ColorPicker, TextField, Button, Tooltip, Popover, Select, DataTable
 } from '@shopify/polaris'
 import { useAuthenticatedFetch } from '../hooks';
-import {Modal} from '@shopify/app-bridge-react';
+import {Modal , useToast} from '@shopify/app-bridge-react';
+
 export default function Settings() {
 
   const [starValue, setStarValue] = useState('themecolor');
@@ -103,6 +104,7 @@ export default function Settings() {
 
   //******** variables********
 
+  const {show} = useToast();
   let type = ['autopublish', 'emailSettings', 'starIconColor', 'reviewListingLayout', 'reviewListingText', 'reviewFormText', 'badgeText']
   let data = [{ type: 'autopublish', setting: AutopublishSetting },
   { type: 'emailSettings', setting: emailSetting },
@@ -198,7 +200,7 @@ export default function Settings() {
       body: JSON.stringify({ data }),
     })
       .then(res => res.json())
-      .then(data => {console.log((data))});
+      .then(data => {show('settings saved!', {duration: 2000})});
 
   }
 
@@ -212,7 +214,7 @@ export default function Settings() {
 
     fetch(`/api/settings/resetSettings`)
       .then(res => res.json())
-      .then(data => setFormData(data))
+      .then(data => {setFormData(data),show(' successfully reset setting!', {duration: 2000})})
   }
 
   const test = () => {
@@ -953,12 +955,13 @@ export default function Settings() {
            }
           ]}
              />
+             {/* <Toast content="Success!" duration={2000}/> */}
             <Button size='large' onClick={()=>setIsModalOpen(true)}> Reset all settings to default</Button>
             <Button size='large'> Export deleted reviews</Button>
             <Button size='large' onClick={() => saveSettings()}> Save </Button>
           </InlineStack>
         </BlockStack>
-        <Button onClick={() => test()}> test</Button>
+        <Button onClick={() => {	show('Success! 🎉', {duration: 2000, onDismiss: () => console.log('👋 Toast dismissed')})}}> test</Button>
         <Button onClick={() => test2()}> test2</Button>
         <Button onClick={() => getSettings()}> get Settings</Button>
       </Page>

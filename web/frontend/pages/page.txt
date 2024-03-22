@@ -56,7 +56,7 @@ loading spinner and loading skeleton
 *update settings api 
 *reset to default api 
 *save and update frontend part 
-
+*toast message after saving or reset settings
 
 
 //////////////

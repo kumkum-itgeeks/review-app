@@ -6,7 +6,7 @@ import { ImportIcon, ExportIcon } from '@shopify/polaris-icons';
 import { useTranslation, Trans } from "react-i18next";
 import { useAuthenticatedFetch } from "../hooks";
 import { useState, useCallback, useEffect } from 'react';
-import { useNavigate } from "@shopify/app-bridge-react";
+import { useNavigate , useToast } from "@shopify/app-bridge-react";
 import emptyStar from '../assets/star-regular.svg'
 import solidStar from '../assets/star-solid.svg'
 import '../css/index.css'
@@ -68,6 +68,7 @@ export default function HomePage() {
 
   //********variables********
 
+  const {show}=useToast;
   const { t } = useTranslation();
   const stars = [1, 2, 3, 4, 5];
   const star = 3;
@@ -94,25 +95,25 @@ export default function HomePage() {
   const deleteReview = () => {
     fetch(`/api/review/deleteReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => getAllReviews());
+      .then(data => {getAllReviews(),show(' review deleted ', {duration: 2000})});
   }
 
   const unSpamReview = () => {
     fetch(`/api/review/unSpam/${selectedResources}`)
       .then(res => res.json())
-      .then(data => getAllReviews());
+      .then(data => {getAllReviews(),show(' review unspammed! ', {duration: 2000})});
   }
 
   const publishReview = () => {
     fetch(`/api/review/publishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => getAllReviews());
+      .then(data => {getAllReviews(),show(' review published! ', {duration: 2000})});
   }
 
   const unpublishReview = () => {
     fetch(`/api/review/unpublishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => getAllReviews());
+      .then(data => {getAllReviews(),show(' review unpublished! ', {duration: 2000})});
   }
 
   const createTable = () => {
