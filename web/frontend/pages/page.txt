@@ -51,6 +51,14 @@ loading spinner and loading skeleton
 * get setting data api
 * set the data in frontend
 
+22/3/24
+
+*update settings api 
+*reset to default api 
+*save and update frontend part 
+
+
+
 //////////////
 
   

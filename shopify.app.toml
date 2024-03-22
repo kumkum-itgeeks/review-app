@@ -2,7 +2,7 @@
 
 client_id = "c8b76d8cdccd39ae45b847901d4b4fb3"
 name = "reviews"
-application_url = "https://shapes--prisoner-at.trycloudflare.com"
+application_url = "https://wn-kansas-electoral-finder.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://shapes--prisoner-at.trycloudflare.com/auth/callback",
-  "https://shapes--prisoner-at.trycloudflare.com/auth/shopify/callback",
-  "https://shapes--prisoner-at.trycloudflare.com/api/auth/callback"
+  "https://wn-kansas-electoral-finder.trycloudflare.com/auth/callback",
+  "https://wn-kansas-electoral-finder.trycloudflare.com/auth/shopify/callback",
+  "https://wn-kansas-electoral-finder.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

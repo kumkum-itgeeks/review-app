@@ -41,6 +41,8 @@ const createReviewsTable = async (_req, res) => {
       reviewStatus VARCHAR(255), 
       isSpam BOOLEAN DEFAULT 0,
       starRating INT(5),
+      created_at TIMESTAMP NOT NULL,
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
       data JSON,
       PRIMARY KEY (id)
       )`;
@@ -72,6 +74,8 @@ const createDetailTable = async (_req, res) => {
       reviewStatus VARCHAR(255),
       starRating INT(5),
       reply LONGTEXT,
+      created_at TIMESTAMP NOT NULL,
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
       PRIMARY KEY (id)
       )`;
   con.query(sql, function (err, result) {

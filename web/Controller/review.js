@@ -61,83 +61,42 @@ const getAllReviews = (req, res) => {
     if (SearchValue.length <= 0) {
         //check if selected all reviews as filter
         if (status == 'All Reviews') {
-            //checking direction of sort
-            if (sortStr.includes('asc')) {
-                con.query(`SELECT * FROM ${reviewTable} ORDER BY ${sortStr.replace(" asc", "")} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
-            }
-            else {
-                con.query(`SELECT * FROM ${reviewTable} ORDER BY ${sortStr.replace(" desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-            }
         }
         else if (status == 'Spam') {
 
-            if (sortStr.includes('asc')) {
-                con.query(`SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 ORDER BY ${sortStr.replace(" asc", "")} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
-            }
-            else {
-                con.query(`SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 ORDER BY ${sortStr.replace(" desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-            }
+            
         }
         else {
 
-            if (sortStr.includes('asc')) {
-                con.query(`SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' ORDER BY ${sortStr.replace(" asc", "")} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
-            }
-            else {
-                con.query(`SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' ORDER BY ${sortStr.replace(" desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-            }
         }
     }
     else {
         if (status == 'All Reviews') {
-            if (sortStr.includes('asc')) {
 
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' ORDER BY ${sortStr.replace(" asc", "")}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' ORDER BY ${sortStr}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
-            }
-            else{
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' ORDER BY ${sortStr.replace(" desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-            }
+       
         }
         else {
 
-            if (sortStr.includes('asc')) {
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND reviewStatus='${status}' ORDER BY ${sortStr.replace("asc", "")}   LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND reviewStatus='${status}' ORDER BY ${sortStr}   LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
-            }
-
-            else{
-
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND reviewStatus='${status}' ORDER BY ${sortStr.replace(" desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-            }
         }
     }
 }
@@ -265,83 +224,44 @@ const getAllProductReviews = (req,res) => {
     if (SearchValue.length <= 0) {
         //check if selected all reviews as filter
         if (status == 'All Reviews') {
-            //checking direction of sort
-            if (sortStr.includes('asc')) {
-                con.query(`SELECT * FROM ${reviewTable} WHERE productid = ${id} ORDER BY ${sortStr.replace("asc", "")} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+           
+                con.query(`SELECT * FROM ${reviewTable} WHERE productid = ${id} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
-            }
-            else {
-                con.query(`SELECT * FROM ${reviewTable} WHERE productid = ${id} ORDER BY ${sortStr.replace("desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-            }
+           
         }
         else if (status == 'Spam') {
 
-            if (sortStr.includes('asc')) {
-                con.query(`SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 AND productid = ${id} ORDER BY ${sortStr.replace("asc", "")} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 AND productid = ${id} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
-            }
-            else {
-                con.query(`SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 AND productid = ${id} ORDER BY ${sortStr.replace("desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-            }
+        
         }
         else {
 
-            if (sortStr.includes('asc')) {
-                con.query(`SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' AND productid = ${id} ORDER BY ${sortStr.replace("asc", "")} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' AND productid = ${id} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
-            }
-            else {
-                con.query(`SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' AND productid = ${id} ORDER BY ${sortStr.replace("desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-            }
         }
     }
     else {
         if (status == 'All Reviews') {
-            if (sortStr.includes('asc')) {
 
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND productid = ${id} ORDER BY ${sortStr.replace("asc", "")}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND productid = ${id} ORDER BY ${sortStr}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
-            }
-            else{
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND productid = ${id} ORDER BY ${sortStr.replace("desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-            }
+      
         }
         else {
-
-            if (sortStr.includes('asc')) {
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND  reviewStatus='${status}' AND productid = ${id} ORDER BY ${sortStr.replace("asc", "")}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND  reviewStatus='${status}' AND productid = ${id} ORDER BY ${sortStr}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
-
-            }
-            else{
-
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND  reviewStatus='${status}' AND productid = ${id} ORDER BY ${sortStr.replace("desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-            }
+       
         }
     }
 }
