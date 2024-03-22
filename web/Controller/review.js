@@ -9,13 +9,13 @@ import { con } from '../index.js';
 
 
 
-const totalReviews = async (req, res) => {
+const totalReviews = (req, res) => {
     const status = req.params.status;
     const shop = res.locals.shopify.session.shop;
     let shopLowercase = shop.toLowerCase();
     let removeSuffix = shopLowercase.replace(".myshopify.com", "");
     let shopName = removeSuffix.replace("-", "_");
-    let reviewTable = shopName + '_reviews'
+    let reviewTable = shopName + '_review'
     let detailTable = shopName + '_details'
     if (status == 'All') {
         con.query(`SELECT * FROM ${reviewTable}`, function (err, result) {
@@ -54,7 +54,7 @@ const getAllReviews = (req, res) => {
     let shopLowercase = shop.toLowerCase();
     let removeSuffix = shopLowercase.replace(".myshopify.com", "");
     let shopName = removeSuffix.replace("-", "_");
-    let reviewTable = shopName + '_reviews'
+    let reviewTable = shopName + '_review'
     let detailTable = shopName + '_details'
 
     //check if search
@@ -63,13 +63,13 @@ const getAllReviews = (req, res) => {
         if (status == 'All Reviews') {
             //checking direction of sort
             if (sortStr.includes('asc')) {
-                con.query(`SELECT * FROM ${reviewTable} ORDER BY ${sortStr.replace("asc", "")} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable} ORDER BY ${sortStr.replace(" asc", "")} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
             }
             else {
-                con.query(`SELECT * FROM ${reviewTable} ORDER BY ${sortStr.replace("desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable} ORDER BY ${sortStr.replace(" desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
@@ -78,13 +78,13 @@ const getAllReviews = (req, res) => {
         else if (status == 'Spam') {
 
             if (sortStr.includes('asc')) {
-                con.query(`SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 ORDER BY ${sortStr.replace("asc", "")} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 ORDER BY ${sortStr.replace(" asc", "")} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
             }
             else {
-                con.query(`SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 ORDER BY ${sortStr.replace("desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 ORDER BY ${sortStr.replace(" desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
@@ -93,13 +93,13 @@ const getAllReviews = (req, res) => {
         else {
 
             if (sortStr.includes('asc')) {
-                con.query(`SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' ORDER BY ${sortStr.replace("asc", "")} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' ORDER BY ${sortStr.replace(" asc", "")} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
             }
             else {
-                con.query(`SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' ORDER BY ${sortStr.replace("desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' ORDER BY ${sortStr.replace(" desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
@@ -110,13 +110,13 @@ const getAllReviews = (req, res) => {
         if (status == 'All Reviews') {
             if (sortStr.includes('asc')) {
 
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' ORDER BY ${sortStr.replace("asc", "")}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' ORDER BY ${sortStr.replace(" asc", "")}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
             }
             else{
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' ORDER BY ${sortStr.replace("desc", "")}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' ORDER BY ${sortStr.replace(" desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
@@ -125,7 +125,7 @@ const getAllReviews = (req, res) => {
         else {
 
             if (sortStr.includes('asc')) {
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND reviewStatus='${status}' ORDER BY ${sortStr.replace("asc", "")}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND reviewStatus='${status}' ORDER BY ${sortStr.replace("asc", "")}   LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
@@ -133,7 +133,7 @@ const getAllReviews = (req, res) => {
 
             else{
 
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND reviewStatus='${status}' ORDER BY ${sortStr.replace("desc", "")}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND reviewStatus='${status}' ORDER BY ${sortStr.replace(" desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
@@ -143,13 +143,13 @@ const getAllReviews = (req, res) => {
 }
 
 
-const getReviews = async (req, res) => {
+const getReviews = (req, res) => {
     const status = req.params.status;
     const shop = res.locals.shopify.session.shop;
     let shopLowercase = shop.toLowerCase();
     let removeSuffix = shopLowercase.replace(".myshopify.com", "");
     let shopName = removeSuffix.replace("-", "_");
-    let reviewTable = shopName + '_reviews'
+    let reviewTable = shopName + '_review'
     let detailTable = shopName + '_details'
 
     con.query(`SELECT * FROM ${reviewTable} WHERE reviewStatus='${status}'`, function (err, result) {
@@ -159,13 +159,13 @@ const getReviews = async (req, res) => {
     })
 }
 
-const deleteReview = async (req, res) => {
+const deleteReview =(req, res) => {
     const id = req.params.id;
     const shop = res.locals.shopify.session.shop;
     let shopLowercase = shop.toLowerCase();
     let removeSuffix = shopLowercase.replace(".myshopify.com", "");
     let shopName = removeSuffix.replace("-", "_");
-    let reviewTable = shopName + '_reviews'
+    let reviewTable = shopName + '_review'
     let detailTable = shopName + '_details'
 
 
@@ -177,13 +177,13 @@ const deleteReview = async (req, res) => {
 
 }
 
-const UnSpamReview = async (req, res) => {
+const UnSpamReview =  (req, res) => {
     const id = req.params.id;
     const shop = res.locals.shopify.session.shop;
     let shopLowercase = shop.toLowerCase();
     let removeSuffix = shopLowercase.replace(".myshopify.com", "");
     let shopName = removeSuffix.replace("-", "_");
-    let reviewTable = shopName + '_reviews'
+    let reviewTable = shopName + '_review'
     let detailTable = shopName + '_details'
 
 
@@ -200,7 +200,7 @@ const publishReview = (req, res) => {
     let shopLowercase = shop.toLowerCase();
     let removeSuffix = shopLowercase.replace(".myshopify.com", "");
     let shopName = removeSuffix.replace("-", "_");
-    let reviewTable = shopName + '_reviews'
+    let reviewTable = shopName + '_review'
     let detailTable = shopName + '_details'
 
 
@@ -217,7 +217,7 @@ const unpublishReview = (req, res) => {
     let shopLowercase = shop.toLowerCase();
     let removeSuffix = shopLowercase.replace(".myshopify.com", "");
     let shopName = removeSuffix.replace("-", "_");
-    let reviewTable = shopName + '_reviews'
+    let reviewTable = shopName + '_review'
     let detailTable = shopName + '_details'
 
     const query = `UPDATE ${reviewTable} SET reviewStatus = 'Unpublished' WHERE id IN (${id});UPDATE ${detailTable} SET reviewStatus = 'Unpublished' WHERE id IN (${id}) `
@@ -233,7 +233,7 @@ const getProductReviews = (req, res) => {
     let shopLowercase = shop.toLowerCase();
     let removeSuffix = shopLowercase.replace(".myshopify.com", "");
     let shopName = removeSuffix.replace("-", "_");
-    let reviewTable = shopName + '_reviews'
+    let reviewTable = shopName + '_review'
     let detailTable = shopName + '_details'
 
     const query = `SELECT * FROM ${detailTable} WHERE productid=${id}`
@@ -258,7 +258,7 @@ const getAllProductReviews = (req,res) => {
     let shopLowercase = shop.toLowerCase();
     let removeSuffix = shopLowercase.replace(".myshopify.com", "");
     let shopName = removeSuffix.replace("-", "_");
-    let reviewTable = shopName + '_reviews'
+    let reviewTable = shopName + '_review'
     let detailTable = shopName + '_details'
 
     //check if search
@@ -320,7 +320,7 @@ const getAllProductReviews = (req,res) => {
                 })
             }
             else{
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND productid = ${id} ORDER BY ${sortStr.replace("desc", "")}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND productid = ${id} ORDER BY ${sortStr.replace("desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })
@@ -337,7 +337,7 @@ const getAllProductReviews = (req,res) => {
             }
             else{
 
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND  reviewStatus='${status}' AND productid = ${id} ORDER BY ${sortStr.replace("desc", "")}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND  reviewStatus='${status}' AND productid = ${id} ORDER BY ${sortStr.replace("desc", "")} DESC LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
                     if (err) throw err;
                     res.send(JSON.stringify(result));
                 })

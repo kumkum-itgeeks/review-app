@@ -11,8 +11,13 @@ import sql from 'mysql';
 import reviewRoutes from './Routes/review.js'
 import tableRoutes from './Routes/table.js'
 import detailsRoute from './Routes/details.js'
+import settingsRoute from './Routes/settings.js'
+// import createReviewsTable from './Controller/table.js'
+// import TableController from './Controller/table.js'
 // import ShopifyApi from 'shopify-api-node';
 
+
+// TableController.createReviewsTable()
 export const con = sql.createConnection({
   host: "localhost",
   user: "root",
@@ -39,6 +44,7 @@ const STATIC_PATH =
     : `${process.cwd()}/frontend/`;
 
 const app = express();
+const router=express.Router()
 
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
@@ -59,9 +65,22 @@ app.post(
 // If you are adding routes outside of the /api path, remember to
 // also add a proxy rule for them in web/frontend/vite.config.js
 
-app.use("/api/*", shopify.validateAuthenticatedSession());
+app.use("/api/*", shopify.validateAuthenticatedSession(), getShopName);
 
 app.use(express.json());
+
+async function getShopName (req,res,next){
+
+  const shop = await res.locals.shopify.session.shop;
+  let shopLowercase = shop.toLowerCase();
+  let removeSuffix = shopLowercase.replace(".myshopify.com", "");
+  let shopName = removeSuffix.replace("-", "_");
+  req.shopname=shopName;
+
+  next()
+  // Send the shopName or reviewTable back in the response
+  // res.json({ shop, reviewTable });
+}
 
 app.get('/api/createReviewTable', async (_req, res) => {
 
@@ -69,7 +88,7 @@ app.get('/api/createReviewTable', async (_req, res) => {
   let shopLowercase = shop.toLowerCase();
   let removeSuffix = shopLowercase.replace(".myshopify.com", "");
   let shopName = removeSuffix.replace("-", "_");
-  let tableName = shopName + '_reviews'
+  let tableName = shopName + '_reviewss'
 
   var sql = `CREATE TABLE IF NOT EXISTS ${tableName}  (
     id INT NOT NULL AUTO_INCREMENT,
@@ -78,7 +97,7 @@ app.get('/api/createReviewTable', async (_req, res) => {
     userName VARCHAR(255),
     productid INT(100),
     productHandle VARCHAR(255),
-    datePosted DATETIME DEFAULT NOW(),
+    datePosted DATE DEFAULT NOW(),
     reviewStatus VARCHAR(255),
     starRating VARCHAR(255),
     data JSON,
@@ -102,11 +121,54 @@ app.use('/api/table',tableRoutes);
 // details middleware
 app.use('/api/details',detailsRoute);
 
+// settings middleware
+app.use('/api/settings',settingsRoute);
+
+
+////
+
+
+
+// app.post('shopify/install', async (_req, res) => {
+
+//   const shop = res.locals.shopify.session.shop;
+//   let shopLowercase = shop.toLowerCase();
+//   let removeSuffix = shopLowercase.replace(".myshopify.com", "");
+//   let shopName = removeSuffix.replace("-", "_");
+//   let tableName = shopName + '_ress'
+
+//   var sql = `CREATE TABLE IF NOT EXISTS ${tableName}  (
+//     id INT NOT NULL AUTO_INCREMENT,
+//     reviewTitle VARCHAR(200),
+//     reviewDescription LONGTEXT,
+//     userName VARCHAR(255),
+//     productid INT(100),
+//     productHandle VARCHAR(255),
+//     datePosted DATE DEFAULT NOW(),
+//     reviewStatus VARCHAR(255),
+//     starRating VARCHAR(255),
+//     data JSON,
+//     PRIMARY KEY (id)
+//     )`;
+//   con.query(sql, function (err, result) {
+//     if (err) throw err;
+//     console.log("Table created");
+//     res.send(result);
+//   });
+
+// })
+
+/////
+
 app.get("/api/products/count", async (_req, res) => {
   const countData = await shopify.api.rest.Product.count({
     session: res.locals.shopify.session,
   });
   res.status(200).send(countData);
+});
+app.get("/api/test", async (_req, res) => {
+
+  res.status(200).send('countData');
 });
 
 app.get("/api/products/create", async (_req, res) => {
@@ -137,18 +199,23 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
     .status(200)
     .set("Content-Type", "text/html")
     .send(readFileSync(join(STATIC_PATH, "index.html")));
-});
+}, );
 
-app.post('/install', async (_req, res) => {
-  const shop = res.locals.shopify.session.shop;
-  let shopLowercase = shop.toLowerCase();
-  let tableName = shopLowercase.replace("-", "_");
+// async function createTable(req, res ,next){
+//   const shop = res.locals.shopify.session.shop;
+//   let shopLowercase = shop.toLowerCase();
+//   let removeSuffix = shopLowercase.replace(".myshopify.com", "");
+//   let shopName = removeSuffix.replace("-", "_");
+//   let Table = shopName + '_test'
 
-  var sql = `CREATE TABLE ${tableName}_reviews IF NOT EXISTS (name VARCHAR(255), address VARCHAR(255));`;
-  con.query(sql, function (err, result) {
-    if (err) throw err;
-    console.log("Table created");
-  });
-})
+
+//   var sql = `CREATE TABLE ${Table} IF NOT EXISTS (name VARCHAR(255), address VARCHAR(255));`;
+//   con.query(sql, function (err, result) {
+//     if (err) throw err;
+//     console.log("Table created");
+//   });
+//   next()
+// }
+
 
 app.listen(PORT);

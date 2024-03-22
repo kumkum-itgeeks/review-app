@@ -32,7 +32,7 @@ const changeStatus=async(req,res)=>{
     let removeSuffix = shopLowercase.replace(".myshopify.com", "");
     let shopName = removeSuffix.replace("-", "_");
     let detailTable = shopName + '_details'
-    let reviewtable = shopName + '_reviews'
+    let reviewtable = shopName + '_review'
     // res.send(JSON.stringify(status))
     // return;
     if(status=='Published'){

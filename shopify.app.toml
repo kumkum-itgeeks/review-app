@@ -2,7 +2,7 @@
 
 client_id = "c8b76d8cdccd39ae45b847901d4b4fb3"
 name = "reviews"
-application_url = "https://gb-compression-terrorism-bears.trycloudflare.com"
+application_url = "https://shapes--prisoner-at.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://gb-compression-terrorism-bears.trycloudflare.com/auth/callback",
-  "https://gb-compression-terrorism-bears.trycloudflare.com/auth/shopify/callback",
-  "https://gb-compression-terrorism-bears.trycloudflare.com/api/auth/callback"
+  "https://shapes--prisoner-at.trycloudflare.com/auth/callback",
+  "https://shapes--prisoner-at.trycloudflare.com/auth/shopify/callback",
+  "https://shapes--prisoner-at.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

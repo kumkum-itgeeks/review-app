@@ -1,17 +1,13 @@
 import {
-  Text, Page, Button, TextField, IndexTable, IndexFilters, useSetIndexFiltersMode,
-  useIndexResourceState, ChoiceList, RangeSlider, Badge, useBreakpoints,
-  Divider, Box, Link, Icon, InlineStack, Image
+  Text, Page, Button,  IndexTable, IndexFilters, useSetIndexFiltersMode, useIndexResourceState, 
+  Badge, useBreakpoints, Box, Link, InlineStack, Image, Pagination,BlockStack
 } from "@shopify/polaris";
 import { ImportIcon, ExportIcon } from '@shopify/polaris-icons';
 import { useTranslation, Trans } from "react-i18next";
-import { TitleBar } from "@shopify/app-bridge-react";
 import { useAuthenticatedFetch } from "../hooks";
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from "@shopify/app-bridge-react";
-import { StarFilledIcon, StarIcon } from '@shopify/polaris-icons';
 import emptyStar from '../assets/star-regular.svg'
-import HalfStar from '../assets/star-half.svg'
 import solidStar from '../assets/star-solid.svg'
 import '../css/index.css'
 
@@ -46,6 +42,7 @@ export default function HomePage() {
   useEffect(() => {
 
     getTotalRows();
+    setPageNumber(1);
   }, [reviewStatus])
 
 
@@ -88,33 +85,34 @@ export default function HomePage() {
   //*******functions**********
 
   const createMetafield = () => {
-    fetch('/api/table/getMetafields')
+    fetch('/api/table/createReviewTable')
       .then(res => res.json())
       .then(data => console.log(data));
+    console.log('err')
   }
 
-  const deleteReview=()=>{
+  const deleteReview = () => {
     fetch(`/api/review/deleteReview/${selectedResources}`)
-    .then(res => res.json())
-    .then(data => getAllReviews());
+      .then(res => res.json())
+      .then(data => getAllReviews());
   }
 
-  const unSpamReview=()=>{
+  const unSpamReview = () => {
     fetch(`/api/review/unSpam/${selectedResources}`)
-    .then(res => res.json())
-    .then(data => getAllReviews());
+      .then(res => res.json())
+      .then(data => getAllReviews());
   }
 
-  const publishReview=()=>{
+  const publishReview = () => {
     fetch(`/api/review/publishReview/${selectedResources}`)
-    .then(res => res.json())
-    .then(data => getAllReviews());
+      .then(res => res.json())
+      .then(data => getAllReviews());
   }
 
-  const unpublishReview=()=>{
+  const unpublishReview = () => {
     fetch(`/api/review/unpublishReview/${selectedResources}`)
-    .then(res => res.json())
-    .then(data => getAllReviews());
+      .then(res => res.json())
+      .then(data => getAllReviews());
   }
 
   const createTable = () => {
@@ -152,33 +150,6 @@ export default function HomePage() {
     }
   }
 
-  const onCreateNewView = async (value) => {
-    await sleep(500);
-    setItemStrings([...itemStrings, value]);
-    setSelected(itemStrings.length);
-    return true;
-  };
-
-  function disambiguateLabel(key, value) {
-    switch (key) {
-      case 'moneySpent':
-        return `Money spent is between $${value[0]} and $${value[1]}`;
-      case 'taggedWith':
-        return `Tagged with ${value}`;
-      case 'accountStatus':
-        return (value).map((val) => `Customer ${val}`).join(', ');
-      default:
-        return value;
-    }
-  }
-
-  function isEmpty(value) {
-    if (Array.isArray(value)) {
-      return value.length === 0;
-    } else {
-      return value === '' || value == null;
-    }
-  }
 
   const onHandleCancel = () => { };
 
@@ -187,18 +158,7 @@ export default function HomePage() {
     return true;
   };
 
-  const handleAccountStatusChange = useCallback(
-    (value) => setAccountStatus(value),
-    [],
-  );
-  const handleMoneySpentChange = useCallback(
-    (value) => setMoneySpent(value),
-    [],
-  );
-  const handleTaggedWithChange = useCallback(
-    (value) => setTaggedWith(value),
-    [],
-  );
+
   const handleFiltersQueryChange = useCallback(
     (value) => setQueryValue(value),
     [],
@@ -249,59 +209,6 @@ export default function HomePage() {
     { label: 'Status', value: 'reviewStatus desc', directionLabel: 'Z-A' },
   ];
 
-  const filters = [
-    {
-      key: 'accountStatus',
-      label: 'Account status',
-      filter: (
-        <ChoiceList
-          title="Account status"
-          titleHidden
-          choices={[
-            { label: 'Enabled', value: 'enabled' },
-            { label: 'Not invited', value: 'not invited' },
-            { label: 'Invited', value: 'invited' },
-            { label: 'Declined', value: 'declined' },
-          ]}
-          selected={accountStatus || []}
-          // onChange={handleAccountStatusChange}
-          allowMultiple
-        />
-      ),
-      shortcut: true,
-    },
-    {
-      key: 'taggedWith',
-      label: 'Tagged with',
-      filter: (
-        <TextField
-          label="Tagged with"
-          value={taggedWith}
-          onChange={handleTaggedWithChange}
-          autoComplete="off"
-          labelHidden
-        />
-      ),
-      shortcut: true,
-    },
-    {
-      key: 'moneySpent',
-      label: 'Money spent',
-      filter: (
-        <RangeSlider
-          label="Money spent is between"
-          labelHidden
-          value={moneySpent || [0, 500]}
-          prefix="$"
-          output
-          min={0}
-          max={2000}
-          step={1}
-          onChange={handleMoneySpentChange}
-        />
-      ),
-    },
-  ];
 
   const { selectedResources, allResourcesSelected, handleSelectionChange } =
     useIndexResourceState(tableData);
@@ -319,20 +226,20 @@ export default function HomePage() {
         position={index}
       >
         <IndexTable.Cell>
-          
-          <Box maxWidth="100px">
-          <InlineStack>
-            {
-              stars.map((itm) => 
-                starRating >= itm ?
-                <Image source={solidStar} key={itm}/>
 
-                  :
-                  <Image source={emptyStar} key={itm}/>
-                
-              )
-            }
-          </InlineStack>
+          <Box maxWidth="100px">
+            <InlineStack>
+              {
+                stars.map((itm) =>
+                  starRating >= itm ?
+                    <Image source={solidStar} key={itm} />
+
+                    :
+                    <Image source={emptyStar} key={itm} />
+
+                )
+              }
+            </InlineStack>
           </Box>
         </IndexTable.Cell>
         <IndexTable.Cell>
@@ -363,14 +270,14 @@ export default function HomePage() {
               isSpam ?
                 <>
                   <InlineStack gap={200}>
-                    {reviewStatus=='Unpublished'?
-                    <Badge tone='warning' progress="incomplete">
-                      {reviewStatus}
-                    </Badge>
-                    :
-                    <Badge tone='success' progress="complete">
-                    {reviewStatus}
-                  </Badge>
+                    {reviewStatus == 'Unpublished' ?
+                      <Badge tone='warning' progress="incomplete">
+                        {reviewStatus}
+                      </Badge>
+                      :
+                      <Badge tone='success' progress="complete">
+                        {reviewStatus}
+                      </Badge>
                     }
                     <Badge tone='critical' >
                       SPAM
@@ -412,33 +319,6 @@ export default function HomePage() {
     }
   ];
 
-  //conditional statements
-
-  if (accountStatus && !isEmpty(accountStatus)) {
-    const key = 'accountStatus';
-    appliedFilters.push({
-      key,
-      label: disambiguateLabel(key, accountStatus),
-      onRemove: handleAccountStatusRemove,
-    });
-  }
-  if (moneySpent) {
-    const key = 'moneySpent';
-    appliedFilters.push({
-      key,
-      label: disambiguateLabel(key, moneySpent),
-      onRemove: handleMoneySpentRemove,
-    });
-  }
-  if (!isEmpty(taggedWith)) {
-    const key = 'taggedWith';
-    appliedFilters.push({
-      key,
-      label: disambiguateLabel(key, taggedWith),
-      onRemove: handleTaggedWithRemove,
-    });
-  }
-
   return (
     <>
       <Page
@@ -456,42 +336,11 @@ export default function HomePage() {
           },
         ]}
 
-        actionGroups={[
-          {
-            title: 'More actions',
-            actions: [
-              {
-                content: 'Export deleted reviews',
-                onAction: () => console.log('export deleted reviews'),
-              },
-            ],
-          },
-        ]}
-        pagination={{
-          hasPrevious: prevPage,
-          hasNext: nextPage,
-          onPrevious: (() => {
-            pageNumber != 1 ? (setPageNumber(pageNumber - 1)) : '';
-          }),
-          onNext: (() => {
-            !isLastPage ? (setPageNumber(pageNumber + 1)) : '';
-          })
-        }}
       >
-        <TitleBar
-          title={("Reviews")}
-          secondaryActions={[
-            {
-              content: ("Products"),
-              onAction: () => console.log("Secondary action"),
-            },
-            {
-              content: ("Settings"),
-              onAction: () => Navigate('/settings'),
-            }
-          ]}
-        />
 
+        <BlockStack gap={400}>
+
+        <Box as="div">
         <IndexFilters
           sortOptions={sortOptions}
           sortSelected={sortSelected}
@@ -508,8 +357,6 @@ export default function HomePage() {
           tabs={tabs}
           selected={selected}
           onSelect={setSelected}
-          canCreateNewView
-          onCreateNewView={onCreateNewView}
           filters={[]}
           appliedFilters={appliedFilters}
           onClearAll={handleFiltersClearAll}
@@ -537,8 +384,22 @@ export default function HomePage() {
         >
           {rowMarkup}
         </IndexTable>
-        <Divider />
-        <Button onClick={() => createMetafield()}>test</Button>
+
+        </Box>
+        <InlineStack align="center">
+        <Pagination
+          hasPrevious={prevPage}
+          onPrevious={() => {
+            pageNumber != 1 ? (setPageNumber(pageNumber - 1)) : '';
+          }}
+          hasNext={nextPage}
+          onNext={() => {
+            !isLastPage ? (setPageNumber(pageNumber + 1)) : '';
+          }}
+        />
+        </InlineStack>
+        </BlockStack>
+        
       </Page>
     </>
   );

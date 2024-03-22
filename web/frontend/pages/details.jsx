@@ -168,7 +168,7 @@ export default function Details() {
       title={review ? `${review.reviewTitle}` : ''}
       titleMetadata={review ? `${review.datePosted}` : ''}
     >
-      <TitleBar
+      {/* <TitleBar
         title={review ? `${review.reviewTitle}` : ''}
         secondaryActions={[
           {
@@ -180,8 +180,7 @@ export default function Details() {
             onAction: () => publishReview(),
           }
         ]}
-      />
-      {/* <InlineStack><Icon source={CheckIcon}/>{'Publish'}</InlineStack> */}
+      /> */}
       <BlockStack gap='300'>
         <Button variant="plain" onClick={() => changeStatus()} textAlign="start" size="large" >
           {

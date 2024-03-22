@@ -531,7 +531,7 @@ export default function Product() {
           })
         }}
       >
-        <TitleBar
+        {/* <TitleBar
           title={("Products")}
           actionGroups={[
             {
@@ -551,7 +551,7 @@ export default function Product() {
             },
 
           ]}
-        />
+        /> */}
 
         <BlockStack gap={600}>
           <Box background="bg-surface" borderColor="border" borderWidth="025" paddingBlock="600"  >

@@ -11,5 +11,7 @@ router.get('/createMetaField', TableController.createMetafield);
 
 router.get('/getMetafields', TableController.getMetafields);
 
+router.get('/createSettingsTable', TableController.createSettingsTable);
+
 export default router;
 

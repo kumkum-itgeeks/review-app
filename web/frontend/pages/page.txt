@@ -31,3 +31,26 @@ loading spinner and loading skeleton
 *product description detail on details page
 
 
+19/3/24
+
+*settings page complete design 
+* setting page state management 
+*color popovers
+
+
+20/3/24
+
+*checkboxes and radio button
+*color picker value to rgb state
+*db settings table creation
+
+21/3/24
+
+*default setting table
+* set setting data api
+* get setting data api
+* set the data in frontend
+
+//////////////
+
+  
