@@ -68,7 +68,7 @@ export default function HomePage() {
 
   //********variables********
 
-  const {show}=useToast;
+  const {show}=useToast();
   const { t } = useTranslation();
   const stars = [1, 2, 3, 4, 5];
   const star = 3;
@@ -134,7 +134,6 @@ export default function HomePage() {
     })
       .then(res => res.json())
       .then(data => setTableData(data));
-
 
   };
 

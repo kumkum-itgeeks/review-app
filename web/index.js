@@ -128,36 +128,6 @@ app.use('/api/settings',settingsRoute);
 ////
 
 
-
-// app.post('shopify/install', async (_req, res) => {
-
-//   const shop = res.locals.shopify.session.shop;
-//   let shopLowercase = shop.toLowerCase();
-//   let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-//   let shopName = removeSuffix.replace("-", "_");
-//   let tableName = shopName + '_ress'
-
-//   var sql = `CREATE TABLE IF NOT EXISTS ${tableName}  (
-//     id INT NOT NULL AUTO_INCREMENT,
-//     reviewTitle VARCHAR(200),
-//     reviewDescription LONGTEXT,
-//     userName VARCHAR(255),
-//     productid INT(100),
-//     productHandle VARCHAR(255),
-//     datePosted DATE DEFAULT NOW(),
-//     reviewStatus VARCHAR(255),
-//     starRating VARCHAR(255),
-//     data JSON,
-//     PRIMARY KEY (id)
-//     )`;
-//   con.query(sql, function (err, result) {
-//     if (err) throw err;
-//     console.log("Table created");
-//     res.send(result);
-//   });
-
-// })
-
 /////
 
 app.get("/api/products/count", async (_req, res) => {
@@ -201,21 +171,7 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
     .send(readFileSync(join(STATIC_PATH, "index.html")));
 }, );
 
-// async function createTable(req, res ,next){
-//   const shop = res.locals.shopify.session.shop;
-//   let shopLowercase = shop.toLowerCase();
-//   let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-//   let shopName = removeSuffix.replace("-", "_");
-//   let Table = shopName + '_test'
 
-
-//   var sql = `CREATE TABLE ${Table} IF NOT EXISTS (name VARCHAR(255), address VARCHAR(255));`;
-//   con.query(sql, function (err, result) {
-//     if (err) throw err;
-//     console.log("Table created");
-//   });
-//   next()
-// }
 
 
 app.listen(PORT);

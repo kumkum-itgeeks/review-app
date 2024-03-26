@@ -531,27 +531,6 @@ export default function Product() {
           })
         }}
       >
-        {/* <TitleBar
-          title={("Products")}
-          actionGroups={[
-            {
-              title: 'Actions',
-              actions: [
-                {
-                  content: 'View in your store',
-                  onAction: () => console.log('export deleted reviews'),
-                },
-              ],
-            },
-          ]}
-          secondaryActions={[
-            {
-              content: ("Edit product"),
-              onAction: () => console.log("Secondary action"),
-            },
-
-          ]}
-        /> */}
 
         <BlockStack gap={600}>
           <Box background="bg-surface" borderColor="border" borderWidth="025" paddingBlock="600"  >

@@ -20,7 +20,6 @@ const addSettings = (req, res) => {
     console.log('Data inserted successfully:', results);
     res.status(200).send(JSON.stringify('Data inserted successfully'));
   });
-
 }
 
 const getSettings = (req, res) => {
@@ -40,7 +39,6 @@ const getSettings = (req, res) => {
     res.status(200).send(JSON.stringify(transformedData));
   }
   );
-
 }
 
 const ModifySettings = (req, res) => {

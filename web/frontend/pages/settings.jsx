@@ -157,6 +157,7 @@ export default function Settings() {
   }, [color, borderColor, dividerColor,])
 
 
+
   useEffect(() => {
     const arr = formData?.map((itm) => (itm))
     arr.map((arr) => {
@@ -237,7 +238,7 @@ export default function Settings() {
       .then(data => console.log((data)));
   }
 
-  const convertToHex = ({ hue, saturation, brightness, alpha }) => {
+  const convertToHex = ({ hue, saturation, brightness }) => {
     const hsbToRgb = (h, s, v) => {
       let r, g, b;
       const i = Math.floor(h * 6);
@@ -283,12 +284,12 @@ export default function Settings() {
     };
 
     const [red, green, blue] = hsbToRgb(hue / 360, saturation, brightness);
-    const alphaValue = Math.round(alpha * 255).toString(16).padStart(2, '0');
+    // const alphaValue = Math.round(alpha * 255).toString(16).padStart(2, '0');
     const redHex = red.toString(16).padStart(2, '0');
     const greenHex = green.toString(16).padStart(2, '0');
     const blueHex = blue.toString(16).padStart(2, '0');
 
-    return `#${redHex}${greenHex}${blueHex}${alphaValue}`;
+    return `#${redHex}${greenHex}${blueHex}`;
   };
 
 
@@ -426,25 +427,24 @@ export default function Settings() {
   //******** data variables*********
 
   const activator = (
-    <Button onClick={togglePopoverActive} >
+    <Button onClick={togglePopoverActive}  >
       color
     </Button>
   );
 
   const activatordivider = (
-    <Button onClick={togglePopoverActiveDivider} >
+    <Button onClick={togglePopoverActiveDivider}  >
       color
     </Button>
   );
 
   const activatorStar = (
-    <Button onClick={togglePopoverActiveStar} >
+    <Button onClick={togglePopoverActiveStar}  >
       color
     </Button>
   );
 
 // console.log(isModalOpen)
-
 
   return (
     <>
@@ -504,7 +504,7 @@ export default function Settings() {
                   <BlockStack gap={300}>
                     <Checkbox
                       label="Send me an email when a review is submitted."
-                      checked={checked}
+                      checked={emailSetting.sendEmail}
                       onChange={handleCheck}
                     />
                     {
@@ -542,7 +542,7 @@ export default function Settings() {
                     <RadioButton
                       label="Theme color"
                       helpText="Icons get their color from your theme."
-                      checked={starValue === 'themecolor'}
+                      checked={starIconColor.isThemeColor === 'themecolor'}
                       id="themecolor"
                       name="star"
                       onChange={handleStarSetting}
@@ -552,7 +552,7 @@ export default function Settings() {
                       helpText="Icons are a custom color."
                       id="customcolor"
                       name="star"
-                      checked={starValue === 'customcolor'}
+                      checked={starIconColor.isThemeColor === 'customcolor'}
                       onChange={handleStarSetting}
                     />
                     {
@@ -563,7 +563,7 @@ export default function Settings() {
                           autofocusTarget="first-node"
                           onClose={togglePopoverActiveStar}
                         >
-                          <ColorPicker allowAlpha onChange={setStarColorfunction} color={color} />
+                          <ColorPicker  onChange={setStarColorfunction} color={starIconColor.customColor} />
                         </Popover>
                         : ''
                     }
@@ -591,7 +591,7 @@ export default function Settings() {
                   <BlockStack gap={300}>
                     <Checkbox
                       label="Show reviews on load"
-                      checked={showReviewChecked}
+                      checked={reviewListingLayout.reviewOnload}
                       onChange={showReviewCheck}
                     />
                     <Text>The reviews for products will be visible for all users by default.</Text>
@@ -603,7 +603,7 @@ export default function Settings() {
                       autofocusTarget="first-node"
                       onClose={togglePopoverActive}
                     >
-                      <ColorPicker allowAlpha onChange={setBorderColorfunction} color={borderColor} />
+                      <ColorPicker  onChange={setBorderColorfunction} color={reviewListingLayout.bordercolor} />
                     </Popover>
 
                     <Text>Border color</Text>
@@ -614,7 +614,7 @@ export default function Settings() {
                       autofocusTarget="first-node"
                       onClose={togglePopoverActiveDivider}
                     >
-                      <ColorPicker allowAlpha onChange={setDividerColorfunction} color={dividerColor} />
+                      <ColorPicker  onChange={setDividerColorfunction} color={reviewListingLayout.dividercolor} />
 
                     </Popover>
                     <Text>Divider color</Text>
@@ -944,6 +944,7 @@ export default function Settings() {
           <Modal 
           title="Reset all settings to default?" message="Are you sure ? you want to reset all settings to default? This action cannot be reversed." 
           open={isModalOpen}
+          onClose={()=>setIsModalOpen(false)}
           size='Small' 
           primaryAction={{
             content:'Reset all settings' ,
@@ -961,9 +962,6 @@ export default function Settings() {
             <Button size='large' onClick={() => saveSettings()}> Save </Button>
           </InlineStack>
         </BlockStack>
-        <Button onClick={() => {	show('Success! 🎉', {duration: 2000, onDismiss: () => console.log('👋 Toast dismissed')})}}> test</Button>
-        <Button onClick={() => test2()}> test2</Button>
-        <Button onClick={() => getSettings()}> get Settings</Button>
       </Page>
     </>
   )

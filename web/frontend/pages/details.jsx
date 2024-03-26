@@ -4,7 +4,7 @@ import {
   SkeletonThumbnail,Image,
   Icon
 } from "@shopify/polaris";
-import { TitleBar } from "@shopify/app-bridge-react";
+import { TitleBar , useToast} from "@shopify/app-bridge-react";
 import { useState, useCallback, useEffect } from "react";
 import { useAuthenticatedFetch } from "../hooks";
 import { StarFilledIcon, StarIcon, CheckIcon } from '@shopify/polaris-icons';
@@ -31,6 +31,7 @@ export default function Details() {
 
 
   //*******variables********
+  const {show}=useToast();
   const fetch = useAuthenticatedFetch();
   const Navigate = useNavigate();
   const stars = [1, 2, 3, 4, 5];
@@ -48,7 +49,7 @@ export default function Details() {
   const deleteReview = () => {
     fetch(`/api/review/deleteReview/${Id}`)
       .then(res => res.json())
-      .then(data => getReviewDetails());
+      .then(data => {getReviewDetails(),show(' review deleted ', {duration: 2000})});
   }
 
   const publishReview = () => {
@@ -77,7 +78,7 @@ export default function Details() {
   const changeStatus = () => {
     fetch(`api/details/changeStatus/${Id}/${review.reviewStatus}`)
       .then(res => res.json())
-      .then(data => setStatus(data))
+  .then(data => {setStatus(data),show(` review ${review.reviewStatus=='Published'? 'unpublished' : 'published'} `, {duration: 2000}), console.log(status)})
 
   }
 
@@ -91,7 +92,7 @@ export default function Details() {
       body: JSON.stringify({ textFieldValue, Id }),
     })
       .then(res => res.json())
-      .then(data => console.log(data));
+      .then(data => {setTextFieldValue(''),show(' reply posted ', {duration: 2000})});
   }
 
   const getProductDetails = () => {
