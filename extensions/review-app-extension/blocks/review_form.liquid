@@ -1,0 +1,223 @@
+{{ 'form.css' | asset_url | stylesheet_tag }}
+
+<div id='review-section'>
+    <div id='titlebar'>
+        <h2>
+            Customer Reviews
+        </h2>
+    </div>
+    <div id='review-info-bar'>
+        <p> no reviews yet <p/>
+        <a href='#' onclick="handleButtonClick()"><p> write a review</p></a>
+    </div>
+    <div id='form-section'>
+    <hr>
+        <h4>
+            Write a review
+        </h>
+    <form>
+        <label >Name</label>
+        <Input type='text' placeholder='Enter your name'  value ='' id='nameInput'/>
+        <span id='nameErr' class='err'></span>
+        <label >Email</label>
+        <Input type='text' placeholder='johnsmith@example.com' id='emailInput' value=''/>
+        <span id='emailErr' class='err'></span>
+
+        <label >Rating</label>
+         <div class="star-rating">
+            <a href="#" class="star" data-rating="1">&#9733;</a>
+            <a href="#" class="star" data-rating="2">&#9733;</a>
+            <a href="#" class="star" data-rating="3">&#9733;</a>
+            <a href="#" class="star" data-rating="4">&#9733;</a>
+            <a href="#" class="star" data-rating="5">&#9733;</a>
+        </div>
+        <span id='ratingErr' class='err'></span>
+
+        <label >Review Title</label>
+        <Input type='text' placeholder='Give your review a title' id='reviewTitleInput' value=''/>
+        <span id='titleErr' class='err'></span>
+        <label >Body of Review (1500)</label>
+        <textarea  rows='10' placeholder='write your comments here' id='reviewBodyInput' value='' >
+        </textarea>
+        <span id='bodyErr' class='err'></span>
+        <div id='submit-btn'>
+            <button type='submit' onclick={handleSubmit(event)} ><b>Submit Review</b></button>
+        </div>
+    </form>
+    </div>
+</div>
+
+<script>
+
+
+  let currentRating = 0;
+
+
+  function handleButtonClick() {
+    document.getElementById('form-section').style.display='block'
+  }
+
+document.addEventListener('DOMContentLoaded', function () {
+  const stars = document.querySelectorAll('.star-rating .star');
+
+  stars.forEach(star => {
+    star.addEventListener('mouseenter', function () {
+      const rating = this.getAttribute('data-rating');
+      stars.forEach(s => {
+        if (s.getAttribute('data-rating') <= rating) {
+          s.classList.add('active');
+          s.style.opacity = '1';
+        } else {
+          s.style.opacity = '0.5'; // Fading effect for unselected stars on hover
+        }
+      });
+    });
+
+    star.addEventListener('mouseleave', function () {
+      if (currentRating !== 0) {
+        stars.forEach(s => {
+          if (s.getAttribute('data-rating') <= currentRating) {
+            s.classList.add('active');
+            s.style.opacity = '1';
+          } else {
+            s.classList.remove('active');
+            s.style.opacity = '0.5'; // Fading effect for unselected stars after click
+          }
+        });
+      } else {
+        stars.forEach(s => {
+          s.classList.remove('active');
+          s.style.opacity = '1'; // Restore opacity for all stars after mouseleave
+        });
+      }
+    });
+
+    star.addEventListener('click', function (e) {
+      e.preventDefault();
+      const rating = this.getAttribute('data-rating');
+      if (currentRating == rating) {
+        currentRating = 0; // Deselecting the star if clicked again
+      } else {
+        currentRating = rating;
+      }
+
+      console.log('You rated ' + currentRating + ' stars.');
+      stars.forEach(s => {
+        if (s.getAttribute('data-rating') <= currentRating) {
+          s.classList.add('active');
+          s.style.opacity = '1';
+        } else {
+          s.classList.remove('active');
+          s.style.opacity = '0.5'; // Fading effect for unselected stars after click
+        }
+      });
+    });
+  });
+});
+
+   function handleSubmit(e) {
+        e.preventDefault();
+        let  isEmailValid = false;
+        let  isNameValid = false;
+        let isTitleValid = false;
+        let isBodyValid = false;
+        let  nameRegex= /^[A-Za-z\s]+$/;
+        const emailRegex=/^\S+@\S+\.\S+$/;
+        const name = document.getElementById('nameInput').value.trim();
+        const email = document.getElementById('emailInput').value.trim();
+        const reviewTitle = document.getElementById('reviewTitleInput').value.trim();
+        const reviewBody = document.getElementById('reviewBodyInput').value.trim();
+
+        if((email.match(emailRegex)) && (email!='')){
+            isEmailValid = true;
+        }
+        else{
+            isEmailValid = false;
+        }
+        
+
+        if((name.match(nameRegex)) && (name!= '') && (name.length<=25)){
+            isNameValid= true;
+        }
+        else{
+            isNameValid = false;
+        }
+
+        if((reviewTitle!='') && (reviewTitle.length <= 100 ) ){
+            isTitleValid = true;
+        }
+        else{
+            isTitleValid = false;
+        }
+
+        if((reviewBody !='') && (reviewBody.length <=1500)){
+            isBodyValid = true;
+        }
+        else{
+            isBodyValid = false;
+        }
+
+
+      
+        if (isNameValid === false || isTitleValid=== false || isBodyValid === false|| currentRating===0 || isEmailValid===false) {
+           
+            if (isNameValid === false){ 
+                document.getElementById('nameErr').innerHTML="name length must be between 1-25 !"
+                }
+            else{
+                document.getElementById('nameErr').innerHTML='';
+            }
+            if (isEmailValid === false) {
+                document.getElementById('emailErr').innerHTML="Please enter valid email !"
+                }
+            else{
+                document.getElementById('emailErr').innerHTML='';
+            }
+            
+            if (isTitleValid=== false){ 
+                document.getElementById('titleErr').innerHTML="length must be between 1-100 !"
+                }
+            else{
+                document.getElementById('titleErr').innerHTML='';
+            }
+            if (isBodyValid === false) {
+                document.getElementById('bodyErr').innerHTML=" length must be between 1-1500!"
+                }
+            else{
+                document.getElementById('bodyErr').innerHTML='';
+            }
+            if (currentRating === 0){ 
+                document.getElementById('ratingErr').innerHTML="rating must be given !"
+                }
+            else{
+                document.getElementById('ratingErr').innerHTML='';
+            }
+
+            
+        } else {
+           
+           var errorMessages=document.getElementsByClassName('err');
+           for (var i = 0; i < errorMessages.length; i++) {
+            errorMessages[i].innerHTML = '';
+           }
+            window.confirm('Form submitted successfully!');
+        
+        }
+    }
+     
+</script>
+
+
+
+
+
+{% schema %}
+{
+  "name": "form",
+  "target": "section",
+  "settings": [
+    { "type": "product", "id": "product", "label": "product", "autofill": true },
+    { "type": "color", "id": "colour", "label": "Star Colour", "default": "#ff0000" }
+  ]
+}
+{% endschema %}

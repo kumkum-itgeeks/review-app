@@ -59,6 +59,17 @@ loading spinner and loading skeleton
 *toast message after saving or reset settings
 
 
+26/3/24
+
+*settings module completed
+*extensions module started
+
+27/3/24
+
+*implemented extensions
+*created form for reviews 
+*user rating 
+*form validation
 //////////////
 
   
