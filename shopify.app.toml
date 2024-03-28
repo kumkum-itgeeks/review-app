@@ -2,7 +2,7 @@
 
 client_id = "c8b76d8cdccd39ae45b847901d4b4fb3"
 name = "reviews"
-application_url = "https://floyd-registry-supplemental-networking.trycloudflare.com"
+application_url = "https://vintage-jake-cohen-colleagues.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://floyd-registry-supplemental-networking.trycloudflare.com/auth/callback",
-  "https://floyd-registry-supplemental-networking.trycloudflare.com/auth/shopify/callback",
-  "https://floyd-registry-supplemental-networking.trycloudflare.com/api/auth/callback"
+  "https://vintage-jake-cohen-colleagues.trycloudflare.com/auth/callback",
+  "https://vintage-jake-cohen-colleagues.trycloudflare.com/auth/shopify/callback",
+  "https://vintage-jake-cohen-colleagues.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
