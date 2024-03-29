@@ -265,7 +265,7 @@ export default function Details() {
                         <Divider />
                         <InlineStack>
                           <Text>{review ? `${review.userName}` : ''}</Text>
-                          <Text><Link removeUnderline>{review ? `( ${review.userHandle} )` : ''}</Link></Text>
+                          <Text><Link removeUnderline>{review ? `( ${review.Email} )` : ''}</Link></Text>
                         </InlineStack>
                       </BlockStack>
                     </>

@@ -70,6 +70,24 @@ loading spinner and loading skeleton
 *created form for reviews 
 *user rating 
 *form validation
+
+
+28/3/24
+
+*extension form submission completed
+
+
+29/3/24
+
+* modified ectension form 
+* thank you message after review submission 
+* api for published reviews on the product 
+* showing dynamic listing for reviews
+
+
+
+
+
 //////////////
 
   

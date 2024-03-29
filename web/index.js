@@ -12,12 +12,9 @@ import reviewRoutes from './Routes/review.js'
 import tableRoutes from './Routes/table.js'
 import detailsRoute from './Routes/details.js'
 import settingsRoute from './Routes/settings.js'
-// import createReviewsTable from './Controller/table.js'
-// import TableController from './Controller/table.js'
-// import ShopifyApi from 'shopify-api-node';
+import bodyParser from "body-parser";
 
 
-// TableController.createReviewsTable()
 export const con = sql.createConnection({
   host: "localhost",
   user: "root",
@@ -39,12 +36,62 @@ const PORT = parseInt(
 );
 
 const STATIC_PATH =
-  process.env.NODE_ENV === "production"
-    ? `${process.cwd()}/frontend/dist`
-    : `${process.cwd()}/frontend/`;
+process.env.NODE_ENV === "production"
+? `${process.cwd()}/frontend/dist`
+: `${process.cwd()}/frontend/`;
 
 const app = express();
 const router=express.Router()
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// adding reviews from extension
+
+app.get("/api/addReviews/:obj/:shop", async (_req, res) => {
+        
+  const Obj =JSON.parse(_req.params.obj);
+  const shop =JSON.parse(_req.params.shop).toLowerCase(); 
+  const reviewTable = shop+'_review' 
+  const detailsTable = shop+'_details' 
+  const Columns= (Object.keys(Obj))
+  const Data = Object.values(Obj)
+  const DataValue=  Data.map(cat => `'${cat}'`).join(', ');
+
+
+  const query=`INSERT INTO ${reviewTable} (${Columns}) VALUES (${DataValue});INSERT INTO ${detailsTable} (${Columns}) VALUES (${DataValue})`
+  con.query(query, (err, results) => {
+    if (err) {
+      console.error('Error inserting reviews',err);
+      return;
+    }
+    console.log(results);
+    res.send(JSON.stringify('Data inserted successfully'));
+    
+  });
+});
+
+// fetching published reviews from db
+
+app.get(`/api/getReviews/:shop/:id`,(req,res)=>{
+
+  // console.log(req.params,'ssdfsagfdtrh****************')
+  
+  const shop =JSON.parse(req.params.shop).toLowerCase(); 
+  const productId = req.params.id;
+  const detailsTable = shop+'_details' 
+
+  const query=` SELECT starRating , reviewTitle , userName , datePosted , reviewDescription , reply  FROM ${detailsTable} WHERE productid=${productId} AND reviewStatus='Published'`;
+
+  con.query(query, (err, results) => {
+    if (err) {
+      console.error('Error retrieving data',err);
+      return;
+    }
+    console.log(results);
+    res.send(JSON.stringify(results));
+    
+  });
+})
 
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
@@ -52,12 +99,16 @@ app.get(
   shopify.config.auth.callbackPath,
   shopify.auth.callback(),
   shopify.redirectToShopifyOrAppRoot()
-);
-app.post(
-  shopify.config.webhooks.path,
-  shopify.processWebhooks({ webhookHandlers: PrivacyWebhookHandlers })
-);
+  );
+  app.post(
+    shopify.config.webhooks.path,
+    shopify.processWebhooks({ webhookHandlers: PrivacyWebhookHandlers })
+    );
+    
+    
+    
 
+ 
 
 
 // Register webhooks after OAuth completes
@@ -65,9 +116,15 @@ app.post(
 // If you are adding routes outside of the /api path, remember to
 // also add a proxy rule for them in web/frontend/vite.config.js
 
+
+
+
+
+
 app.use("/api/*", shopify.validateAuthenticatedSession(), getShopName);
 
 app.use(express.json());
+
 
 async function getShopName (req,res,next){
 
@@ -115,8 +172,8 @@ app.get('/api/createReviewTable', async (_req, res) => {
 app.use('/api/review', reviewRoutes );
 
 //table middleware
-
 app.use('/api/table',tableRoutes);
+
 
 // details middleware
 app.use('/api/details',detailsRoute);
@@ -135,10 +192,6 @@ app.get("/api/products/count", async (_req, res) => {
     session: res.locals.shopify.session,
   });
   res.status(200).send(countData);
-});
-app.get("/api/test", async (_req, res) => {
-
-  res.status(200).send('countData');
 });
 
 app.get("/api/products/create", async (_req, res) => {

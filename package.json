@@ -15,7 +15,9 @@
     "@shopify/app": "3.56.3",
     "@shopify/cli": "3.56.3",
     "@shopify/polaris": "^12.20.0",
+    "body-parser": "^1.20.2",
     "composer": "^4.1.0",
+    "cors": "^2.8.5",
     "mysql": "^2.18.1",
     "shopify-api-node": "^3.13.1"
   },

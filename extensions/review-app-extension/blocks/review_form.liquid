@@ -1,31 +1,52 @@
 {{ 'form.css' | asset_url | stylesheet_tag }}
 
+{% assign productId = product.id %}
+{% assign shopName = shop.name %}
+{% assign productName = product.title %}
+
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Your Page Title</title>
+</head>
+
+<body>
+
+
 <div id='review-section'>
     <div id='titlebar'>
         <h2>
             CUSTOMER REVIEWS
+            <p id='api'></p>
+            <button onclick="getReviews('{{shopName}}',{{productId}})"> test </button>
         </h2>
     </div>
     <div id='review-info-bar'>
-        <p> No reviews yet <p/>
-        <a href='#' onclick="handleButtonClick()"><p> Write a review</p></a>
+        <h3> No reviews yet </h3>
+        <a href='#' onclick="handleButtonClick(event)" id='write-review-link'><h3> Write a review</h3></a>
     </div>
-    <div id='form-section'>
-    <hr>
+
+    <div id='submit-message'>
+     <hr/>
         <h3>
             WRITE A REVIEW
         </h3>
+        <p> thank you for submitting a review !!</p>
+    </div>    
+
+    <div id='form-section'>
     <form>
         <label >Name</label>
-        <Input type='text' placeholder='Enter your name'  value ='' id='nameInput'/>
+        <Input type='text' placeholder='Enter your name'  value ='' id='nameInput' autocomplete='off' class='input-box'/>
         <span id='nameErr' class='err'></span>
         <label >Email</label>
-        <Input type='text' placeholder='johnsmith@example.com' id='emailInput' value=''/>
+        <Input type='text' placeholder='johnsmith@example.com' id='emailInput' value='' autocomplete='off' class='input-box'/>
         <span id='emailErr' class='err'></span>
 
         <label >Rating</label>
          <div class="star-rating">
-            <a href="#" class="star" data-rating="1">&#9733;</a>
+           <a href="#" class="star" data-rating="1">&#9733;</a>
             <a href="#" class="star" data-rating="2">&#9733;</a>
             <a href="#" class="star" data-rating="3">&#9733;</a>
             <a href="#" class="star" data-rating="4">&#9733;</a>
@@ -34,178 +55,32 @@
         <span id='ratingErr' class='err'></span>
 
         <label >Review Title</label>
-        <Input type='text' placeholder='Give your review a title' id='reviewTitleInput' value=''/>
+        <Input type='text' placeholder='Give your review a title' id='reviewTitleInput' value='' autocomplete='off' class='input-box'/>
         <span id='titleErr' class='err'></span>
         <label >Body of Review (1500)</label>
-        <textarea  rows='10' placeholder='write your comments here' id='reviewBodyInput' >
-        </textarea>
+        <textarea  rows='10'  id='reviewBodyInput' placeholder='Write your comments here' class='input-box'></textarea>
         <span id='bodyErr' class='err'></span>
         <div id='submit-btn'>
-            <button type='submit' onclick={handleSubmit(event)} ><b>Submit Review</b></button>
+            <button type='submit' onclick="handleSubmit(event,{{productId}},'{{shopName}}','{{productName}}')" class='btn button' ><b>Submit Review</b></button>
         </div>
     </form>
     </div>
+
+    <div id='review-listing'>
+    </div>
+   
 </div>
-
-<script>
-
-
-  let currentRating = 0;
-
-
-  function handleButtonClick() {
-    document.getElementById('form-section').style.display='block'
-  }
-
-document.addEventListener('DOMContentLoaded', function () {
-  const stars = document.querySelectorAll('.star-rating .star');
-
-  stars.forEach(star => {
-    star.addEventListener('mouseenter', function () {
-      const rating = this.getAttribute('data-rating');
-      stars.forEach(s => {
-        if (s.getAttribute('data-rating') <= rating) {
-          s.classList.add('active');
-          s.style.opacity = '1';
-        } else {
-          s.style.opacity = '0.5'; // Fading effect for unselected stars on hover
-        }
-      });
-    });
-
-    star.addEventListener('mouseleave', function () {
-      if (currentRating !== 0) {
-        stars.forEach(s => {
-          if (s.getAttribute('data-rating') <= currentRating) {
-            s.classList.add('active');
-            s.style.opacity = '1';
-          } else {
-            s.classList.remove('active');
-            s.style.opacity = '0.5'; // Fading effect for unselected stars after click
-          }
-        });
-      } else {
-        stars.forEach(s => {
-          s.classList.remove('active');
-          s.style.opacity = '1'; // Restore opacity for all stars after mouseleave
-        });
-      }
-    });
-
-    star.addEventListener('click', function (e) {
-      e.preventDefault();
-      const rating = this.getAttribute('data-rating');
-      if (currentRating == rating) {
-        currentRating = 0; // Deselecting the star if clicked again
-      } else {
-        currentRating = rating;
-      }
-
-      console.log('You rated ' + currentRating + ' stars.');
-      stars.forEach(s => {
-        if (s.getAttribute('data-rating') <= currentRating) {
-          s.classList.add('active');
-          s.style.opacity = '1';
-        } else {
-          s.classList.remove('active');
-          s.style.opacity = '0.5'; // Fading effect for unselected stars after click
-        }
-      });
-    });
-  });
-});
-
-   function handleSubmit(e) {
-        e.preventDefault();
-        let  isEmailValid = false;
-        let  isNameValid = false;
-        let isTitleValid = false;
-        let isBodyValid = false;
-        let  nameRegex= /^[A-Za-z\s]+$/;
-        const emailRegex=/^\S+@\S+\.\S+$/;
-        const name = document.getElementById('nameInput').value.trim();
-        const email = document.getElementById('emailInput').value.trim();
-        const reviewTitle = document.getElementById('reviewTitleInput').value.trim();
-        const reviewBody = document.getElementById('reviewBodyInput').value.trim();
-
-        if((email.match(emailRegex)) && (email!='')){
-            isEmailValid = true;
-        }
-        else{
-            isEmailValid = false;
-        }
-        
-
-        if((name.match(nameRegex)) && (name!= '') && (name.length<=25)){
-            isNameValid= true;
-        }
-        else{
-            isNameValid = false;
-        }
-
-        if((reviewTitle!='') && (reviewTitle.length <= 100 ) ){
-            isTitleValid = true;
-        }
-        else{
-            isTitleValid = false;
-        }
-
-        if((reviewBody !='') && (reviewBody.length <=1500)){
-            isBodyValid = true;
-        }
-        else{
-            isBodyValid = false;
-        }
+ 
+  <script src="{{ '../assets/form.js' | asset_url }}">
+  
+  </script>
 
 
-      
-        if (isNameValid === false || isTitleValid=== false || isBodyValid === false|| currentRating===0 || isEmailValid===false) {
-           
-            if (isNameValid === false){ 
-                document.getElementById('nameErr').innerHTML="name length must be between 1-25 !"
-                }
-            else{
-                document.getElementById('nameErr').innerHTML='';
-            }
-            if (isEmailValid === false) {
-                document.getElementById('emailErr').innerHTML="Please enter valid email !"
-                }
-            else{
-                document.getElementById('emailErr').innerHTML='';
-            }
-            
-            if (isTitleValid=== false){ 
-                document.getElementById('titleErr').innerHTML="length must be between 1-100 !"
-                }
-            else{
-                document.getElementById('titleErr').innerHTML='';
-            }
-            if (isBodyValid === false) {
-                document.getElementById('bodyErr').innerHTML=" length must be between 1-1500!"
-                }
-            else{
-                document.getElementById('bodyErr').innerHTML='';
-            }
-            if (currentRating === 0){ 
-                document.getElementById('ratingErr').innerHTML="rating must be given !"
-                }
-            else{
-                document.getElementById('ratingErr').innerHTML='';
-            }
+</body>
+</html>
 
-            
-        } else {
-           
-           var errorMessages=document.getElementsByClassName('err');
-           for (var i = 0; i < errorMessages.length; i++) {
-            errorMessages[i].innerHTML = '';
-           }
-            window.confirm('Form submitted successfully!');
-        
-        }
-    }
-     
-</script>
+
+
 
 
 
