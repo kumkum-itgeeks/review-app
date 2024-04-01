@@ -1,63 +1,82 @@
 
-
-function test(obj, shop) {
+function addReviews(obj, shop) {
   
-  fetch(`https://pointer-research-nd-bill.trycloudflare.com/api/addReviews/${JSON.stringify(obj)}/${JSON.stringify(shop)}`)
+  fetch(`https://anaheim-trusted-transparency-palestinian.trycloudflare.com/api/addReviews/${JSON.stringify(obj)}/${JSON.stringify(shop)}`)
   .then(res => res.json())
   .then(data => console.log(data))
-
+  
 }
 
 function getReviews(shop, pid) {
-  fetch(`https://pointer-research-nd-bill.trycloudflare.com/api/getReviews/${JSON.stringify(shop)}/${pid}`)
-    .then(res => res.json())
-    .then(data => document.getElementById('review-listing').innerHTML=dataDistructure(data))
-    
+  
+  fetch(`https://anaheim-trusted-transparency-palestinian.trycloudflare.com/api/getReviews/${JSON.stringify(shop)}/${pid}`)
+  .then(res => res.json())
+  .then(data => {
+    setReviewInfo(data)
+  }
+  )
 }
 
+const setReviewInfo = (data) => {
+  let stars = [1, 2, 3, 4, 5];
+  document.getElementById('review-listing').innerHTML = dataDistructure(data.reviews),
+    document.getElementById('review-count').innerHTML = data.length ? `Based on ${data.length} reviews` : 'no reviews yet',
+    document.getElementById('average-rating').innerHTML = `<div class='rating' >${stars.map((star) => {
+      return data.averageRating >= star ? '<a href="#" id="review-list-star">&#9733;</a>' : '<a href="#">&#9733;</a>';
+    }).join('')}<div class='rating' >`;
+}
 
-function dataDistructure(data){
+function dataDistructure(data) {
   let html = '';
   data.forEach(obj => {
-      html += createHTMLForObject(obj);
+    html += createHTMLForObject(obj);
   });
   return html;
 }
 
 
-function createHTMLForObject(itm){
-  let stars=[1,2,3,4,5];
-return`
+function createHTMLForObject(itm) {
+  let stars = [1, 2, 3, 4, 5];
+  return `
 <div id='review-list-section'>
 <hr/>
 <div class='rating' >
-${
-  stars.map((star)=>{
-    if (itm.starRating >= star){
-     return`
-      <a href="#" style="color:yellow" >&#9733;</a>
+${stars.map((star) => {
+    if (itm?.starRating >= star) {
+      return `
+      <a href="#" id='review-list-star' >&#9733</a>
       `
     }
-    else{
-     return`
-      <a href="#" >&#9733;</a>
+    else {
+      return `
+      <a href="#" >&#9733</a>
       `
     }
-  })
-}
+  }).join('')
+    }
 
     </div>
-    <h3 id='review-title-list' > ${itm.reviewTitle} </h3>
-    <p>${itm.userName} on ${itm.datePosted}</p>
-    <p> ${itm.reviewDescription} </p>
-    <div id='reply-box'>
-        <p> ${itm.reply} - admin reply </p>
-    </div>
+    <h3 id='review-title-list' class='spr' > ${itm?.reviewTitle} </h3>
+    <p><i><b>${itm?.userName} </b> on <b>${formatDate(itm?.datePosted)}</b></i></p>
+    <p id='review-list-description'> ${itm.reviewDescription} </p>
+    ${itm?.reply === '' || itm.reply === null ?
+      ''
+      :
+      `<div id='reply-box'>
+    <p> ${itm?.reply} </p>
+    <p id='reply-from'> - admin reply </p>
+</div>`
+    }
 
 </div>`
 
 }
 
+function formatDate(dateString) {
+  const options = { month: 'short', day: 'numeric', year: 'numeric' };
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', options);
+}
 
 let currentRating = 0;
 
@@ -232,8 +251,8 @@ function handleSubmit(e, id, shop, product) {
       productHandle: product
     }
 
-    test(dataObj, shop);
-   
+    addReviews(dataObj, shop);
+
 
     ThankyouMessage.style.display = 'block';
     Form.style.display = 'none';

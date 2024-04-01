@@ -36,60 +36,97 @@ const PORT = parseInt(
 );
 
 const STATIC_PATH =
-process.env.NODE_ENV === "production"
-? `${process.cwd()}/frontend/dist`
-: `${process.cwd()}/frontend/`;
+  process.env.NODE_ENV === "production"
+    ? `${process.cwd()}/frontend/dist`
+    : `${process.cwd()}/frontend/`;
 
 const app = express();
-const router=express.Router()
+const router = express.Router()
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // adding reviews from extension
 
 app.get("/api/addReviews/:obj/:shop", async (_req, res) => {
-        
-  const Obj =JSON.parse(_req.params.obj);
-  const shop =JSON.parse(_req.params.shop).toLowerCase(); 
-  const reviewTable = shop+'_review' 
-  const detailsTable = shop+'_details' 
-  const Columns= (Object.keys(Obj))
+
+  const Obj = JSON.parse(_req.params.obj);
+  const shop = JSON.parse(_req.params.shop).toLowerCase();
+  const reviewTable = shop + '_review'
+  const detailsTable = shop + '_details'
+  const settingsTable = shop + '_settings'
+  const Columns = (Object.keys(Obj))
   const Data = Object.values(Obj)
-  const DataValue=  Data.map(cat => `'${cat}'`).join(', ');
+  const DataValue = Data.map(cat => `'${cat}'`).join(', ');
 
+  const checkStatus = `Select settings FROM ${settingsTable} Where type='autopublish'`;
+  const query = `INSERT INTO ${reviewTable} (${Columns}) VALUES (${DataValue});INSERT INTO ${detailsTable} (${Columns}) VALUES (${DataValue})`
+  const enabledQuery = `INSERT INTO ${reviewTable} (${Columns} , reviewStatus) VALUES (${DataValue}, 'Published');INSERT INTO ${detailsTable} (${Columns} , reviewStatus) VALUES (${DataValue},'Published')`
 
-  const query=`INSERT INTO ${reviewTable} (${Columns}) VALUES (${DataValue});INSERT INTO ${detailsTable} (${Columns}) VALUES (${DataValue})`
-  con.query(query, (err, results) => {
+  con.query(checkStatus, (err, results) => {
     if (err) {
-      console.error('Error inserting reviews',err);
+      console.error('Error inserting reviews', err);
       return;
     }
-    console.log(results);
-    res.send(JSON.stringify('Data inserted successfully'));
-    
+    let settingObj = (JSON.parse(results[0].settings));
+    var reviewStatus = (settingObj.autopublish)
+
+    if (reviewStatus === 'enabled') {
+
+      con.query(enabledQuery, (err, results) => {
+        if (err) {
+          console.error('Error inserting reviews', err);
+          return;
+        }
+
+        res.send(JSON.stringify('Data inserted successfully'));
+
+      });
+    }
+    else{
+      con.query(query, (err, results) => {
+        if (err) {
+          console.error('Error inserting reviews',err);
+          return;
+        }
+       
+        res.send(JSON.stringify('Data inserted successfully'));
+        
+      });
+    }
+
   });
+
+
 });
+
 
 // fetching published reviews from db
 
-app.get(`/api/getReviews/:shop/:id`,(req,res)=>{
+app.get(`/api/getReviews/:shop/:id`, (req, res) => {
 
   // console.log(req.params,'ssdfsagfdtrh****************')
-  
-  const shop =JSON.parse(req.params.shop).toLowerCase(); 
-  const productId = req.params.id;
-  const detailsTable = shop+'_details' 
 
-  const query=` SELECT starRating , reviewTitle , userName , datePosted , reviewDescription , reply  FROM ${detailsTable} WHERE productid=${productId} AND reviewStatus='Published'`;
+  const shop = JSON.parse(req.params.shop).toLowerCase();
+  const productId = req.params.id;
+  const detailsTable = shop + '_details'
+
+  const query = ` SELECT starRating , reviewTitle , userName , datePosted , reviewDescription , reply  FROM ${detailsTable} WHERE productid=${productId} AND reviewStatus='Published'`;
 
   con.query(query, (err, results) => {
     if (err) {
-      console.error('Error retrieving data',err);
+      console.error('Error retrieving data', err);
       return;
     }
-    console.log(results);
-    res.send(JSON.stringify(results));
-    
+    let sum = 0;
+    let rating = results.map((itm) => itm.starRating)
+    let length = results.length
+    let totalRating = rating.forEach((itm) => {
+      sum += itm;
+    })
+    let averageRating = sum / length;
+    console.log('length => ', length, 'avaerage rating =>', sum / length);
+    res.send(JSON.stringify({ reviews: results, length: length, averageRating: averageRating }));
+
   });
 })
 
@@ -99,16 +136,16 @@ app.get(
   shopify.config.auth.callbackPath,
   shopify.auth.callback(),
   shopify.redirectToShopifyOrAppRoot()
-  );
-  app.post(
-    shopify.config.webhooks.path,
-    shopify.processWebhooks({ webhookHandlers: PrivacyWebhookHandlers })
-    );
-    
-    
-    
+);
+app.post(
+  shopify.config.webhooks.path,
+  shopify.processWebhooks({ webhookHandlers: PrivacyWebhookHandlers })
+);
 
- 
+
+
+
+
 
 
 // Register webhooks after OAuth completes
@@ -126,13 +163,13 @@ app.use("/api/*", shopify.validateAuthenticatedSession(), getShopName);
 app.use(express.json());
 
 
-async function getShopName (req,res,next){
+async function getShopName(req, res, next) {
 
   const shop = await res.locals.shopify.session.shop;
   let shopLowercase = shop.toLowerCase();
   let removeSuffix = shopLowercase.replace(".myshopify.com", "");
   let shopName = removeSuffix.replace("-", "_");
-  req.shopname=shopName;
+  req.shopname = shopName;
 
   next()
   // Send the shopName or reviewTable back in the response
@@ -169,17 +206,17 @@ app.get('/api/createReviewTable', async (_req, res) => {
 })
 
 // review middleware
-app.use('/api/review', reviewRoutes );
+app.use('/api/review', reviewRoutes);
 
 //table middleware
-app.use('/api/table',tableRoutes);
+app.use('/api/table', tableRoutes);
 
 
 // details middleware
-app.use('/api/details',detailsRoute);
+app.use('/api/details', detailsRoute);
 
 // settings middleware
-app.use('/api/settings',settingsRoute);
+app.use('/api/settings', settingsRoute);
 
 
 ////
@@ -222,7 +259,7 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
     .status(200)
     .set("Content-Type", "text/html")
     .send(readFileSync(join(STATIC_PATH, "index.html")));
-}, );
+},);
 
 
 

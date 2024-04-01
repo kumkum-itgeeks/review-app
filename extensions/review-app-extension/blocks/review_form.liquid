@@ -22,8 +22,9 @@
             <button onclick="getReviews('{{shopName}}',{{productId}})"> test </button>
         </h2>
     </div>
+        <h3 id='average-rating'> </h3><br>
     <div id='review-info-bar'>
-        <h3> No reviews yet </h3>
+        <h3 id='review-count'> </h3>
         <a href='#' onclick="handleButtonClick(event)" id='write-review-link'><h3> Write a review</h3></a>
     </div>
 
@@ -37,6 +38,10 @@
 
     <div id='form-section'>
     <form>
+    <hr/>
+        <h3>
+            WRITE A REVIEW
+        </h3>
         <label >Name</label>
         <Input type='text' placeholder='Enter your name'  value ='' id='nameInput' autocomplete='off' class='input-box'/>
         <span id='nameErr' class='err'></span>
@@ -73,6 +78,11 @@
  
   <script src="{{ '../assets/form.js' | asset_url }}">
   
+  </script>
+  <script>
+     document.addEventListener('DOMContentLoaded', function() {
+      getReviews('{{ shopName }}', {{ productId }}); // Replace with Liquid variables
+    });
   </script>
 
 

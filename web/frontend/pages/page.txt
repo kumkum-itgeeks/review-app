@@ -85,7 +85,11 @@ loading spinner and loading skeleton
 * showing dynamic listing for reviews
 
 
+01/04/24
 
+* review listing design
+* show replies on reviews (if any)
+* display average rating and review count
 
 
 //////////////
