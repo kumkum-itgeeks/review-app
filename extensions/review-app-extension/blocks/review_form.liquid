@@ -13,21 +13,19 @@
 
 <body>
 
-
 <div id='review-section'>
     <div id='titlebar'>
         <h2>
             CUSTOMER REVIEWS
-            <p id='api'></p>
-            <button onclick="getReviews('{{shopName}}',{{productId}})"> test </button>
+            <button onclick="getSettingsData('{{shopName}}')"> test </button>
+            <button onclick="getOnloadReviewsSetting('{{shopName}}')"> test Onload </button>
         </h2>
     </div>
-        <h3 id='average-rating'> </h3><br>
+        <h3 id='average-rating'> </h3>
     <div id='review-info-bar'>
-        <h3 id='review-count'> </h3>
+        <a href='#' onclick="changeReviewDisplay(event)" id='review-count'><h3> </h3></a>
         <a href='#' onclick="handleButtonClick(event)" id='write-review-link'><h3> Write a review</h3></a>
     </div>
-
     <div id='submit-message'>
      <hr/>
         <h3>
@@ -81,7 +79,7 @@
   </script>
   <script>
      document.addEventListener('DOMContentLoaded', function() {
-      getReviews('{{ shopName }}', {{ productId }}); // Replace with Liquid variables
+      getOnloadReviewsSetting('{{ shopName }}', {{ productId }}); // Replace with Liquid variables
     });
   </script>
 

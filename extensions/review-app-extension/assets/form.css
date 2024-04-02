@@ -144,7 +144,7 @@ h2 , h3 , h4 {
     justify-content: flex-end;
   }
 
-  #review-list-star{
+  .rating .review-list-star{
     color: rgb(252, 234, 33);
   }
 
@@ -155,4 +155,9 @@ h2 , h3 , h4 {
 
   #review-count{
     font-size: 16px;
+  }
+
+  #average-rating{
+    margin: 0;
+    padding: 0;
   }

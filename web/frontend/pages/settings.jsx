@@ -563,7 +563,7 @@ export default function Settings() {
                           autofocusTarget="first-node"
                           onClose={togglePopoverActiveStar}
                         >
-                          <ColorPicker  onChange={setStarColorfunction} color={starIconColor.customColor} />
+                          <ColorPicker  onChange={setStarColorfunction} color={color} />
                         </Popover>
                         : ''
                     }
@@ -603,7 +603,7 @@ export default function Settings() {
                       autofocusTarget="first-node"
                       onClose={togglePopoverActive}
                     >
-                      <ColorPicker  onChange={setBorderColorfunction} color={reviewListingLayout.bordercolor} />
+                      <ColorPicker  onChange={setBorderColorfunction} color={borderColor} />
                     </Popover>
 
                     <Text>Border color</Text>
@@ -614,7 +614,7 @@ export default function Settings() {
                       autofocusTarget="first-node"
                       onClose={togglePopoverActiveDivider}
                     >
-                      <ColorPicker  onChange={setDividerColorfunction} color={reviewListingLayout.dividercolor} />
+                      <ColorPicker  onChange={setDividerColorfunction} color={dividerColor} />
 
                     </Popover>
                     <Text>Divider color</Text>

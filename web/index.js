@@ -71,15 +71,12 @@ app.get("/api/addReviews/:obj/:shop", async (_req, res) => {
     var reviewStatus = (settingObj.autopublish)
 
     if (reviewStatus === 'enabled') {
-
       con.query(enabledQuery, (err, results) => {
         if (err) {
           console.error('Error inserting reviews', err);
           return;
         }
-
         res.send(JSON.stringify('Data inserted successfully'));
-
       });
     }
     else{
@@ -88,23 +85,15 @@ app.get("/api/addReviews/:obj/:shop", async (_req, res) => {
           console.error('Error inserting reviews',err);
           return;
         }
-       
         res.send(JSON.stringify('Data inserted successfully'));
-        
       });
     }
-
   });
-
-
 });
 
 
-// fetching published reviews from db
 
 app.get(`/api/getReviews/:shop/:id`, (req, res) => {
-
-  // console.log(req.params,'ssdfsagfdtrh****************')
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
   const productId = req.params.id;
@@ -130,6 +119,53 @@ app.get(`/api/getReviews/:shop/:id`, (req, res) => {
   });
 })
 
+app.get("/api/getSettingsData/:shop", async (_req, res) => {
+
+  const shop = JSON.parse(_req.params.shop).toLowerCase();
+  const settingsTable = shop + '_settings'
+  const type =['starIconColor','reviewListingLayout', 'reviewListingText' , 'reviewFormText' , 'badgeText'];
+  const typeValue = type.map(itm => `'${itm}'`).join(', ');
+
+  const query=`SELECT type , settings FROM ${settingsTable} WHERE type IN (${typeValue})`;
+
+  con.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching data',err);
+      return;
+    }
+    const transformedData = results.map(item => {
+      const settingsObj = JSON.parse(item.settings);
+      return { [item.type]: settingsObj };
+    });
+
+    // console.log(transformedData)
+    res.status(200).send(JSON.stringify(transformedData))
+  });
+});
+
+
+app.get("/api/checkReviewsOnload/:shop", async (_req, res) => {
+  const shop = JSON.parse(_req.params.shop).toLowerCase();
+  const settingsTable = shop + '_settings';
+
+  const query =`SELECT settings from ${settingsTable} Where type ='reviewListingLayout' `;
+
+  con.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching onload details',err);
+      return;
+    }
+    else{
+      let data=(results.map((itm)=>itm.settings))
+      let onLoad=(JSON.parse(data).reviewOnload)
+     res.status(200).send(onLoad)
+
+    }
+    
+  });
+});
+
+
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());
 app.get(
@@ -144,17 +180,10 @@ app.post(
 
 
 
-
-
-
-
 // Register webhooks after OAuth completes
 
 // If you are adding routes outside of the /api path, remember to
 // also add a proxy rule for them in web/frontend/vite.config.js
-
-
-
 
 
 

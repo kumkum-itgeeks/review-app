@@ -2,7 +2,7 @@
 
 client_id = "c8b76d8cdccd39ae45b847901d4b4fb3"
 name = "reviews"
-application_url = "https://anaheim-trusted-transparency-palestinian.trycloudflare.com"
+application_url = "https://finances-bus-stand-calculator.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://anaheim-trusted-transparency-palestinian.trycloudflare.com/auth/callback",
-  "https://anaheim-trusted-transparency-palestinian.trycloudflare.com/auth/shopify/callback",
-  "https://anaheim-trusted-transparency-palestinian.trycloudflare.com/api/auth/callback"
+  "https://finances-bus-stand-calculator.trycloudflare.com/auth/callback",
+  "https://finances-bus-stand-calculator.trycloudflare.com/auth/shopify/callback",
+  "https://finances-bus-stand-calculator.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

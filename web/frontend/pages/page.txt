@@ -90,8 +90,12 @@ loading spinner and loading skeleton
 * review listing design
 * show replies on reviews (if any)
 * display average rating and review count
+* autopublish review setting complete
 
 
 //////////////
 
+* show review on load setting 
+
+show reviews on load
   
