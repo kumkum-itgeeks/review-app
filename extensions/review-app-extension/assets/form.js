@@ -6,97 +6,171 @@
 // console.log(starIconColor)
 
 function addReviews(obj, shop) {
-  
+
   fetch(`https://finances-bus-stand-calculator.trycloudflare.com/api/addReviews/${JSON.stringify(obj)}/${JSON.stringify(shop)}`)
-  .then(res => res.json())
-  .then(data => console.log(data))
-  
+    .then(res => res.json())
+    .then(data => console.log(data))
+
 }
 
 function getReviews(shop, pid) {
-  
+
   fetch(`https://finances-bus-stand-calculator.trycloudflare.com/api/getReviews/${JSON.stringify(shop)}/${pid}`)
-  .then(res => res.json())
-  .then(data => {
-    setReviewInfo(data)
-  }
-  )
+    .then(res => res.json())
+    .then(data => {
+      setReviewInfo(data)
+    }
+    )
 }
-function getOnloadReviewsSetting(shop , pid) {
-  
+function getOnloadReviewsSetting(shop, pid) {
+
   fetch(`https://finances-bus-stand-calculator.trycloudflare.com/api/checkReviewsOnload/${JSON.stringify(shop)}`)
-  .then(res => res.json())
-  .then(data => {
-    if (data===true){
-      console.log(data)
-     document.getElementById('review-listing').style.display='block'
-     document.getElementById('review-count').style.textDecoration='none'
-    }
-    else{
-      console.log(data)
+    .then(res => res.json())
+    .then(data => {
+      if (data===true) {
+        console.log(data)
+        document.getElementById('review-listing').style.display = 'block'
+        document.getElementById('review-count').style.textDecoration = 'none'
+        document.getElementById('review-count').style.pointerEvents = 'none'
+      }
+      else {
 
-      document.getElementById('review-listing').style.display='none'
+        document.getElementById('review-listing').style.display = 'none'
+      }
+      getReviews(shop, pid);
     }
-    getReviews(shop,pid);
-  }
-  )
+    )
 }
 
-function changeReviewDisplay(e){
+function changeReviewDisplay(e) {
   e.preventDefault();
-     let display=document.getElementById('review-listing').style.display;
-     console.log('herere',display)
-     if(display=='block'){
-      
-      document.getElementById('review-listing').style.display='none';
-     }
-     else{
-      document.getElementById('review-listing').style.display='block';
-     }
+  let display = document.getElementById('review-listing').style.display;
+  console.log('herere', display)
+  if (display == 'block') {
+
+    document.getElementById('review-listing').style.display = 'none';
+  }
+  else {
+    document.getElementById('review-listing').style.display = 'block';
+  }
 }
 
 
 function getSettingsData(shop) {
-  
+
   fetch(`https://finances-bus-stand-calculator.trycloudflare.com/api/getSettingsData/${JSON.stringify(shop)}`)
-  .then(res => res.json())
-  .then(data => setSettings(data)
-  )
+    .then(res => res.json())
+    .then(data => setSettings(data)
+    )
 }
 
 
-function setSettings(data){
+
+function setSettings(data) {
 
   //star settings
-    
-  starColorData=data.filter((itm)=>(itm.starIconColor))
+  const { settingData, length, reviews, averageRating } = data;
+
+
+
+  starColorData = settingData.filter((itm) => (itm.starIconColor))
   let star = document.getElementsByClassName('review-list-star');
-  let ratingStar= document.querySelectorAll('.star.active');
+  let ratingStar = document.querySelectorAll('.star.active');
 
   for (var i = 0; i < ratingStar.length; i++) {
-    ratingStar[i].style.color=(starColorData.map((itm)=>itm.starIconColor.customColor));
+    ratingStar[i].style.color = (starColorData.map((itm) => itm.starIconColor.customColor));
   }
-  
+
   for (var i = 0; i < star.length; i++) {
-    star[i].style.color=(starColorData.map((itm)=>itm.starIconColor.customColor));
+    star[i].style.color = (starColorData.map((itm) => itm.starIconColor.customColor));
 
   }
 
 
   //review listing layout 
 
-  
+  let reviewListingData = settingData.filter((itm) => (itm.reviewListingLayout))
+  let reviewSection = document.getElementById('review-section');
+  let divider = document.getElementsByTagName('hr');
+
+  reviewSection.style.borderColor = (reviewListingData.map((itm) => itm.reviewListingLayout.bordercolor));
+  reviewSection.style.padding = (reviewListingData.map((itm) => `${itm.reviewListingLayout.reviewListingPadding}px`));
+
+  for (var i = 0; i < divider.length; i++) {
+    divider[i].style.backgroundColor = (reviewListingData.map((itm) => itm.reviewListingLayout.dividercolor));
+
+  }
+
+  //review listing text
+  let reviewListingTextData = settingData.filter((itm) => (itm.reviewListingText));
+  let reviewHeadline = document.getElementById('review-headline');
+  let reviewLink = document.getElementById('review-link-title');
+  let noReviewTitle = document.getElementById('no-review-title');
+  let reviewCountTitle = document.getElementById('review-count-title');
+
+  reviewHeadline.innerHTML = (reviewListingTextData.map((itm) => `${itm.reviewListingText.reviewHeadline}`));
+  reviewLink.innerHTML = (reviewListingTextData.map((itm) => `${itm.reviewListingText.reviewLink}`));
+  length ?
+    reviewCountTitle.innerText = reviewListingTextData.map((itm) => `${itm.reviewListingText.reviewSummary}`) :
+    noReviewTitle.innerHTML = (reviewListingTextData.map((itm) => `${itm.reviewListingText.noReviewSummary}`));
+
+
+  // review form text 
+
+  let reviewFormTextData = settingData.filter((itm) => (itm.reviewFormText));
+  console.log(reviewFormTextData)
+  let EmailPlaceholderValue = (reviewFormTextData.map((itm) => `${itm.reviewFormText.emailHelpMessage}`));
+  let NamePlaceholderValue = (reviewFormTextData.map((itm) => `${itm.reviewFormText.nameHelpMessage}`));
+  let reviewTitlePlaceholderValue = (reviewFormTextData.map((itm) => `${itm.reviewFormText.reviewTitleHelpMessage}`));
+  let reviewBodyPlaceholderValue = (reviewFormTextData.map((itm) => `${itm.reviewFormText.reviewBodyHelpMessage}`));
+
+  let FormTitle = document.getElementById('review-form-title');
+  let submitButtonTitle = document.getElementById('submit-btn-title');
+  let SuccessMessage = document.getElementById('success-message');
+
+  let EmailLabel = document.getElementById('email-label');
+  document.getElementById('emailInput').setAttribute("placeholder", EmailPlaceholderValue);
+
+  let NameLabel = document.getElementById('name-label');
+  document.getElementById('nameInput').setAttribute("placeholder", NamePlaceholderValue);
+
+  let RatingLabel = document.getElementById('rating-label');
+
+  let reviewTitleLabel = document.getElementById('review-title-label');
+  document.getElementById('reviewTitleInput').setAttribute("placeholder", reviewTitlePlaceholderValue);
+
+  let reviewDescLabel = document.getElementById('review-desc-label');
+  document.getElementById('reviewBodyInput').setAttribute("placeholder", reviewBodyPlaceholderValue);
+
+
+  EmailLabel.innerHTML = (reviewFormTextData.map((itm) => `${itm.reviewFormText.authorEmail}`));
+  NameLabel.innerHTML = (reviewFormTextData.map((itm) => `${itm.reviewFormText.authorName}`));
+  RatingLabel.innerHTML = (reviewFormTextData.map((itm) => `${itm.reviewFormText.reviewRating}`));
+  reviewTitleLabel.innerHTML = (reviewFormTextData.map((itm) => `${itm.reviewFormText.reviewTitle}`));
+  reviewDescLabel.innerHTML = (reviewFormTextData.map((itm) => `${itm.reviewFormText.reviewBody}`));
+  FormTitle.innerHTML = (reviewFormTextData.map((itm) => `${itm.reviewFormText.reviewFormTitle}`));
+  submitButtonTitle.innerHTML = (reviewFormTextData.map((itm) => `${itm.reviewFormText.submitButtton}`));
+  SuccessMessage.innerHTML = (reviewFormTextData.map((itm) => `${itm.reviewFormText.successMessage}`));
+
+
+
 
 }
 
 
 const setReviewInfo = (data) => {
+
   let stars = [1, 2, 3, 4, 5];
-    document.getElementById('review-listing').innerHTML = dataDistructure(data.reviews),
-    document.getElementById('review-count').innerHTML = data.length ? `Based on ${data.length} reviews` : 'no reviews yet',
+  let reviewCountTitle = document.getElementById('review-count-title')
+  let noReviewTitle = document.getElementById('no-review-title')
+  document.getElementById('review-listing').innerHTML = dataDistructure(data.reviews),
     document.getElementById('average-rating').innerHTML = `<div class='rating' >${stars.map((star) => {
       return data.averageRating >= star ? '<a href="#" class="review-list-star">&#9733;</a>' : '<a href="#">&#9733;</a>';
     }).join('')}<div class='rating' >`;
+
+  setSettings(data);
+
+
 }
 
 function dataDistructure(data) {

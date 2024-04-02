@@ -15,39 +15,40 @@
 
 <div id='review-section'>
     <div id='titlebar'>
-        <h2>
-            CUSTOMER REVIEWS
+        <h2 id='review-headline'></h2>
             <button onclick="getSettingsData('{{shopName}}')"> test </button>
             <button onclick="getOnloadReviewsSetting('{{shopName}}')"> test Onload </button>
-        </h2>
     </div>
         <h3 id='average-rating'> </h3>
     <div id='review-info-bar'>
-        <a href='#' onclick="changeReviewDisplay(event)" id='review-count'><h3> </h3></a>
-        <a href='#' onclick="handleButtonClick(event)" id='write-review-link'><h3> Write a review</h3></a>
+        <a href='#' onclick="changeReviewDisplay(event)" id='review-count'><h3>
+        <p id='review-count-title'> </p> 
+        <p id='no-review-title'></p>
+        </h3></a>
+        <a href='#' onclick="handleButtonClick(event)" id='write-review-link'><h3 id='review-link-title'></h3></a>
     </div>
     <div id='submit-message'>
      <hr/>
         <h3>
             WRITE A REVIEW
         </h3>
-        <p> thank you for submitting a review !!</p>
+        <p id='success-message'> thank you for submitting a review !!</p>
     </div>    
 
     <div id='form-section'>
     <form>
     <hr/>
-        <h3>
+        <h3 id='review-form-title'>
             WRITE A REVIEW
         </h3>
-        <label >Name</label>
+        <label id='name-label'>Name</label>
         <Input type='text' placeholder='Enter your name'  value ='' id='nameInput' autocomplete='off' class='input-box'/>
         <span id='nameErr' class='err'></span>
-        <label >Email</label>
+        <label id='email-label'>Email</label>
         <Input type='text' placeholder='johnsmith@example.com' id='emailInput' value='' autocomplete='off' class='input-box'/>
         <span id='emailErr' class='err'></span>
 
-        <label >Rating</label>
+        <label id='rating-label'>Rating</label>
          <div class="star-rating">
            <a href="#" class="star" data-rating="1">&#9733;</a>
             <a href="#" class="star" data-rating="2">&#9733;</a>
@@ -57,14 +58,14 @@
         </div>
         <span id='ratingErr' class='err'></span>
 
-        <label >Review Title</label>
+        <label id='review-title-label'>Review Title</label>
         <Input type='text' placeholder='Give your review a title' id='reviewTitleInput' value='' autocomplete='off' class='input-box'/>
         <span id='titleErr' class='err'></span>
-        <label >Body of Review (1500)</label>
+        <label id='review-desc-label'>Body of Review (1500)</label>
         <textarea  rows='10'  id='reviewBodyInput' placeholder='Write your comments here' class='input-box'></textarea>
         <span id='bodyErr' class='err'></span>
         <div id='submit-btn'>
-            <button type='submit' onclick="handleSubmit(event,{{productId}},'{{shopName}}','{{productName}}')" class='btn button' ><b>Submit Review</b></button>
+            <button type='submit' onclick="handleSubmit(event,{{productId}},'{{shopName}}','{{productName}}')" class='btn button' ><b id='submit-btn-title'>Submit Review</b></button>
         </div>
     </form>
     </div>

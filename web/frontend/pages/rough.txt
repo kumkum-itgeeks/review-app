@@ -1,92 +1,18 @@
-{
-    data :[
-        {
-            id : '1',
-            type : 'autopublish',
-            settings : [
-                {
-                    title : 'autopublish',
-                    value : 'disabled'
-                },
-            ]
-        },
-        {
-            id : '2',
-            type : 'emailsetting',
-            settings : [
-                {
-                    title : 'send email',
-                    value : 'true'
-                },
-                {
-                    title : 'email',
-                    value : 'example@email.com'
-                },
-            ]
-        },
-        {
-            id : '3',
-            type : 'stariconcolor',
-            settings : [
-                {
-                    title : 'theme color',
-                    value : 'false'
-                },
-                {
-                    title : 'custom color',
-                    value : '#D007FF3'
-                },
-            ]
-        },
-        {
-            id : '4',
-            type : 'reviewlistinglayout',
-            settings : [
-                {
-                    title : 'reviewsonload',
-                    value : 'false'
-                },
-                {
-                    title : 'border color',
-                    value : '#D007FF3'
-                },
-                {
-                    title : 'divider color',
-                    value : '#D007FF3'
-                },
-                {
-                    title : 'padding',
-                    value : '24'
-                },
-                {
-                    title : 'reviews per page',
-                    value : '5'
-                },
-            ]
-        },
-       
-    ]
-}
+settings status 
 
-db.query(
-    'INSERT INTO my_table (name, description, value) VALUES ?',
-    [items.map(item => [item.name, item.description, item.value])],
-    (error, results) => {...}
-);
+***autopublish*** done
+
+***star icon setting ***
+theme color
 
 
+***review listing layout***
+pagination
 
-const keyObj = apiResponse.map((itm)=>{
-    return Object.keys(itm)
-})
 
-   for(key of keyObj ){
-      for(settings of apiResponse ){
-          if(key === 'autoPublish'){
-            setAutoPublish(settings.autoPublish)
-          }
-          if(key === 'otherKey'){
-            setOtherState(settings.otherKey)
-          }
-      }
-   }
+***review listing text***
+
+review summary with one or more reviews
+next and prev pagination btn
+report as inappropriate
+author on date 

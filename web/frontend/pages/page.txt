@@ -95,7 +95,10 @@ loading spinner and loading skeleton
 
 //////////////
 
-* show review on load setting 
+02/04/24
 
-show reviews on load
+*show review on load setting 
+*review listing layout setting
+* review form text setting 
+  and their api's 
   
