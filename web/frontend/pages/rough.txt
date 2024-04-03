@@ -1,18 +1,16 @@
-settings status 
-
-***autopublish*** done
-
-***star icon setting ***
-theme color
 
 
-***review listing layout***
-pagination
 
+pagination 
 
-***review listing text***
+report innaprpriate review 
 
-review summary with one or more reviews
-next and prev pagination btn
-report as inappropriate
-author on date 
+star input color 
+
+send email on reviews
+
+star color theme color
+
+err field common 
+
+review count 

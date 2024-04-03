@@ -1,7 +1,7 @@
 #review-section{
     padding: 20px;
     margin: 0;
-    border: 1px solid #000000
+    border: 1px solid #000000;
 }
 
 #review-info-bar{
@@ -106,7 +106,7 @@ h2 , h3 , h4 {
   }
   .star-rating a:hover,
   .star-rating a.active {
-    color: #ffcc00; 
+    color: #b300ff; 
   }
 
   #submit-message{
@@ -161,3 +161,38 @@ h2 , h3 , h4 {
     margin: 0;
     padding: 0;
   }
+
+  #page-number-display{
+    display: none;
+  }
+
+  #pagination-section{
+    display: flex;
+    justify-content:end;
+    align-items: center;
+    
+  }
+
+  .pagination-btn{
+    height:40px;
+    width:100px;
+    margin: 0 20px 0 20px;
+    outline:none;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+
+  #review-listing{
+    min-height: 600px;
+  }
+/* 
+  #prev-btn{
+    background-color:rgb(92, 210, 196);
+  
+  }
+
+  #next-btn{
+    background-color:rgb(77, 205, 77);
+   
+  } */

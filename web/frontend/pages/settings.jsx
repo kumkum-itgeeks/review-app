@@ -82,8 +82,8 @@ export default function Settings() {
     authorName: 'Name',
     nameHelpMessage: 'Enter your name',
     nameType: 'required',
-    authorLocation: '',
-    locationHelpMessage: '',
+    authorLocation: 'Location',
+    locationHelpMessage: 'Enter your location',
     locationType: 'required',
     reviewFormTitle: 'Write a review',
     reviewRating: 'Rating',
@@ -750,6 +750,7 @@ export default function Settings() {
                 <Box background='bg-surface' padding={400}>
                   <BlockStack gap={300}>
                     <TextField
+                      disabled={reviewFormText.emailType==='hidden'?true:false}
                       label="Author's email"
                       type="text"
                       value={reviewFormText.authorEmail}
@@ -757,6 +758,7 @@ export default function Settings() {
                       autoComplete="off"
                     />
                     <TextField
+                      disabled={reviewFormText.emailType==='hidden'?true:false}
                       label="Help message"
                       type="text"
                       value={reviewFormText.emailHelpMessage}
@@ -774,6 +776,7 @@ export default function Settings() {
                     <Divider />
 
                     <TextField
+                      disabled={reviewFormText.nameType==='hidden'?true:false}
                       label="Author's name"
                       type="text"
                       value={reviewFormText.authorName}
@@ -781,6 +784,7 @@ export default function Settings() {
                       autoComplete="off"
                     />
                     <TextField
+                      disabled={reviewFormText.nameType==='hidden'?true:false}
                       label="Help message"
                       type="text"
                       value={reviewFormText.nameHelpMessage}
@@ -798,15 +802,16 @@ export default function Settings() {
                     <Divider />
 
                     <TextField
-                      disabled
+                      disabled={reviewFormText.locationType==='hidden'?true:false}
                       label="Author's location"
                       type="text"
                       value={reviewFormText.authorLocation}
                       onChange={(value) => handlereviewFormText('authorLocation', value)}
                       autoComplete="off"
                     />
+
                     <TextField
-                      disabled
+                      disabled={reviewFormText.locationType==='hidden'?true:false}
                       label="Help message"
                       type="text"
                       value={reviewFormText.locationHelpMessage}

@@ -92,50 +92,25 @@ app.get("/api/addReviews/:obj/:shop", async (_req, res) => {
 });
 
 
+app.get(`/api/getReviews/:shop/:id/:page`, (req, res) => {
 
-// app.get(`/api/getReviews/:shop/:id`, (req, res) => {
-
-//   const shop = JSON.parse(req.params.shop).toLowerCase();
-//   const productId = req.params.id;
-//   const detailsTable = shop + '_details'
-//   const settingsTable = shop + '_settings'
-
-
-//   const query = ` SELECT starRating , reviewTitle , userName , datePosted , reviewDescription , reply  FROM ${detailsTable} WHERE productid=${productId} AND reviewStatus='Published'`;
-
-//   con.query(query, (err, results) => {
-//     if (err) {
-//       console.error('Error retrieving data', err);
-//       return;
-//     }
-//     let sum = 0;
-//     let rating = results.map((itm) => itm.starRating)
-//     let length = results.length
-//     let totalRating = rating.forEach((itm) => {
-//       sum += itm;
-//     })
-//     let averageRating = sum / length;
-//     console.log('length => ', length, 'avaerage rating =>', sum / length);
-//     res.send(JSON.stringify({ reviews: results, length: length, averageRating: averageRating }));
-
-//   });
-// })
-
-
-app.get(`/api/getReviews/:shop/:id`, (req, res) => {
-
+  var settingData;
+  var reviewPerpage;
+  var isLastPage;
+  var length;
+  var averageRating;
   const shop = JSON.parse(req.params.shop).toLowerCase();
   const productId = req.params.id;
+  const pageNumber = Number(req.params.page);
+  console.log('page number ***********', pageNumber)
   const detailsTable = shop + '_details'
   const settingsTable = shop + '_settings'
   const type =['starIconColor','reviewListingLayout', 'reviewListingText' , 'reviewFormText' , 'badgeText'];
   const typeValue = type.map(itm => `'${itm}'`).join(', ');
-
-
   const   settingsQuery=`SELECT type , settings FROM ${settingsTable} WHERE type IN (${typeValue})`;
-  const query = ` SELECT starRating , reviewTitle , userName , datePosted , reviewDescription , reply  FROM ${detailsTable} WHERE productid=${productId} AND reviewStatus='Published'`;
-  var settingData;
-  
+  const totoalDataquery = ` SELECT starRating , reviewTitle , userName , datePosted , reviewDescription , reply  FROM ${detailsTable} WHERE productid=${productId} AND reviewStatus='Published'`
+
+
 
   con.query(settingsQuery, (err, results) => {
     if (err) {
@@ -146,76 +121,55 @@ app.get(`/api/getReviews/:shop/:id`, (req, res) => {
       const settingsObj = JSON.parse(item.settings);
       return { [item.type]: settingsObj };
     });
+    
+    settingData=transformedData
+    reviewPerpage=(transformedData.filter((itm)=>(itm.reviewListingLayout)).map((itm)=>itm.reviewListingLayout.reviewPerpage).join(''))
+    
+    const limit = Number(reviewPerpage);
+    const offset = Number((pageNumber - 1) * limit);
+    console.log(offset)
+    
+    
+    console.log(reviewPerpage)
+    const query = ` SELECT starRating , reviewTitle , userName , datePosted , reviewDescription , reply  FROM ${detailsTable} WHERE productid=${productId} AND reviewStatus='Published' LIMIT ${limit} OFFSET ${offset}`;
+    
 
-    // res.status(200).send(JSON.stringify(transformedData))
-    settingData=transformedData;
-  });
+    con.query(totoalDataquery, (err, results) => {
+      if (err) {
+        console.error('Error retrieving data', err);
+        return;
+      }
+      let sum = 0;
+      let rating = results.map((itm) => itm.starRating)
+      length = results.length
+      let totalRating = rating.forEach((itm) => {
+        sum += itm;
+      })
+       averageRating = sum / length;
+    
+       
+      if(length < (limit+offset)){
+        isLastPage=true
+      }
+      else{
+        isLastPage=false
+      }
+    });
 
+    
   con.query(query, (err, results) => {
     if (err) {
       console.error('Error retrieving data', err);
       return;
     }
-    let sum = 0;
-    let rating = results.map((itm) => itm.starRating)
-    let length = results.length
-    let totalRating = rating.forEach((itm) => {
-      sum += itm;
-    })
-    let averageRating = sum / length;
-  
-      // console.log('length => ', length, 'avaerage rating =>', sum / length);
-    res.send(JSON.stringify({ reviews: results, length: length, averageRating: averageRating , settingData : settingData}));
+    res.send(JSON.stringify({ reviews: results, length: length, averageRating: averageRating , settingData : settingData , isLastPage: isLastPage}));
 
   });
+});
   //
 })
 
-// app.get("/api/getSettingsData/:shop", async (_req, res) => {
 
-//   const shop = JSON.parse(_req.params.shop).toLowerCase();
-//   const settingsTable = shop + '_settings'
-//   const type =['starIconColor','reviewListingLayout', 'reviewListingText' , 'reviewFormText' , 'badgeText'];
-//   const typeValue = type.map(itm => `'${itm}'`).join(', ');
-
-//   const query=`SELECT type , settings FROM ${settingsTable} WHERE type IN (${typeValue})`;
-
-//   con.query(query, (err, results) => {
-//     if (err) {
-//       console.error('Error fetching data',err);
-//       return;
-//     }
-//     const transformedData = results.map(item => {
-//       const settingsObj = JSON.parse(item.settings);
-//       return { [item.type]: settingsObj };
-//     });
-
-//     res.status(200).send(JSON.stringify(transformedData))
-//   });
-// });
-// app.get("/api/getSettingsData/:shop", async (_req, res) => {
-
-//   const shop = JSON.parse(_req.params.shop).toLowerCase();
-//   const settingsTable = shop + '_settings'
-//   const type =['starIconColor','reviewListingLayout', 'reviewListingText' , 'reviewFormText' , 'badgeText'];
-//   const typeValue = type.map(itm => `'${itm}'`).join(', ');
-
-//   const query=`SELECT type , settings FROM ${settingsTable} WHERE type IN (${typeValue})`;
-
-//   con.query(query, (err, results) => {
-//     if (err) {
-//       console.error('Error fetching data',err);
-//       return;
-//     }
-//     const transformedData = results.map(item => {
-//       const settingsObj = JSON.parse(item.settings);
-//       return { [item.type]: settingsObj };
-//     });
-
-//     // console.log(transformedData)
-//     res.status(200).send(JSON.stringify(transformedData))
-//   });
-// });
 
 
 app.get("/api/checkReviewsOnload/:shop", async (_req, res) => {

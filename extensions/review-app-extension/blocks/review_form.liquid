@@ -42,11 +42,15 @@
             WRITE A REVIEW
         </h3>
         <label id='name-label'>Name</label>
-        <Input type='text' placeholder='Enter your name'  value ='' id='nameInput' autocomplete='off' class='input-box'/>
+        <Input type='text' placeholder='Enter your name'  value ='' id='nameInput' autocomplete='off' class='input-box' isRequired=true/>
         <span id='nameErr' class='err'></span>
         <label id='email-label'>Email</label>
-        <Input type='text' placeholder='johnsmith@example.com' id='emailInput' value='' autocomplete='off' class='input-box'/>
+        <Input type='text' placeholder='johnsmith@example.com' id='emailInput' value='' autocomplete='off' class='input-box' isRequired=true/>
         <span id='emailErr' class='err'></span>
+
+        <label id='location-label'>Location</label>
+        <Input type='text' placeholder='location' id='locationInput' value='' autocomplete='off' class='input-box' isRequired=true/>
+        <span id='locationErr' class='err'></span>
 
         <label id='rating-label'>Rating</label>
          <div class="star-rating">
@@ -59,10 +63,10 @@
         <span id='ratingErr' class='err'></span>
 
         <label id='review-title-label'>Review Title</label>
-        <Input type='text' placeholder='Give your review a title' id='reviewTitleInput' value='' autocomplete='off' class='input-box'/>
+        <Input type='text' placeholder='Give your review a title' id='reviewTitleInput' value='' autocomplete='off' class='input-box' />
         <span id='titleErr' class='err'></span>
         <label id='review-desc-label'>Body of Review (1500)</label>
-        <textarea  rows='10'  id='reviewBodyInput' placeholder='Write your comments here' class='input-box'></textarea>
+        <textarea  rows='10'  id='reviewBodyInput' placeholder='Write your comments here' class='input-box' ></textarea>
         <span id='bodyErr' class='err'></span>
         <div id='submit-btn'>
             <button type='submit' onclick="handleSubmit(event,{{productId}},'{{shopName}}','{{productName}}')" class='btn button' ><b id='submit-btn-title'>Submit Review</b></button>
@@ -70,7 +74,14 @@
     </form>
     </div>
 
+<div >
     <div id='review-listing'>
+    </div>
+    <div id='pagination-section'>
+      <button onclick="setPrev('{{ shopName }}', {{ productId }} , event )" id='prev-btn' class='pagination-btn btn button'>Prev</button>
+      <input type='number' id='page-number-display' value='1'/>
+      <button onclick="setNext('{{ shopName }}', {{ productId }} , event)" id='next-btn' class='pagination-btn btn button'>Next</button>
+    </div>
     </div>
    
 </div>
@@ -79,8 +90,9 @@
   
   </script>
   <script>
+
      document.addEventListener('DOMContentLoaded', function() {
-      getOnloadReviewsSetting('{{ shopName }}', {{ productId }}); // Replace with Liquid variables
+      getOnloadReviewsSetting('{{ shopName }}', {{ productId }} ); // Replace with Liquid variables
     });
   </script>
 

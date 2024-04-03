@@ -169,19 +169,7 @@ export default function Details() {
       title={review ? `${review.reviewTitle}` : ''}
       titleMetadata={review ? `${review.datePosted}` : ''}
     >
-      {/* <TitleBar
-        title={review ? `${review.reviewTitle}` : ''}
-        secondaryActions={[
-          {
-            content: ("Delete"),
-            onAction: () => deleteReview(),
-          },
-          {
-            content: ("Publish"),
-            onAction: () => publishReview(),
-          }
-        ]}
-      /> */}
+  
       <BlockStack gap='300'>
         <Button variant="plain" onClick={() => changeStatus()} textAlign="start" size="large" >
           {
@@ -265,6 +253,10 @@ export default function Details() {
                         <Divider />
                         <InlineStack>
                           <Text>{review ? `${review.userName}` : ''}</Text>
+                          {
+                            (review?.location)?<Text>,  from { review.location} </Text>:''
+                          }
+                       
                           <Text><Link removeUnderline>{review ? `( ${review.Email} )` : ''}</Link></Text>
                         </InlineStack>
                       </BlockStack>

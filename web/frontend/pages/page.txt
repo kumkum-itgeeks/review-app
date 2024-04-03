@@ -101,4 +101,11 @@ loading spinner and loading skeleton
 *review listing layout setting
 * review form text setting 
   and their api's 
+
+03/04/24
+
+* required , optional and hidden fields 
+* review listing pagination complete
+* pagination api
+* star rating input color setting
   
