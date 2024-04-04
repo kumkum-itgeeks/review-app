@@ -2,12 +2,11 @@
 //global variables*********
 let currentPage = 1;
 var isthisLastPage;
-let PageNumber = document.getElementById('page-number-display').value;
-const url = `https://hottest-sought-sharon-learning.trycloudflare.com`
+var shopName; let PageNumber = document.getElementById('page-number-display').value;
+const url = `https://older-antibody-method-modification.trycloudflare.com`
 
 // dom content loaded********
 
-//setting star value
 document.addEventListener('DOMContentLoaded', function () {
   const stars = document.querySelectorAll('.star-rating .star');
   PageNumber = 1;
@@ -85,35 +84,43 @@ function addReviews(obj, shop) {
 
 function getOnloadReviewsSetting(shop, pid) {
 
+
   fetch(`${url}/api/checkReviewsOnload/${JSON.stringify(shop)}`)
     .then(res => res.json())
     .then(data => {
       if (data === true) {
         console.log(data)
         document.getElementById('review-listing').style.display = 'block'
+        document.getElementById('pagination-section').style.display = 'block'
         document.getElementById('review-count').style.textDecoration = 'none'
         document.getElementById('review-count').style.pointerEvents = 'none'
       }
       else {
 
         document.getElementById('review-listing').style.display = 'none'
+        document.getElementById('pagination-section').style.display = 'none'
+
       }
       getReviews(shop, pid, PageNumber);
     }
     )
 }
 
-// changing functionality for based on onload function results *****
+// changing functionality  based on onload function results *****
 
 function changeReviewDisplay(e) {
   e.preventDefault();
   let display = document.getElementById('review-listing').style.display;
   if (display == 'block') {
-
     document.getElementById('review-listing').style.display = 'none';
+    document.getElementById('pagination-section').style.display = 'none'
+
   }
   else {
     document.getElementById('review-listing').style.display = 'block';
+    document.getElementById('pagination-section').style.display = 'flex'
+
+
   }
 }
 
@@ -124,11 +131,10 @@ function getReviews(shop, pid, page) {
   fetch(`${url}/api/getReviews/${JSON.stringify(shop)}/${pid}/${page}`)
     .then(res => res.json())
     .then(data => {
-      setReviewInfo(data)
+      setReviewInfo(data, shop)
     }
     )
 }
-
 
 // pagination functionality ********
 function setPrev(shop, pid, e) {
@@ -144,7 +150,7 @@ function setPrev(shop, pid, e) {
   getReviews(shop, pid, PageNumber)
 
 
-  console.log('page=>', PageNumber)
+
 
 }
 
@@ -152,7 +158,6 @@ function setNext(shop, pid, e) {
 
   e.preventDefault();
 
-  // console.log('last page',isthisLastPage)
 
   if (isthisLastPage) {
     document.getElementById('next-btn').disabled = true
@@ -168,6 +173,22 @@ function setNext(shop, pid, e) {
   console.log('page=>', PageNumber)
 }
 
+//report inappropriate review 
+
+function reportReview(e, shop, id, reportText) {
+
+  e.preventDefault();
+
+  let targetID = document.getElementById(`target-id-${id}`);
+  fetch(`${url}/api/reportInappropriate/${JSON.stringify(shop)}/${id}`)
+    .then(res => res.json())
+    .then(data => {
+      targetID.innerHTML = reportText
+    }
+    )
+}
+
+
 // fetching app setting data *******
 
 function getSettingsData(shop) {
@@ -179,13 +200,12 @@ function getSettingsData(shop) {
 }
 
 
-
-const setReviewInfo = (data) => {
+const setReviewInfo = (data, shop) => {
 
   let stars = [1, 2, 3, 4, 5];
-  let reviewCountTitle = document.getElementById('review-count-title')
-  let noReviewTitle = document.getElementById('no-review-title')
-  document.getElementById('review-listing').innerHTML = dataDistructure(data.reviews),
+  // let reviewCountTitle = document.getElementById('review-count-title')
+  // let noReviewTitle = document.getElementById('no-review-title')
+  document.getElementById('review-listing').innerHTML = dataDistructure(data, shop),
     document.getElementById('average-rating').innerHTML = `<div class='rating' >${stars.map((star) => {
       return data.averageRating >= star ? '<a href="#" class="review-list-star">&#9733;</a>' : '<a href="#">&#9733;</a>';
     }).join('')}<div class='rating' >`;
@@ -195,11 +215,14 @@ const setReviewInfo = (data) => {
 
 }
 
+// setting all setting's values**********
+
 function setSettings(data) {
 
-  //star settings
+  //star settings**
   const { settingData, length, reviews, averageRating, isLastPage } = data;
 
+  const isInappropriateReview = reviews.map((itm) => itm.isInappropriate)
   isthisLastPage = isLastPage;
 
   starColorData = settingData.filter((itm) => (itm.starIconColor))
@@ -210,12 +233,6 @@ function setSettings(data) {
     ratingStar[i].style.color = (starColorData.filter((itm) => itm.starIconColor.customColor));
   }
 
-  // let ratingStar = document.querySelectorAll('.star.active');
-
-  // for (let i = 0; i < ratingStar.length; i++) {
-  //   let customColor = starColorData[i].starIconColor.customColor;
-  //   ratingStar[i].style.color = customColor;
-  // }
 
   for (var i = 0; i < star.length; i++) {
     star[i].style.color = (starColorData.map((itm) => itm.starIconColor.customColor));
@@ -223,7 +240,7 @@ function setSettings(data) {
   }
 
 
-  //review listing layout 
+  //review listing layout**
 
   let reviewListingData = settingData.filter((itm) => (itm.reviewListingLayout))
   let reviewSection = document.getElementById('review-section');
@@ -237,7 +254,7 @@ function setSettings(data) {
 
   }
 
-  //review listing text
+  //review listing text**
   let reviewListingTextData = settingData.filter((itm) => (itm.reviewListingText));
   let reviewHeadline = document.getElementById('review-headline');
   let reviewLink = document.getElementById('review-link-title');
@@ -245,27 +262,33 @@ function setSettings(data) {
   let reviewCountTitle = document.getElementById('review-count-title');
   let NextButton = document.getElementById('next-btn')
   let PrevButton = document.getElementById('prev-btn')
-  let reportReview = document.querySelectorAll('#report-review')
 
+  //storing label values
   reviewHeadline.innerHTML = (reviewListingTextData.map((itm) => `${itm.reviewListingText.reviewHeadline}`));
   reviewLink.innerHTML = (reviewListingTextData.map((itm) => `${itm.reviewListingText.reviewLink}`));
   NextButton.innerHTML = (reviewListingTextData.map((itm) => `${itm.reviewListingText.paginationNextLabel}`));
   PrevButton.innerHTML = (reviewListingTextData.map((itm) => `${itm.reviewListingText.paginationPrevLabel}`));
-  // reportReview.innerHTML = (reviewListingTextData.map((itm) => `${itm.reviewListingText.reportAsinappropriate}`));
+
+  //setting review count title based on reviews availble or not (eg: 'based on 4 reviews' or no reviews yet)
   length ?
-    reviewCountTitle.innerText = reviewListingTextData.map((itm) => `${itm.reviewListingText.reviewSummary}, ${'here', length}`) :
+    reviewCountTitle.innerText = reviewListingTextData.map((itm) => `${(itm.reviewListingText.reviewSummary)}`.replaceAll("${length}", `${length}`)) :
     noReviewTitle.innerHTML = (reviewListingTextData.map((itm) => `${itm.reviewListingText.noReviewSummary}`));
- 
-    for (var i = 0; i < reportReview.length; i++) {
-      reportReview[i].innerHTML = (reviewListingTextData.map((itm) => `${itm.reviewListingText.reportAsinappropriate}`));
 
-  
+
+  //showing review either reported or can report
+  reviews.map((itm) => {
+    if (itm.isInappropriate === 1) {
+      document.getElementById(`target-id-${itm.id}`).innerHTML = reviewListingTextData.map((itm) => `${itm.reviewListingText.reportAsinappropriateMessage}`)
     }
+    else {
+      document.getElementById(`target-id-${itm.id}`).innerHTML = reviewListingTextData.map((itm) => `${itm.reviewListingText.reportAsinappropriate}`)
 
-  // review form text 
+    }
+  })
+
+  // review form text** 
 
   let reviewFormTextData = settingData.filter((itm) => (itm.reviewFormText));
-  console.log(reviewFormTextData)
   let EmailPlaceholderValue = (reviewFormTextData.map((itm) => `${itm.reviewFormText.emailHelpMessage}`));
   let NamePlaceholderValue = (reviewFormTextData.map((itm) => `${itm.reviewFormText.nameHelpMessage}`));
   let reviewTitlePlaceholderValue = (reviewFormTextData.map((itm) => `${itm.reviewFormText.reviewTitleHelpMessage}`));
@@ -281,7 +304,12 @@ function setSettings(data) {
   let reviewBodyInput = document.getElementById('reviewBodyInput');
   let locationInput = document.getElementById('locationInput');
   let locationErr = document.getElementById('locationErr');
+  let commonErr = document.getElementById('common-err')
 
+  //common error box
+  commonErr.innerHTML = (reviewFormTextData.map((itm) => `${itm.reviewFormText.errorMessage}`));
+
+  //setting input values 
   let LocationLabel = document.getElementById('location-label');
   locationInput.setAttribute("placeholder", locationPlaceholderValue);
 
@@ -298,6 +326,8 @@ function setSettings(data) {
 
   let reviewDescLabel = document.getElementById('review-desc-label');
   reviewBodyInput.setAttribute("placeholder", reviewBodyPlaceholderValue);
+
+  //Input display (hidden or required or optional)**
 
   //email Input display 
 
@@ -355,7 +385,7 @@ function setSettings(data) {
 
 
 
-  //name input display 
+  //setting label values
   RatingLabel.innerHTML = (reviewFormTextData.map((itm) => `${itm.reviewFormText.reviewRating}`));
   reviewTitleLabel.innerHTML = (reviewFormTextData.map((itm) => `${itm.reviewFormText.reviewTitle}`));
   reviewDescLabel.innerHTML = (reviewFormTextData.map((itm) => `${itm.reviewFormText.reviewBody}`));
@@ -366,19 +396,25 @@ function setSettings(data) {
 
 }
 
-// mapping function for all reviews
 
-function dataDistructure(data) {
+// mapping function for all reviews** (distributing objects from array )
+
+function dataDistructure(data, shop) {
+  const { reviews } = data;
   let html = '';
-  data.forEach(obj => {
-    html += createHTMLForObject(obj);
+  reviews.forEach(obj => {
+    html += createHTMLForObject(data, obj, shop);
   });
   return html;
 }
 
-// creating html for review list
 
-function createHTMLForObject(itm) {
+// generating html for review list (block for each review )
+
+function createHTMLForObject(data, itm, shop) {
+  let reviewListingData = (data.settingData.filter((itm) => itm.reviewListingText))
+  let authorInformation = (reviewListingData[0].reviewListingText.authorInformation)
+  let reportedText = (reviewListingData[0].reviewListingText.reportAsinappropriateMessage)
   let stars = [1, 2, 3, 4, 5];
   return `
 <div id='review-list-section'>
@@ -400,9 +436,12 @@ ${stars.map((star) => {
 
     </div>
     <h3 id='review-title-list' class='spr' > ${itm?.reviewTitle} </h3>
-    <p><i><b>${itm?.userName} </b> on <b>${formatDate(itm?.datePosted)}</b></i></p>
+    ${(authorInformation).replace('${itm.userName}', itm?.userName).replace('${itm.datePosted}', formatDate(itm?.datePosted))}
     <p id='review-list-description'> ${itm.reviewDescription} </p>
-    <a href='#' id='report-review' style="color:#28282ABF"> </a>
+    <div class='report-section'>
+    <a href='#' class='report-review' id='target-id-${itm.id}' style="color:#28282ABF" onclick="reportReview(event,'${shop}',${itm.id} , '${reportedText}')"> 
+    </a>
+    </div>
     <br>
     ${itm?.reply === '' || itm.reply === null ?
       ''
@@ -417,7 +456,7 @@ ${stars.map((star) => {
 
 }
 
-// date format for review list 
+// date format for review list*** (eg: Mar 25 , 2024)
 function formatDate(dateString) {
   const options = { month: 'short', day: 'numeric', year: 'numeric' };
   const date = new Date(dateString);
@@ -427,16 +466,24 @@ function formatDate(dateString) {
 let currentRating = 0;
 
 function handleButtonClick(e) {
-  document.getElementById('form-section').style.display = 'block'
-  document.getElementById('submit-message').style.display = 'none'
-
 
   e.preventDefault();
+  document.getElementById('submit-message').style.display = 'none';
+  let FormDisplay = document.getElementById('form-section').style.display;
+
+  if (FormDisplay == 'block') {
+    document.getElementById('form-section').style.display = 'none';
+  }
+  else {
+    document.getElementById('form-section').style.display = 'block';
+  }
+
+
 }
 
 
 
-// on submit validaiton 
+// on submit validaiton (on click of submit button only)
 function handleSubmit(e, id, shop, product) {
   e.preventDefault();
   let stars = [1, 2, 3, 4, 5]
@@ -458,6 +505,8 @@ function handleSubmit(e, id, shop, product) {
   const emailRequired = document.getElementById('emailInput').getAttribute('isRequired')
   const nameRequired = document.getElementById('nameInput').getAttribute('isRequired')
   const locationRequired = document.getElementById('locationInput').getAttribute('isRequired')
+  let commonErr = document.getElementById('common-err')
+
 
   if ((email.match(emailRegex)) && (email != '')) {
     isEmailValid = true;
@@ -512,43 +561,60 @@ function handleSubmit(e, id, shop, product) {
   }
 
 
-
+  //showing red lines for error fields and black for no err
 
   if (isNameValid === false || isTitleValid === false || isBodyValid === false || currentRating === 0 || isEmailValid === false || isLocationValid === false) {
 
+    commonErr.style.display = 'block';
+
     if (isNameValid === false) {
-      document.getElementById('nameErr').innerHTML = "Please enter a valid name !"
+      document.getElementById('nameInput').style.borderColor = "red"
+      document.getElementById('nameInput').style.borderWidth = "2px"
     }
     else {
-      document.getElementById('nameErr').innerHTML = '';
+      document.getElementById('nameInput').style.borderColor = "black"
+      document.getElementById('nameInput').style.borderWidth = "1px"
+
     }
     if (isEmailValid === false) {
-      document.getElementById('emailErr').innerHTML = "Please enter valid email !"
+      document.getElementById('emailInput').style.borderColor = "red"
+      document.getElementById('emailInput').style.borderWidth = "2px"
     }
     else {
-      document.getElementById('emailErr').innerHTML = '';
+      document.getElementById('emailInput').style.borderColor = "black"
+      document.getElementById('emailInput').style.borderWidth = "1px"
+
     }
 
     if (isTitleValid === false) {
-      document.getElementById('titleErr').innerHTML = "Title length must be between 1-100 !"
+      document.getElementById('reviewTitleInput').style.borderColor = "red"
+      document.getElementById('reviewTitleInput').style.borderWidth = "2px"
     }
     else {
-      document.getElementById('titleErr').innerHTML = '';
+      document.getElementById('reviewTitleInput').style.borderColor = "black"
+      document.getElementById('reviewTitleInput').style.borderWidth = "1px"
+
     }
     if (isBodyValid === false) {
-      document.getElementById('bodyErr').innerHTML = " Body length must be between 1-1500!"
+      document.getElementById('reviewBodyInput').style.borderColor = "red"
+      document.getElementById('reviewBodyInput').style.borderWidth = "2px"
     }
     else {
-      document.getElementById('bodyErr').innerHTML = '';
+      document.getElementById('reviewBodyInput').style.borderColor = "black"
+      document.getElementById('reviewBodyInput').style.borderWidth = "1px"
+
     }
     if (isLocationValid === false) {
-      document.getElementById('locationErr').innerHTML = " Location must be between 1-1500!"
+      document.getElementById('locationInput').style.borderColor = "red"
+      document.getElementById('locationInput').style.borderWidth = "2px"
     }
     else {
-      document.getElementById('locationErr').innerHTML = '';
+      document.getElementById('locationInput').style.borderColor = "black"
+      document.getElementById('locationInput').style.borderWidth = "1px"
+
     }
     if (currentRating === 0) {
-      document.getElementById('ratingErr').innerHTML = "rating must be given !"
+      document.getElementById('ratingErr').innerHTML = "*"
     }
     else {
       document.getElementById('ratingErr').innerHTML = '';
@@ -557,11 +623,20 @@ function handleSubmit(e, id, shop, product) {
 
   } else {
 
-    var errorMessages = document.getElementsByClassName('err');
+    //common red error box on top
+    commonErr.style.display = 'none';
+
+    //removing all errors from fields
+    var errorMessages = document.getElementsByClassName('input-box');
     for (var i = 0; i < errorMessages.length; i++) {
-      errorMessages[i].innerHTML = '';
+      errorMessages[i].style.borderColorColor = 'black';
+      errorMessages[i].style.borderWidth = "1px"
     }
-    //  window.confirm('Form submitted successfully!');
+
+    document.getElementById('ratingErr').innerHTML = ''
+
+
+    //  submiting form data**
 
     const dataObj = {
       reviewTitle: reviewTitle,
@@ -574,20 +649,29 @@ function handleSubmit(e, id, shop, product) {
       location: location
     }
 
+    //api function for adding formdata **
     addReviews(dataObj, shop);
 
 
+    //thanks you message after submitting form **
     ThankyouMessage.style.display = 'block';
+
+    //removing form display after submit (can be visible after click on write review)**
     Form.style.display = 'none';
     reviewLink.display = 'none'
+
+    //emptying input boxes**
     var inputBoxes = document.getElementsByClassName('input-box');
     for (var i = 0; i < inputBoxes.length; i++) {
       inputBoxes[i].value = '';
     }
+
+    //setting rating to 0 again 
     currentRating = 0;
-    stars.forEach((star) => {
-      star.classList.remove('active');
-    })
+    
+    // stars.forEach((star) => {
+    //   star.classList.remove('active');
+    // })
 
 
   }

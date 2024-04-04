@@ -16,8 +16,6 @@
 <div id='review-section'>
     <div id='titlebar'>
         <h2 id='review-headline'></h2>
-            <button onclick="getSettingsData('{{shopName}}')"> test </button>
-            <button onclick="getOnloadReviewsSetting('{{shopName}}')"> test Onload </button>
     </div>
         <h3 id='average-rating'> </h3>
     <div id='review-info-bar'>
@@ -41,6 +39,7 @@
         <h3 id='review-form-title'>
             WRITE A REVIEW
         </h3>
+        <div id='common-err'></div>
         <label id='name-label'>Name</label>
         <Input type='text' placeholder='Enter your name'  value ='' id='nameInput' autocomplete='off' class='input-box' isRequired=true/>
         <span id='nameErr' class='err'></span>
@@ -74,15 +73,16 @@
     </form>
     </div>
 
-<div >
+
     <div id='review-listing'>
     </div>
+    
     <div id='pagination-section'>
       <button onclick="setPrev('{{ shopName }}', {{ productId }} , event )" id='prev-btn' class='pagination-btn btn button'>Prev</button>
       <input type='number' id='page-number-display' value='1'/>
       <button onclick="setNext('{{ shopName }}', {{ productId }} , event)" id='next-btn' class='pagination-btn btn button'>Next</button>
     </div>
-    </div>
+   
    
 </div>
  

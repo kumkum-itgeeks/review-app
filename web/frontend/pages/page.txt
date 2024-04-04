@@ -109,3 +109,8 @@ loading spinner and loading skeleton
 * pagination api
 * star rating input color setting
   
+04/04/24
+
+*common err field setting 
+*report as innaprpriate setting (database and frontend both)
+*author information setting 

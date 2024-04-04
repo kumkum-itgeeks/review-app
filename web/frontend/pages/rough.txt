@@ -1,16 +1,31 @@
 
 
 
-pagination 
+pagination ......
 
-report innaprpriate review 
+err field common ....
 
-star input color 
+review count ....
 
-send email on reviews
+star input color ......
+
+report innaprpriate review ...
+
+
+
+*******************************************
+
+report inappropriate app functionality 
+
+star icon color in setting
 
 star color theme color
 
-err field common 
+loading in extensions
 
-review count 
+product page unpublished bug 
+
+app setting discription 
+
+setting page dynamic functions
+

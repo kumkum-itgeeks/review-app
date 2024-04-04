@@ -127,11 +127,8 @@ app.get(`/api/getReviews/:shop/:id/:page`, (req, res) => {
     
     const limit = Number(reviewPerpage);
     const offset = Number((pageNumber - 1) * limit);
-    console.log(offset)
-    
-    
-    console.log(reviewPerpage)
-    const query = ` SELECT starRating , reviewTitle , userName , datePosted , reviewDescription , reply  FROM ${detailsTable} WHERE productid=${productId} AND reviewStatus='Published' LIMIT ${limit} OFFSET ${offset}`;
+  
+    const query = ` SELECT id ,starRating , reviewTitle , userName , datePosted , reviewDescription , reply , isInappropriate FROM ${detailsTable} WHERE productid=${productId} AND reviewStatus='Published' LIMIT ${limit} OFFSET ${offset}`;
     
 
     con.query(totoalDataquery, (err, results) => {
@@ -193,6 +190,29 @@ app.get("/api/checkReviewsOnload/:shop", async (_req, res) => {
   });
 });
 
+
+app.get("/api/reportInappropriate/:shop/:id",(req,res)=>{
+
+  const shop = JSON.parse(req.params.shop).toLowerCase();
+  const reviewTable=shop+'_review';
+  const detailsTable=shop+'_details';
+  const Id= req.params.id;
+
+  console.log(reviewTable , detailsTable , Id)
+  const query=`UPDATE ${reviewTable} SET isInappropriate = 1 WHERE id = ${Id}; UPDATE ${detailsTable} SET isInappropriate = 1 WHERE id = ${Id}`
+  con.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching onload details',err);
+      return;
+    }
+    else{
+     res.status(200).send(JSON.stringify(results))
+    }
+    
+  });
+
+
+})
 
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());

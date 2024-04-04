@@ -186,13 +186,20 @@ h2 , h3 , h4 {
   #review-listing{
     min-height: 600px;
   }
-/* 
-  #prev-btn{
-    background-color:rgb(92, 210, 196);
-  
+
+  #common-err{
+    display: none;
+    background-color: rgb(234, 45, 45);
+    color:white;
+    font-weight: bold;
+    height: 50px;
+    padding: 16px;
+    align-content: center;
+    margin-bottom: 10px;
   }
 
-  #next-btn{
-    background-color:rgb(77, 205, 77);
-   
-  } */
+  .report-section{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
