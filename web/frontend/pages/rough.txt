@@ -15,9 +15,9 @@ report innaprpriate review ...
 
 *******************************************
 
-report inappropriate app functionality 
+report inappropriate app functionality ...
 
-star icon color in setting
+star icon color in setting ..
 
 star color theme color
 

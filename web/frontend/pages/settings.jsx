@@ -427,21 +427,38 @@ export default function Settings() {
   //******** data variables*********
 
   const activator = (
+    <>
     <Button onClick={togglePopoverActive}  >
       color
     </Button>
+    <Box style={{backgroundColor:borderRgb , maxWidth:'50px' , marginTop:'10px' , paddingLeft:'7px' , borderRadius:'10%'}}>
+        color
+      </Box>
+    </>
+
   );
 
   const activatordivider = (
+    <>
     <Button onClick={togglePopoverActiveDivider}  >
       color
     </Button>
+    <Box style={{backgroundColor:divierRgb , maxWidth:'50px' , marginTop:'10px' , paddingLeft:'7px' , borderRadius:'10%'}}>
+        color
+      </Box>
+    </>
   );
 
   const activatorStar = (
-    <Button onClick={togglePopoverActiveStar}  >
+    <>
+    <Button onClick={togglePopoverActiveStar}   >
       color
+      
     </Button>
+      <Box style={{backgroundColor:starRgb , maxWidth:'50px' , marginTop:'10px' , paddingLeft:'7px' , borderRadius:'10%'}}>
+        color
+      </Box>
+    </>
   );
 
 // console.log(isModalOpen)
@@ -547,7 +564,9 @@ export default function Settings() {
                       name="star"
                       onChange={handleStarSetting}
                     />
+
                     <RadioButton
+                    
                       label="Custom color"
                       helpText="Icons are a custom color."
                       id="customcolor"
@@ -555,6 +574,7 @@ export default function Settings() {
                       checked={starIconColor.isThemeColor === 'customcolor'}
                       onChange={handleStarSetting}
                     />
+                   
                     {
                       starValue == 'customcolor' ?
                         <Popover

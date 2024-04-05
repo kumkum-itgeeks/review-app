@@ -1,10 +1,10 @@
 import {
   Box, Page, Link, Grid, BlockStack, InlineStack, Text, Divider, Thumbnail,
   TextField, Button, SkeletonDisplayText, SkeletonBodyText, Badge, Spinner,
-  SkeletonThumbnail,Image,
+  SkeletonThumbnail, Image, Banner,
   Icon
 } from "@shopify/polaris";
-import { TitleBar , useToast} from "@shopify/app-bridge-react";
+import { TitleBar, useToast } from "@shopify/app-bridge-react";
 import { useState, useCallback, useEffect } from "react";
 import { useAuthenticatedFetch } from "../hooks";
 import { StarFilledIcon, StarIcon, CheckIcon } from '@shopify/polaris-icons';
@@ -23,15 +23,16 @@ export default function Details() {
   const [statusLoading, setStatusLoading] = useState(true);
   const [productLoading, setProductLoading] = useState(true);
   const [metafields, setMetaFields] = useState();
-  const [productDescription,setProductDescription]=useState()
+  const [productDescription, setProductDescription] = useState()
   const [published, setPublish] = useState(0);
   const [unpublished, setUnpublished] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
   const [totalRating, setTotalRating] = useState(0);
+  const [showWarning, setShowWarning] = useState(0);
 
 
   //*******variables********
-  const {show}=useToast();
+  const { show } = useToast();
   const fetch = useAuthenticatedFetch();
   const Navigate = useNavigate();
   const stars = [1, 2, 3, 4, 5];
@@ -42,6 +43,11 @@ export default function Details() {
 
   //*******functions********
 
+  function formatDate(dateString) {
+    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', options);
+  }
   const test = () => {
     console.log('id', review.productid)
   }
@@ -49,7 +55,7 @@ export default function Details() {
   const deleteReview = () => {
     fetch(`/api/review/deleteReview/${Id}`)
       .then(res => res.json())
-      .then(data => {getReviewDetails(),show(' review deleted ', {duration: 2000})});
+      .then(data => { getReviewDetails(), show(' review deleted ', { duration: 2000 }) });
   }
 
   const publishReview = () => {
@@ -57,6 +63,7 @@ export default function Details() {
       .then(res => res.json())
       .then(data => getReviewDetails());
   }
+
   const getMetafields = () => {
     fetch('/api/table/getMetafields')
       .then(res => res.json())
@@ -72,13 +79,28 @@ export default function Details() {
     setCardLoading(true)
     fetch(`api/details/getAllDetails/${Id}`)
       .then(res => res.json())
-      .then(data => setReview(data[0]))
+      .then(data => checkForInappropriate(data))
   }
+
+  function checkForInappropriate(data) {
+    let isInappropriate = (data[0].isInappropriate)
+    isInappropriate === 1 ?
+      setShowWarning(1)
+      :
+      setShowWarning(0);
+
+    setReview(data[0])
+  }
+const dissmissInappropriate=()=>{
+  fetch(`api/details/dissmissInappropriate/${Id}`)
+  .then(res => res.json())
+  .then(data => {setShowWarning(0),show('cleared Inappropriate review ', { duration: 2000 })})
+}
 
   const changeStatus = () => {
     fetch(`api/details/changeStatus/${Id}/${review.reviewStatus}`)
       .then(res => res.json())
-  .then(data => {setStatus(data),show(` review ${review.reviewStatus=='Published'? 'unpublished' : 'published'} `, {duration: 2000}), console.log(status)})
+      .then(data => { setStatus(data), show(` review ${review.reviewStatus == 'Published' ? 'unpublished' : 'published'} `, { duration: 2000 }), console.log(status) })
 
   }
 
@@ -92,7 +114,7 @@ export default function Details() {
       body: JSON.stringify({ textFieldValue, Id }),
     })
       .then(res => res.json())
-      .then(data => {setTextFieldValue(''),show(' reply posted ', {duration: 2000})});
+      .then(data => { setTextFieldValue(''), show(' reply posted ', { duration: 2000 }) });
   }
 
   const getProductDetails = () => {
@@ -101,14 +123,14 @@ export default function Details() {
     fetch(`api/details/getProductDetails/${review.productid}`)
       .then(res => res.json())
       .then(data => setProduct(data))
-      
-    }
-    
-    const getProductReviewDetails=()=>{
-      fetch(`api/details/getProductReviewDetails/${review.productid}`)
-        .then(res => res.json())
-        .then(data => setProductDescription(data))
-      
+
+  }
+
+  const getProductReviewDetails = () => {
+    fetch(`api/details/getProductReviewDetails/${review.productid}`)
+      .then(res => res.json())
+      .then(data => setProductDescription(data))
+
   }
   //*******useEffects********
 
@@ -130,7 +152,7 @@ export default function Details() {
         {
           getProductReviewDetails()
         }
-        
+
       </>
 
       : ""
@@ -150,26 +172,26 @@ export default function Details() {
       : ""
   }, [product])
 
-  useEffect(()=>{
+  useEffect(() => {
 
-  let sum = 0;
+    let sum = 0;
 
-  productDescription?.forEach((itm) => {
-    sum += Number(itm.starRating);
-  });
-  
-  const avgRating = productDescription?.length > 0 ? sum / productDescription?.length : 0;
-  const totalRating=productDescription?.length
-  setPublish(totalRating)
-  setAverageRating(avgRating);
+    productDescription?.forEach((itm) => {
+      sum += Number(itm.starRating);
+    });
 
-  },[productDescription])
+    const avgRating = productDescription?.length > 0 ? sum / productDescription?.length : 0;
+    const totalRating = productDescription?.length
+    setPublish(totalRating)
+    setAverageRating(avgRating);
+
+  }, [productDescription])
   return (
     <Page
       title={review ? `${review.reviewTitle}` : ''}
-      titleMetadata={review ? `${review.datePosted}` : ''}
+      titleMetadata={review ? `${formatDate(review.datePosted)}` : ''}
     >
-  
+
       <BlockStack gap='300'>
         <Button variant="plain" onClick={() => changeStatus()} textAlign="start" size="large" >
           {
@@ -180,6 +202,15 @@ export default function Details() {
               : ""
           }
         </Button>
+        {
+          showWarning?
+        <Banner onDismiss={() => {dissmissInappropriate()}} tone="warning">
+          <p>
+            This review has been reported as inappropriate.
+          </p>
+        </Banner>
+        :''
+        }
         <Box>
           <Grid >
             <Grid.Cell columnSpan={{ xs: 8, sm: 8, md: 8, lg: 8, xl: 8 }}>
@@ -213,9 +244,9 @@ export default function Details() {
                                   {review ?
                                     stars.map((itm) =>
                                       review.starRating >= itm ?
-                                      <Image source={solidStar} key={itm}/>
+                                        <Image source={solidStar} key={itm} />
                                         :
-                                        <Image source={emptyStar} key={itm}/>
+                                        <Image source={emptyStar} key={itm} />
 
 
                                     )
@@ -254,9 +285,9 @@ export default function Details() {
                         <InlineStack>
                           <Text>{review ? `${review.userName}` : ''}</Text>
                           {
-                            (review?.location)?<Text>,  from { review.location} </Text>:''
+                            (review?.location) ? <Text>,  from {review.location} </Text> : ''
                           }
-                       
+
                           <Text><Link removeUnderline>{review ? `( ${review.Email} )` : ''}</Link></Text>
                         </InlineStack>
                       </BlockStack>
@@ -287,21 +318,21 @@ export default function Details() {
                       <Text variant="bodyLg" as="p">{product ? `${product.title}` : ''}</Text>
                       <Box maxWidth="100px">
                         <InlineStack>
-                        {
-                        stars.map((itm) =>
-                          averageRating >= itm ?
-                            <Image source={solidStar} key={itm} />
-                            :
-                            averageRating + 0.5 === itm ?
-                              <Image source={HalfStar} key={itm} />
-                              :
-                              <Image source={emptyStar} key={itm} />
-                        )
-                      }
+                          {
+                            stars.map((itm) =>
+                              averageRating >= itm ?
+                                <Image source={solidStar} key={itm} />
+                                :
+                                averageRating + 0.5 === itm ?
+                                  <Image source={HalfStar} key={itm} />
+                                  :
+                                  <Image source={emptyStar} key={itm} />
+                            )
+                          }
                         </InlineStack>
                       </Box>
                       {/* <Text variant="bodyLg" as="p">{metafields ? `${metafields[2].node.value} (reviews)` : ""}</Text> */}
-                      <Text variant="bodyLg" as="p">{productDescription? `${published} (reviews)` : ""}</Text>
+                      <Text variant="bodyLg" as="p">{productDescription ? `${published} (reviews)` : ""}</Text>
 
                     </>
                 }

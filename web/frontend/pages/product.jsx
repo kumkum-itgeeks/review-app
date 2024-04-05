@@ -98,9 +98,6 @@ export default function Product() {
     pageNumber != 1 ? setPrevPage(true) : setPrevPage(false)
   }, [pageNumber, queryValue, sortSelected, reviewStatus])
 
-  // useEffect(() => {
-
-  // }, [tableData])
   //********variables********
 
   const { t } = useTranslation();
@@ -121,6 +118,12 @@ export default function Product() {
   const isLastPage = totalData !== recordsPerPage || pageNumber == totalPages || totalPages == 1;
 
   //*******functions**********
+
+  function formatDate(dateString) {
+    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', options);
+  }
 
   const getProduct = () => {
     fetch(`/api/details/getProductDetails/${Id}`)
@@ -427,7 +430,7 @@ export default function Product() {
             -{userName} on <Link removeUnderline>{productHandle}</Link>
           </Text>
         </IndexTable.Cell>
-        <IndexTable.Cell>{datePosted}</IndexTable.Cell>
+        <IndexTable.Cell>{formatDate(datePosted)}</IndexTable.Cell>
         <IndexTable.Cell id="tab">{
           reviewStatus == 'Published' && isSpam == false ?
             <Badge tone="success" progress="complete">

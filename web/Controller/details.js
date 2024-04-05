@@ -14,9 +14,9 @@ const getAllDetails = async (req, res) => {
     let shopLowercase = shop.toLowerCase();
     let removeSuffix = shopLowercase.replace(".myshopify.com", "");
     let shopName = removeSuffix.replace("-", "_");
-    let tableName = shopName + '_details'
+    let detailsTable = shopName + '_details'
 
-    const query = ` SELECT * FROM ${tableName} WHERE id=${id}`;
+    const query = ` SELECT * FROM ${detailsTable} WHERE id=${id}`;
     con.query(query,function (err, result) {
         if (err) throw err;
         res.status(200).send(JSON.stringify(result))
@@ -134,4 +134,19 @@ const getProductReviewDetails=(req,res)=>{
 
 }
 
-export default { getAllDetails ,changeStatus,postReply,getShopifyProductDetails,getProductReviewDetails}
+const dissmissInappropriate=(req,res)=>{
+
+  const shop=req.shopname;
+  const detailsTable = shop+'_details'
+  const reviewTable =shop+'_review'
+  const id = req.params.id
+
+  const query=`UPDATE ${reviewTable} SET isInappropriate = '0' WHERE id=${id} ;UPDATE ${detailsTable} SET isInappropriate = '0' WHERE id=${id};`
+  con.query(query,function(err,result){
+    if (err) throw err;
+    res.send(JSON.stringify(result))
+
+})
+}
+
+export default { getAllDetails ,changeStatus,postReply,getShopifyProductDetails,getProductReviewDetails ,dissmissInappropriate}

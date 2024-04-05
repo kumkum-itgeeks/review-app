@@ -85,6 +85,12 @@ export default function HomePage() {
 
   //*******functions**********
 
+  function formatDate(dateString) {
+    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', options);
+  }
+
   const createMetafield = () => {
     fetch('/api/table/createReviewTable')
       .then(res => res.json())
@@ -257,7 +263,7 @@ export default function HomePage() {
             -{userName} on <Link removeUnderline>{productHandle}</Link>
           </Text>
         </IndexTable.Cell>
-        <IndexTable.Cell>{datePosted}</IndexTable.Cell>
+        <IndexTable.Cell>{formatDate(datePosted)}</IndexTable.Cell>
         <IndexTable.Cell id="tab">{
           reviewStatus == 'Published' && isSpam == false ?
             <Badge tone="success" progress="complete">

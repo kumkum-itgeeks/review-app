@@ -3,7 +3,7 @@
 let currentPage = 1;
 var isthisLastPage;
 var shopName; let PageNumber = document.getElementById('page-number-display').value;
-const url = `https://older-antibody-method-modification.trycloudflare.com`
+const url = `https://reminder-some-peer-federation.trycloudflare.com`
 
 // dom content loaded********
 
@@ -227,10 +227,16 @@ function setSettings(data) {
 
   starColorData = settingData.filter((itm) => (itm.starIconColor))
   let star = document.getElementsByClassName('review-list-star');
-  let ratingStar = document.querySelectorAll('.star.active');
+  let ratingStar = document.querySelectorAll('.star');
+
+  // for (let i = 0; i < ratingStar.length; i++) {
+  //   let color = starColorData[0].starIconColor.customColor;
+  //   ratingStar[i].style.color = color;
+  // }
 
   for (var i = 0; i < ratingStar.length; i++) {
-    ratingStar[i].style.color = (starColorData.filter((itm) => itm.starIconColor.customColor));
+    
+    ratingStar[i].style.color = (starColorData.map((itm) => itm.starIconColor.customColor));
   }
 
 

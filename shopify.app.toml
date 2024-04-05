@@ -2,7 +2,7 @@
 
 client_id = "c8b76d8cdccd39ae45b847901d4b4fb3"
 name = "reviews"
-application_url = "https://older-antibody-method-modification.trycloudflare.com"
+application_url = "https://reminder-some-peer-federation.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://older-antibody-method-modification.trycloudflare.com/auth/callback",
-  "https://older-antibody-method-modification.trycloudflare.com/auth/shopify/callback",
-  "https://older-antibody-method-modification.trycloudflare.com/api/auth/callback"
+  "https://reminder-some-peer-federation.trycloudflare.com/auth/callback",
+  "https://reminder-some-peer-federation.trycloudflare.com/auth/shopify/callback",
+  "https://reminder-some-peer-federation.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

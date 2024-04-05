@@ -9,6 +9,8 @@ router.get('/changeStatus/:id/:status',detailsController.changeStatus);
 
 router.post('/postReply/',detailsController.postReply);
 
+router.get('/dissmissInappropriate/:id',detailsController.dissmissInappropriate);
+
 router.get('/getProductDetails/:id',detailsController.getShopifyProductDetails);
 
 router.get('/getProductReviewDetails/:id',detailsController.getProductReviewDetails);

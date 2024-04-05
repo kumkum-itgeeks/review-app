@@ -114,3 +114,8 @@ loading spinner and loading skeleton
 *common err field setting 
 *report as innaprpriate setting (database and frontend both)
 *author information setting 
+
+05/04/24
+
+* report inappropriate app functionality 
+* display selected color in settings
