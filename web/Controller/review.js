@@ -20,21 +20,21 @@ const totalReviews = (req, res) => {
     if (status == 'All') {
         con.query(`SELECT * FROM ${reviewTable}`, function (err, result) {
             if (err) throw err;
-            console.log(result);
+            
             res.status(200).send(JSON.stringify(result.length))
         })
     }
-    else if(status=='Spam'){
+    else if (status == 'Spam') {
         con.query(`SELECT * FROM ${reviewTable} WHERE isSpam = 1`, function (err, result) {
             if (err) throw err;
-            console.log(result);
+           
             res.status(200).send(JSON.stringify(result.length))
         })
     }
     else {
         con.query(`SELECT * FROM ${reviewTable} WHERE reviewStatus='${status}'`, function (err, result) {
             if (err) throw err;
-            console.log(result);
+          
             res.status(200).send(JSON.stringify(result.length))
         })
     }
@@ -61,42 +61,42 @@ const getAllReviews = (req, res) => {
     if (SearchValue.length <= 0) {
         //check if selected all reviews as filter
         if (status == 'All Reviews') {
-                con.query(`SELECT * FROM ${reviewTable} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
+            con.query(`SELECT * FROM ${reviewTable} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                if (err) throw err;
+                res.send(JSON.stringify(result));
+            })
         }
         else if (status == 'Spam') {
 
-                con.query(`SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-            
+            con.query(`SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                if (err) throw err;
+                res.send(JSON.stringify(result));
+            })
+
         }
         else {
 
-                con.query(`SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
+            con.query(`SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                if (err) throw err;
+                res.send(JSON.stringify(result));
+            })
         }
     }
     else {
         if (status == 'All Reviews') {
 
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' ORDER BY ${sortStr}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-       
+            con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' ORDER BY ${sortStr}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                if (err) throw err;
+                res.send(JSON.stringify(result));
+            })
+
         }
         else {
 
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND reviewStatus='${status}' ORDER BY ${sortStr}   LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
+            con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND reviewStatus='${status}' ORDER BY ${sortStr}   LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
+                if (err) throw err;
+                res.send(JSON.stringify(result));
+            })
         }
     }
 }
@@ -118,7 +118,7 @@ const getReviews = (req, res) => {
     })
 }
 
-const deleteReview =(req, res) => {
+const deleteReview = (req, res) => {
     const id = req.params.id;
     const shop = res.locals.shopify.session.shop;
     let shopLowercase = shop.toLowerCase();
@@ -136,7 +136,7 @@ const deleteReview =(req, res) => {
 
 }
 
-const UnSpamReview =  (req, res) => {
+const UnSpamReview = (req, res) => {
     const id = req.params.id;
     const shop = res.locals.shopify.session.shop;
     let shopLowercase = shop.toLowerCase();
@@ -203,8 +203,14 @@ const getProductReviews = (req, res) => {
     // res.send(JSON.stringify('product review'))
 }
 
-const getAllProductReviews = (req,res) => {
+const getAllProductReviews = (req, res) => {
 
+    var query;
+    var averageRating;
+    var length;
+    var isLastPage;
+    var publishedReviews;
+    var unpublishedReviews;
     const SearchValue = (req.body.queryValue).trim();
     const id = req.body.Id;
     const pageNumber = (req.body.pageNumber);
@@ -220,51 +226,87 @@ const getAllProductReviews = (req,res) => {
     let reviewTable = shopName + '_review'
     let detailTable = shopName + '_details'
 
+
     //check if search
     if (SearchValue.length <= 0) {
         //check if selected all reviews as filter
         if (status == 'All Reviews') {
-           
-                con.query(`SELECT * FROM ${reviewTable} WHERE productid = ${id} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-           
+
+            query = `SELECT * FROM ${reviewTable} WHERE productid = ${id} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`
+
         }
         else if (status == 'Spam') {
 
-                con.query(`SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 AND productid = ${id} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-        
+            query = `SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 AND productid = ${id} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`
+
         }
         else {
 
-                con.query(`SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' AND productid = ${id} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
+            query = `SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' AND productid = ${id} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`
+
         }
     }
     else {
         if (status == 'All Reviews') {
 
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND productid = ${id} ORDER BY ${sortStr}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-      
+            query = `SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND productid = ${id} ORDER BY ${sortStr}  LIMIT ${limit} OFFSET ${offset}`
+
         }
         else {
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND  reviewStatus='${status}' AND productid = ${id} ORDER BY ${sortStr}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-       
+            query = `SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND  reviewStatus='${status}' AND productid = ${id} ORDER BY ${sortStr}  LIMIT ${limit} OFFSET ${offset}`
+
         }
     }
+
+    // querying the selected query for results
+
+    let publishedQuery = ` SELECT * FROM ${reviewTable} WHERE reviewStatus='Published' AND productid = ${id}`
+    let totalData = ` SELECT * FROM ${reviewTable} WHERE productid = ${id}`
+
+    con.query(publishedQuery, function (err, result) {
+
+        if (err) throw err;
+        publishedReviews = result.length;
+        console.log('published reviews', publishedReviews)
+    })
+
+    con.query(totalData, function (err, result) {
+
+        if (err) throw err;
+        let sum = 0;
+        length = result.length;
+        unpublishedReviews = length - publishedReviews
+        let rating = result.map((itm) => itm.starRating)
+
+        rating.map((itm) => {
+            sum += itm;
+        })
+        averageRating = sum / length;
+        if (length < (limit + offset)) {
+            isLastPage = true
+        }
+        else {
+            isLastPage = false
+        }
+        console.log('avg rating ', isLastPage)
+    })
+
+    con.query(query, function (err, result) {
+
+        if (err) throw err;
+
+        res.send(JSON.stringify({
+            reviews: result,
+            isLastPage: isLastPage,
+            publishedReviews: publishedReviews,
+            unpublishedReviews: unpublishedReviews ,
+            averageRating : averageRating
+        }));
+    })
+
+
+
 }
 
 
-export default { getAllReviews, getProductReviews, totalReviews, getReviews, deleteReview, UnSpamReview, publishReview, unpublishReview ,getAllProductReviews}
+export default { getAllReviews, getProductReviews, totalReviews, getReviews, deleteReview, UnSpamReview, publishReview, unpublishReview, getAllProductReviews }

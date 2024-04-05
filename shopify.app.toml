@@ -2,7 +2,7 @@
 
 client_id = "c8b76d8cdccd39ae45b847901d4b4fb3"
 name = "reviews"
-application_url = "https://reminder-some-peer-federation.trycloudflare.com"
+application_url = "https://amended-phentermine-taiwan-plenty.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://reminder-some-peer-federation.trycloudflare.com/auth/callback",
-  "https://reminder-some-peer-federation.trycloudflare.com/auth/shopify/callback",
-  "https://reminder-some-peer-federation.trycloudflare.com/api/auth/callback"
+  "https://amended-phentermine-taiwan-plenty.trycloudflare.com/auth/callback",
+  "https://amended-phentermine-taiwan-plenty.trycloudflare.com/auth/shopify/callback",
+  "https://amended-phentermine-taiwan-plenty.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

@@ -149,12 +149,22 @@ export default function Settings() {
     setStarRgb(convertToHex(color))
     handleStarColorSetting('customColor', starRgb)
 
+  }, [color])
+
+  useEffect(() => {
+
+
     setBorderRgb(convertToHex(borderColor))
     handleReviewListing('bordercolor', borderRgb)
 
+   
+  }, [ borderColor])
+
+  useEffect(() => {
+
     setDividerRgb(convertToHex(dividerColor))
     handleReviewListing('dividercolor', divierRgb)
-  }, [color, borderColor, dividerColor,])
+  }, [ dividerColor])
 
 
 
@@ -431,7 +441,7 @@ export default function Settings() {
     <Button onClick={togglePopoverActive}  >
       color
     </Button>
-    <Box style={{backgroundColor:borderRgb , maxWidth:'50px' , marginTop:'10px' , paddingLeft:'7px' , borderRadius:'10%'}}>
+    <Box style={{backgroundColor:reviewListingLayout?.bordercolor , maxWidth:'50px' , marginTop:'10px' , paddingLeft:'7px' , borderRadius:'10%'}}>
         color
       </Box>
     </>
@@ -443,7 +453,7 @@ export default function Settings() {
     <Button onClick={togglePopoverActiveDivider}  >
       color
     </Button>
-    <Box style={{backgroundColor:divierRgb , maxWidth:'50px' , marginTop:'10px' , paddingLeft:'7px' , borderRadius:'10%'}}>
+    <Box style={{backgroundColor:reviewListingLayout?.dividercolor, maxWidth:'50px' , marginTop:'10px' , paddingLeft:'7px' , borderRadius:'10%'}}>
         color
       </Box>
     </>
@@ -455,7 +465,7 @@ export default function Settings() {
       color
       
     </Button>
-      <Box style={{backgroundColor:starRgb , maxWidth:'50px' , marginTop:'10px' , paddingLeft:'7px' , borderRadius:'10%'}}>
+      <Box style={{backgroundColor:starIconColor.customColor , maxWidth:'50px' , marginTop:'10px' , paddingLeft:'7px' , borderRadius:'10%'}}>
         color
       </Box>
     </>
@@ -557,6 +567,7 @@ export default function Settings() {
                 <Box background='bg-surface' padding={400}>
                   <BlockStack gap={300}>
                     <RadioButton
+                      disabled
                       label="Theme color"
                       helpText="Icons get their color from your theme."
                       checked={starIconColor.isThemeColor === 'themecolor'}
@@ -576,7 +587,7 @@ export default function Settings() {
                     />
                    
                     {
-                      starValue == 'customcolor' ?
+                      starIconColor.isThemeColor== 'customcolor' ?
                         <Popover
                           active={popoverActiveStar}
                           activator={activatorStar}
@@ -747,6 +758,10 @@ export default function Settings() {
                       onChange={(value) => handlereviewListingText('authorInformation', value)}
                       autoComplete="off"
                     />
+
+                    <Text as='p' tone="subdued">
+                      {'This field supports very basic javascript syntax .'} <Divider borderColor='transparent'/>{' here ( username = ${itm.userName} ) , ( review date = ${itm.datePosted} ) ' }
+                    </Text>
 
                   </BlockStack>
                 </Box>

@@ -2,13 +2,15 @@
 //global variables*********
 let currentPage = 1;
 var isthisLastPage;
+var starsettingColor;
 var shopName; let PageNumber = document.getElementById('page-number-display').value;
-const url = `https://reminder-some-peer-federation.trycloudflare.com`
+const url = `https://amended-phentermine-taiwan-plenty.trycloudflare.com`
 
 // dom content loaded********
 
 document.addEventListener('DOMContentLoaded', function () {
   const stars = document.querySelectorAll('.star-rating .star');
+ 
   PageNumber = 1;
 
 
@@ -18,9 +20,12 @@ document.addEventListener('DOMContentLoaded', function () {
       stars.forEach(s => {
         if (s.getAttribute('data-rating') <= rating) {
           s.classList.add('active');
+          s.style.color=starsettingColor;
           s.style.opacity = '1';
         } else {
-          s.style.opacity = '0.5'; // Fading effect for unselected stars on hover
+          s.style.opacity = '0.5';
+
+           // Fading effect for unselected stars on hover
         }
       });
     });
@@ -30,16 +35,19 @@ document.addEventListener('DOMContentLoaded', function () {
         stars.forEach(s => {
           if (s.getAttribute('data-rating') <= currentRating) {
             s.classList.add('active');
+            s.style.color=starsettingColor;
             s.style.opacity = '1';
           } else {
             s.classList.remove('active');
+            s.style.color='#ccc';
             s.style.opacity = '0.5'; // Fading effect for unselected stars after click
           }
         });
       } else {
         stars.forEach(s => {
           s.classList.remove('active');
-          s.style.opacity = '1'; // Restore opacity for all stars after mouseleave
+          s.style.opacity = '1';
+          s.style.color='#ccc'; // Restore opacity for all stars after mouseleave
         });
       }
     });
@@ -57,9 +65,11 @@ document.addEventListener('DOMContentLoaded', function () {
       stars.forEach(s => {
         if (s.getAttribute('data-rating') <= currentRating) {
           s.classList.add('active');
+          s.style.color=starsettingColor;
           s.style.opacity = '1';
         } else {
           s.classList.remove('active');
+          s.style.color='#ccc';
           s.style.opacity = '0.5'; // Fading effect for unselected stars after click
         }
       });
@@ -228,16 +238,20 @@ function setSettings(data) {
   starColorData = settingData.filter((itm) => (itm.starIconColor))
   let star = document.getElementsByClassName('review-list-star');
   let ratingStar = document.querySelectorAll('.star');
+  // console.log('1',document.querySelectorAll('.star.active'))
+  // console.log('2',document.querySelectorAll('.active'))
+  // console.log('3',document.querySelectorAll('.star .active'))
 
   // for (let i = 0; i < ratingStar.length; i++) {
   //   let color = starColorData[0].starIconColor.customColor;
   //   ratingStar[i].style.color = color;
   // }
+  starsettingColor=(starColorData[0].starIconColor.customColor)
 
-  for (var i = 0; i < ratingStar.length; i++) {
+  // for (var i = 0; i < ratingStar.length; i++) {
     
-    ratingStar[i].style.color = (starColorData.map((itm) => itm.starIconColor.customColor));
-  }
+  //   ratingStar[i].style.color = (starColorData.map((itm) => itm.starIconColor.customColor));
+  // }
 
 
   for (var i = 0; i < star.length; i++) {
@@ -672,13 +686,22 @@ function handleSubmit(e, id, shop, product) {
       inputBoxes[i].value = '';
     }
 
+    var errorMessages = document.getElementsByClassName('input-box');
+    for (var i = 0; i < errorMessages.length; i++) {
+      errorMessages[i].style.borderColorColor = 'black';
+      errorMessages[i].style.borderWidth = "1px"
+    }
     //setting rating to 0 again 
     currentRating = 0;
-    
-    // stars.forEach((star) => {
-    //   star.classList.remove('active');
-    // })
+    document.getElementById('ratingErr').innerHTML = ''
 
+    let star=document.querySelectorAll('.star-rating .star')
+
+    let mystars = Array.from(star);
+    
+    mystars.map((s) => {
+      s.classList.remove('active');
+    })
 
   }
 }

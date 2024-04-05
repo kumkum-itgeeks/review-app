@@ -12,6 +12,7 @@ import reviewRoutes from './Routes/review.js'
 import tableRoutes from './Routes/table.js'
 import detailsRoute from './Routes/details.js'
 import settingsRoute from './Routes/settings.js'
+
 import bodyParser from "body-parser";
 
 
@@ -46,6 +47,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // adding reviews from extension
+
 
 app.get("/api/addReviews/:obj/:shop", async (_req, res) => {
 

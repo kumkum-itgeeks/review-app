@@ -28,7 +28,7 @@ export default function HomePage() {
   const [moneySpent, setMoneySpent] = useState(undefined,);
   const [accountStatus, setAccountStatus] = useState(undefined,);
   const [reviewStatus, setReviewStatus] = useState('All Reviews');
-  const [sortSelected, setSortSelected] = useState(['starRating asc']);
+  const [sortSelected, setSortSelected] = useState(['starRating desc']);
   const [itemStrings, setItemStrings] = useState([
     'All Reviews',
     'Published',

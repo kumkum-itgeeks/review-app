@@ -119,3 +119,5 @@ loading spinner and loading skeleton
 
 * report inappropriate app functionality 
 * display selected color in settings
+* app setting discription
+* product page bug

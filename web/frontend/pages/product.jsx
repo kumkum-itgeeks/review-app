@@ -21,6 +21,7 @@ import solidStar from '../assets/star-solid.svg'
 export default function Product() {
   const [Loading, setLoading] = useState(true);
   const [runOnce,setRunOnce]=useState(0);
+  const [isLastPage , setIsLastPage]=useState(0)
   const [published, setPublish] = useState(0);
   const [unpublished, setUnpublished] = useState(0);
   const [product, setProduct] = useState();
@@ -38,7 +39,7 @@ export default function Product() {
   const [moneySpent, setMoneySpent] = useState(undefined,);
   const [accountStatus, setAccountStatus] = useState(undefined,);
   const [reviewStatus, setReviewStatus] = useState('All Reviews');
-  const [sortSelected, setSortSelected] = useState(['starRating asc']);
+  const [sortSelected, setSortSelected] = useState(['starRating desc']);
   const [itemStrings, setItemStrings] = useState([
     'All Reviews',
     'Published',
@@ -49,10 +50,6 @@ export default function Product() {
 
   //********useEffects********
 
-  useEffect(() => {
-
-    getTotalRows();
-  }, [reviewStatus])
 
   useEffect(() => {
     getProduct();
@@ -65,37 +62,32 @@ export default function Product() {
   }, [queryValue, pageNumber, sortSelected, reviewStatus])
 
   useEffect(() => {
-    setPageNumber(1);
+    // setPageNumber(1);
   }, [queryValue, sortSelected, reviewStatus])
 
   useEffect(() => {
     setLoading(false)
-    runOnce!=1 ? '' :
-      tableData.map((itm) => {
-        itm.reviewStatus == 'Published' ?
-          setPublish((prevValue) => prevValue + 1)
-          :
-          setUnpublished((prevValue) => prevValue + 1)
-      })
-
-    let sum = 0;
-
-    tableData.forEach((itm) => {
-      sum += Number(itm.starRating);
-    });
-
-    const avgRating = tableData.length > 0 ? sum / tableData.length : 0;
-
-    setTotalRating(sum);
-    setAverageRating(avgRating);
-
-
   }, [tableData])
 
 
   useEffect(() => {
-    !isLastPage ? setNextPage(true) : setNextPage(false)
-    pageNumber != 1 ? setPrevPage(true) : setPrevPage(false)
+
+    if(pageNumber===1 && !isLastPage){
+      setPrevPage(false)
+      setNextPage(true)
+    }
+    else if(pageNumber===1 && isLastPage){
+      setPrevPage(false)
+      setNextPage(false)
+    }
+    else if(pageNumber!=1 && !isLastPage){
+      setPrevPage(true)
+      setNextPage(true)
+    }
+    else if(isLastPage && pageNumber!=1){
+      setPrevPage(true)
+      setNextPage(false)
+    }
   }, [pageNumber, queryValue, sortSelected, reviewStatus])
 
   //********variables********
@@ -115,7 +107,6 @@ export default function Product() {
   const Navigate = useNavigate();
   const totalData = tableData.length;
   const totalPages = totalRows / recordsPerPage;
-  const isLastPage = totalData !== recordsPerPage || pageNumber == totalPages || totalPages == 1;
 
   //*******functions**********
 
@@ -138,27 +129,21 @@ export default function Product() {
   }
 
   const deleteReview = () => {
-    setPublish(0)
-    setUnpublished(0)
-    setRunOnce(0)
+
     fetch(`/api/review/deleteReview/${selectedResources}`)
       .then(res => res.json())
       .then(data => getAllReviews());
   }
 
   const unSpamReview = () => {
-    setPublish(0)
-    setUnpublished(0)
-    setRunOnce(0)
+ 
     fetch(`/api/review/unSpam/${selectedResources}`)
       .then(res => res.json())
       .then(data => getAllReviews());
   }
 
   const publishReview = () => {
-    setPublish(0)
-    setUnpublished(0)
-    setRunOnce(0)
+    
     fetch(`/api/review/publishReview/${selectedResources}`)
       .then(res => res.json())
       .then(data => getAllReviews());
@@ -166,9 +151,7 @@ export default function Product() {
   }
 
   const unpublishReview = () => {
-    setPublish(0)
-    setUnpublished(0)
-    setRunOnce(0)
+   
     fetch(`/api/review/unpublishReview/${selectedResources}`)
       .then(res => res.json())
       .then(data => getAllReviews());
@@ -182,7 +165,6 @@ export default function Product() {
 
   const getAllReviews = () => {
     setLoading(true);
-    setRunOnce((prev)=>prev+1)
     fetch('/api/review/getProductReviews/', {
       method: 'POST',
       headers: {
@@ -192,45 +174,20 @@ export default function Product() {
       body: JSON.stringify({ queryValue, pageNumber, reviewStatus, sortSelected, Id }),
     })
       .then(res => res.json())
-      .then(data => setTableData(data));
+      .then(data => setAlldata(data));
 
 
   };
 
-  const getTotalRows = () => {
-    if (reviewStatus == 'All Reviews') {
-      fetch(`/api/review/totalReviews/All`)
-        .then(res => res.json())
-        .then(data => setTotalRows(data))
-    }
-    else {
-      fetch(`/api/review/totalReviews/${reviewStatus}`)
-        .then(res => res.json())
-        .then(data => setTotalRows(data));
-    }
+  function setAlldata(data){
+    setTableData(data.reviews)
+    setPublish(data.publishedReviews)
+    setUnpublished(data.unpublishedReviews)
+    setAverageRating(data.averageRating)
+    setIsLastPage(data.isLastPage)
   }
 
-  const deleteView = (index) => {
-    const newItemStrings = [...itemStrings];
-    newItemStrings.splice(index, 1);
-    setItemStrings(newItemStrings);
-    setSelected(0);
-  };
 
-  const duplicateView = async (name) => {
-    setItemStrings([...itemStrings, name]);
-    setSelected(itemStrings.length);
-    await sleep(1);
-    return true;
-  };
-
-  const getReviews = (item) => {
-    item == 'All Reviews' ?
-      getAllReviews() :
-      fetch(`/api/review/getReviews/${item}`)
-        .then(res => res.json())
-        .then(data => setTableData(data))
-  }
 
   const onCreateNewView = async (value) => {
     await sleep(500);
@@ -528,6 +485,7 @@ export default function Product() {
           hasNext: nextPage,
           onPrevious: (() => {
             pageNumber != 1 ? (setPageNumber(pageNumber - 1)) : '';
+            
           }),
           onNext: (() => {
             !isLastPage ? (setPageNumber(pageNumber + 1)) : '';
