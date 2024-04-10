@@ -1,0 +1,51 @@
+const myUrl = `https://cells-flour-privileges-cube.trycloudflare.com`
+
+   function test(shop, pid) {
+    fetch(`${myUrl}/api/getReviewCount/${JSON.stringify(shop)}/${pid}`)
+      .then(res => res.json())
+      .then(data => { setData(data, shop)})
+     
+    }
+
+    function getColor(shop){
+      fetch(`${myUrl}/api/starColor/${JSON.stringify(shop)}`)
+        .then(res => res.json())
+        .then(data => { setColor(data) })
+    }
+
+   function setColor(data){
+    const {color}=data;
+    console.log('herer')
+    let activeStars=document.getElementsByClassName('active-star');
+
+    for (var i = 0; i < activeStars.length; i++) {
+        activeStars[i].style.color = color;
+      }
+  }
+
+  function setData(data , shop){
+    let starss=[1,2,3,4,5]
+    const {averageRating , reviewCount} = data;
+
+    let Html=starss.map((itm)=>{
+    
+        if(averageRating>=itm){
+            return '<a href="#" class="review-star active-star" >&#9733</a>'
+        }
+        else{
+            return '<a href="#" class="review-star inactive-star" >&#9733</a>'
+
+        }
+    }).join('')
+
+    document.getElementById('review-list').innerHTML=Html;
+    document.getElementById('review-count-block').innerHTML=`(${reviewCount})`;
+    getColor(shop)
+  }
+
+  function scrollToReviews() {
+    const element = document.getElementById('review-section');
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+    }
+}

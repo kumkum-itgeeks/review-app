@@ -239,7 +239,6 @@ export default function HomePage() {
                 stars.map((itm) =>
                   starRating >= itm ?
                     <Image source={solidStar} key={itm} />
-
                     :
                     <Image source={emptyStar} key={itm} />
 

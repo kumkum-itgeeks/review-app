@@ -1,0 +1,28 @@
+#test{
+    background: #ff3737;
+}
+
+#info-section{
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    margin-left: 20px;
+    
+}
+#review-list a{
+    text-decoration: none;
+    font-size: 30px;
+}
+
+.active-star{
+    color: #ccc;
+}
+
+.inactive-star{
+    color: #ccc;
+}
+
+#review-count-block{
+    font-size:20px;
+    margin-inline: 10px;
+}

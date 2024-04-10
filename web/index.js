@@ -200,6 +200,7 @@ app.get("/api/reportInappropriate/:shop/:id",(req,res)=>{
   const detailsTable=shop+'_details';
   const Id= req.params.id;
 
+
   console.log(reviewTable , detailsTable , Id)
   const query=`UPDATE ${reviewTable} SET isInappropriate = 1 WHERE id = ${Id}; UPDATE ${detailsTable} SET isInappropriate = 1 WHERE id = ${Id}`
   con.query(query, (err, results) => {
@@ -215,6 +216,70 @@ app.get("/api/reportInappropriate/:shop/:id",(req,res)=>{
 
 
 })
+
+// extension apis for rating extension ***************
+
+  // fetch review count and rating 
+
+  app.get("/api/getReviewCount/:shop/:id",(req,res)=>{
+
+    const shop = JSON.parse(req.params.shop).toLowerCase();
+    const Id= req.params.id;
+    const reviewTable=shop+'_review';
+    var averageRating;
+    var length;
+  
+    console.log(reviewTable  , Id)
+  
+    const query=` SELECT starRating , reviewTitle FROM ${reviewTable} WHERE productid=${Id} AND reviewStatus='Published'`;
+
+    con.query(query, (err, results) => {
+      if (err) {
+        console.error('Error fetching onload details',err);
+        return;
+      }
+      else{
+      //  res.status(200).send(JSON.stringify(results))
+      let sum = 0;
+      let rating = results.map((itm) => itm.starRating)
+      length = results.length
+      let totalRating = rating.forEach((itm) => {
+        sum += itm;
+      })
+       averageRating = sum / length;
+     res.status(200).send(JSON.stringify({averageRating : averageRating , reviewCount : length}))
+
+      }
+    });
+  })
+
+  // get star color from settings
+  app.get("/api/starColor/:shop",(req,res)=>{
+
+    const shop = JSON.parse(req.params.shop).toLowerCase();
+    const settingTable = shop+'_settings';
+
+    const query=` SELECT settings FROM ${settingTable} WHERE type='starIconColor'`;
+
+    con.query(query, (err, results) => {
+      if (err) {
+        console.error('Error fetching onload details',err);
+        return;
+      }
+      else{
+
+      let data=(JSON.parse(results[0].settings))
+      let color=(data.customColor)
+   
+      res.status(200).send(JSON.stringify({color:color}))
+    
+
+      }
+    });
+  })
+
+
+
 
 // Set up Shopify authentication and webhook handling
 app.get(shopify.config.auth.path, shopify.auth.begin());

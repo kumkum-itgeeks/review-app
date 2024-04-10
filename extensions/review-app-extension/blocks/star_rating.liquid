@@ -1,12 +1,35 @@
-{% assign avg_rating = block.settings.product.metafields.demo.avg_rating.value | round %}
-<span style="color:{{ block.settings.colour }}">
-  {% render 'stars', rating: avg_rating %}
-</span>
-{% if avg_rating >= 4 %}
-  <br>
-  <img src="{{ "thumbs-up.png" | asset_img_url: '15x' }}" height="15" width="15" loading="lazy">
-  {{ 'ratings.home.recommendationText' | t }}
-{% endif %}
+{{ 'star_rating.css' | asset_url | stylesheet_tag }}
+
+{% assign pid = product.id %}
+{% assign shop= shop.name %}
+
+<html>
+  <head>
+    <title>
+    </title>
+  </head>
+  <body>
+    <div id='info-section' onclick='scrollToReviews()'>
+      <div id='review-rating-section'>
+         <div id="review-list">
+        </div>
+      </div>
+      <div id='review-count-section'>
+        <p id='review-count-block'></p>
+      </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+  <script src="{{ '../assets/star_rating.js' | asset_url }}">
+
+  </script>
+    <script>
+     document.addEventListener('DOMContentLoaded', function() {
+      test('{{ shop }}', {{ pid }} ); 
+    });
+  </script>
 
 {% schema %}
 {

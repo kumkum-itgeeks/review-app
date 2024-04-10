@@ -17,7 +17,6 @@ const addSettings = (req, res) => {
       console.error('Error inserting data:', err);
       return res.status(500).send('Error inserting data');
     }
-    console.log('Data inserted successfully:', results);
     res.status(200).send(JSON.stringify('Data inserted successfully'));
   });
 }
@@ -85,10 +84,9 @@ const resetSettings=(req,res)=>{
       const settingsObj = JSON.parse(item.defaultSettings);
       return { [item.type]: settingsObj };
     });
-    // res.status(200).send(JSON.stringify(results));
+    
     results.forEach((item) => {
-      
-      // console.log(JSON.stringify(item.defaultSettings))
+    
       const { type, defaultSettings } = item;
       const updateQuery = `UPDATE ${settingsTable} SET settings = ? WHERE type = ?`;
     

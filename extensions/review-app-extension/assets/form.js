@@ -3,8 +3,9 @@
 let currentPage = 1;
 var isthisLastPage;
 var starsettingColor;
-var shopName; let PageNumber = document.getElementById('page-number-display').value;
-const url = `https://amended-phentermine-taiwan-plenty.trycloudflare.com`
+var shopName;
+ let PageNumber = document.getElementById('page-number-display').value;
+const URL = `https://cells-flour-privileges-cube.trycloudflare.com`
 
 // dom content loaded********
 
@@ -12,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const stars = document.querySelectorAll('.star-rating .star');
  
   PageNumber = 1;
-
 
   stars.forEach(star => {
     star.addEventListener('mouseenter', function () {
@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', function () {
           s.style.opacity = '1';
         } else {
           s.style.opacity = '0.5';
-
            // Fading effect for unselected stars on hover
         }
       });
@@ -83,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function addReviews(obj, shop) {
 
-  fetch(`${url}/api/addReviews/${JSON.stringify(obj)}/${JSON.stringify(shop)}`)
+  fetch(`${URL}/api/addReviews/${JSON.stringify(obj)}/${JSON.stringify(shop)}`)
     .then(res => res.json())
     .then(data => console.log(data))
 
@@ -95,7 +94,7 @@ function addReviews(obj, shop) {
 function getOnloadReviewsSetting(shop, pid) {
 
 
-  fetch(`${url}/api/checkReviewsOnload/${JSON.stringify(shop)}`)
+  fetch(`${URL}/api/checkReviewsOnload/${JSON.stringify(shop)}`)
     .then(res => res.json())
     .then(data => {
       if (data === true) {
@@ -138,7 +137,7 @@ function changeReviewDisplay(e) {
 
 function getReviews(shop, pid, page) {
 
-  fetch(`${url}/api/getReviews/${JSON.stringify(shop)}/${pid}/${page}`)
+  fetch(`${URL}/api/getReviews/${JSON.stringify(shop)}/${pid}/${page}`)
     .then(res => res.json())
     .then(data => {
       setReviewInfo(data, shop)
@@ -190,7 +189,7 @@ function reportReview(e, shop, id, reportText) {
   e.preventDefault();
 
   let targetID = document.getElementById(`target-id-${id}`);
-  fetch(`${url}/api/reportInappropriate/${JSON.stringify(shop)}/${id}`)
+  fetch(`${URL}/api/reportInappropriate/${JSON.stringify(shop)}/${id}`)
     .then(res => res.json())
     .then(data => {
       targetID.innerHTML = reportText
@@ -213,8 +212,7 @@ function getSettingsData(shop) {
 const setReviewInfo = (data, shop) => {
 
   let stars = [1, 2, 3, 4, 5];
-  // let reviewCountTitle = document.getElementById('review-count-title')
-  // let noReviewTitle = document.getElementById('no-review-title')
+ 
   document.getElementById('review-listing').innerHTML = dataDistructure(data, shop),
     document.getElementById('average-rating').innerHTML = `<div class='rating' >${stars.map((star) => {
       return data.averageRating >= star ? '<a href="#" class="review-list-star">&#9733;</a>' : '<a href="#">&#9733;</a>';
@@ -238,27 +236,13 @@ function setSettings(data) {
   starColorData = settingData.filter((itm) => (itm.starIconColor))
   let star = document.getElementsByClassName('review-list-star');
   let ratingStar = document.querySelectorAll('.star');
-  // console.log('1',document.querySelectorAll('.star.active'))
-  // console.log('2',document.querySelectorAll('.active'))
-  // console.log('3',document.querySelectorAll('.star .active'))
 
-  // for (let i = 0; i < ratingStar.length; i++) {
-  //   let color = starColorData[0].starIconColor.customColor;
-  //   ratingStar[i].style.color = color;
-  // }
   starsettingColor=(starColorData[0].starIconColor.customColor)
-
-  // for (var i = 0; i < ratingStar.length; i++) {
-    
-  //   ratingStar[i].style.color = (starColorData.map((itm) => itm.starIconColor.customColor));
-  // }
-
 
   for (var i = 0; i < star.length; i++) {
     star[i].style.color = (starColorData.map((itm) => itm.starIconColor.customColor));
 
   }
-
 
   //review listing layout**
 
@@ -646,13 +630,6 @@ function handleSubmit(e, id, shop, product) {
     //common red error box on top
     commonErr.style.display = 'none';
 
-    //removing all errors from fields
-    var errorMessages = document.getElementsByClassName('input-box');
-    for (var i = 0; i < errorMessages.length; i++) {
-      errorMessages[i].style.borderColorColor = 'black';
-      errorMessages[i].style.borderWidth = "1px"
-    }
-
     document.getElementById('ratingErr').innerHTML = ''
 
 
@@ -676,6 +653,13 @@ function handleSubmit(e, id, shop, product) {
     //thanks you message after submitting form **
     ThankyouMessage.style.display = 'block';
 
+    //removing all errors from fields
+      var errorMessages = document.getElementsByClassName('input-box');
+      for (var i = 0; i < errorMessages.length; i++) {
+          errorMessages[i].style.borderColor = 'black';
+          errorMessages[i].style.borderWidth = "1px"
+      }
+
     //removing form display after submit (can be visible after click on write review)**
     Form.style.display = 'none';
     reviewLink.display = 'none'
@@ -688,19 +672,18 @@ function handleSubmit(e, id, shop, product) {
 
     var errorMessages = document.getElementsByClassName('input-box');
     for (var i = 0; i < errorMessages.length; i++) {
-      errorMessages[i].style.borderColorColor = 'black';
+      errorMessages[i].style.borderColor = 'black';
       errorMessages[i].style.borderWidth = "1px"
     }
     //setting rating to 0 again 
     currentRating = 0;
     document.getElementById('ratingErr').innerHTML = ''
 
-    let star=document.querySelectorAll('.star-rating .star')
+    let mystar=document.querySelectorAll('.star')
 
-    let mystars = Array.from(star);
-    
-    mystars.map((s) => {
-      s.classList.remove('active');
+
+    mystar.forEach((s) => {
+     s.style.color='#ccc'
     })
 
   }

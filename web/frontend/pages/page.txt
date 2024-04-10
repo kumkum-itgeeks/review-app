@@ -121,3 +121,7 @@ loading spinner and loading skeleton
 * display selected color in settings
 * app setting discription
 * product page bug
+
+10/04/24
+
+* display star rating and rating count extension started 
