@@ -12,6 +12,7 @@ import reviewRoutes from './Routes/review.js'
 import tableRoutes from './Routes/table.js'
 import detailsRoute from './Routes/details.js'
 import settingsRoute from './Routes/settings.js'
+import { GraphQLClient } from 'graphql-request'
 
 import bodyParser from "body-parser";
 
@@ -49,13 +50,17 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // adding reviews from extension
 
 
-app.get("/api/addReviews/:obj/:shop", async (_req, res) => {
+app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
   const Obj = JSON.parse(_req.params.obj);
   const shop = JSON.parse(_req.params.shop).toLowerCase();
+  const handle = _req.params.handle;
+  const Id = _req.params.id;
   const reviewTable = shop + '_review'
   const detailsTable = shop + '_details'
   const settingsTable = shop + '_settings'
+  var averageRating;
+  var length;
   const Columns = (Object.keys(Obj))
   const Data = Object.values(Obj)
   const DataValue = Data.map(cat => `'${cat}'`).join(', ');
@@ -73,28 +78,266 @@ app.get("/api/addReviews/:obj/:shop", async (_req, res) => {
     var reviewStatus = (settingObj.autopublish)
 
     if (reviewStatus === 'enabled') {
-      con.query(enabledQuery, (err, results) => {
+      con.query(enabledQuery, async (err, results) => {
         if (err) {
           console.error('Error inserting reviews', err);
           return;
         }
         res.send(JSON.stringify('Data inserted successfully'));
+        await avgRating()
+
       });
     }
-    else{
-      con.query(query, (err, results) => {
+    else {
+      con.query(query, async (err, results) => {
         if (err) {
-          console.error('Error inserting reviews',err);
+          console.error('Error inserting reviews', err);
           return;
         }
         res.send(JSON.stringify('Data inserted successfully'));
+        await avgRating()
+
       });
     }
   });
-});
+
+  async function avgRating() {
+
+    //************** fetching average rating from db to store in metafield */
+    const getAveragequery = ` SELECT starRating , reviewTitle FROM ${reviewTable} WHERE productHandle=${handle} AND reviewStatus='Published'`;
+    con.query(getAveragequery, async (err, results) => {
+      if (err) {
+        console.error('Error fetching reviews', err);
+        return;
+      }
+      else {
+        let sum = 0;
+        let rating = results.map((itm) => itm.starRating)
+        length = results.length
+        let totalRating = rating.forEach((itm) => {
+          sum += itm;
+        })
+        averageRating = sum / length;
+        await metafieldFunctionality()
+
+      }
+    });
+  }
+
+  async function metafieldFunctionality() {
+
+    //****************** getting session data *******************/
+    let completeShop = shop + '.myshopify.com';
+    var session;
+    var RatingMetaId;
+    var ReviewCountId;
+
+    let getSessionQuery = `Select * from shopify_sessions WHERE shop='${completeShop}'`
+    con.query(getSessionQuery, async (err, results) => {
+      if (err) {
+        console.error('err fetching session ', err)
+
+      }
 
 
-app.get(`/api/getReviews/:shop/:id/:page`, (req, res) => {
+      session = results[0];
+
+      let version = shopify.api.config.apiVersion
+      let endpoint = `https://${shop}.myshopify.com/admin/api/${version}/graphql.json`;
+
+      const client = new shopify.api.clients.Graphql({ session });
+
+
+      //****************************** retrieving metafield id ************************
+
+
+      const getRatingMetaIdQuery = `query {
+      product(id: "gid://shopify/Product/${Id}") {
+        metafield(namespace: "itgeeks_reviews", key: "average_rating") {
+          id
+        }
+      }
+    }`
+
+      const getCountMetaIdQuery = `query {
+      product(id: "gid://shopify/Product/${Id}") {
+        metafield(namespace: "itgeeks_reviews", key: "review_count") {
+          id
+        }
+      }
+    }`
+
+
+      // Execute the rating  mutation
+      try {
+        const response = await client.query({
+          data: {
+            query: getRatingMetaIdQuery,
+          },
+        });
+
+        const myData = await response.body;
+
+        RatingMetaId = (Object(myData).data.product.metafield.id);
+
+      } catch (error) {
+        console.error('erorrrrrr=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
+      }
+
+      // Execute the count  mutation
+      try {
+        const response = await client.query({
+          data: {
+            query: getCountMetaIdQuery,
+          },
+        });
+
+        const myData = await response.body;
+
+        ReviewCountId = (Object(myData).data.product.metafield.id);
+
+      } catch (error) {
+        console.error('erorrrrrr=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
+      }
+
+      //****************** creating metafield *************************/
+      
+      const createMetafieldMutation = `
+      mutation {
+        productUpdate(
+          input : {
+            id: "gid://shopify/Product/${Id}",
+            metafields: [
+              {
+                namespace: "itgeeks_reviews",
+                key: "average_rating",
+                value: "${averageRating?.toFixed(1)}",
+                type: "number_decimal",
+              },
+              {
+                namespace: "itgeeks_reviews",
+                key: "review_count",
+                value: "${length}",
+                type: "integer",
+              }
+            ]
+          }) {
+            product {
+              metafields(first: 3) {
+                edges {
+                  node {
+                    namespace
+                    key
+                    value
+                  }
+                }
+              }
+            }
+          }
+        }
+        `
+        
+        
+        const metafieldsWithId = [
+          {
+            id: `${RatingMetaId}`,
+            value: `${averageRating?.toFixed(1)}`, // Default value for review count
+            
+          },
+          {
+            id: `${ReviewCountId}`,
+            value: `${length}`, // Default value for review count
+            
+          },
+        ];
+        
+        //****************** updating my metafield *************************/
+
+        // Define the GraphQL mutation
+        const UpdateMetafieldMutation = `mutation productUpdate($input: ProductInput!) {
+    productUpdate(input: $input) {
+    product {
+    id
+    metafields(first: 10) {
+    edges {
+    node {
+    namespace
+    key
+    value
+    }
+    }
+    }
+    }
+    userErrors {
+    field
+    message
+    }
+    }
+    }`;
+
+      // Prepare the variables for the mutation
+      const Metafieldvariables = {
+        input: {
+          id: `gid://shopify/Product/${Id}`, // Replace with actual product ID
+          metafields: metafieldsWithId,
+        },
+      };
+
+
+      // ************ checking if metafield exists or not //
+      if (RatingMetaId === null || RatingMetaId === '' || RatingMetaId === undefined || ReviewCountId === null || ReviewCountId === '' || ReviewCountId === undefined ) {
+
+        console.log(' creating metafield **********************************************')
+        try {
+          const createResponse = await client.query({
+            data: {
+              query: createMetafieldMutation
+            }
+          });
+
+          console.log('create mutation response ******************', Object(createResponse).body.data.productUpdate.userErrors)
+
+        } catch (error) {
+          console.error('erorrrrrr with create metafield =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
+        }
+      }
+
+      else {
+        // Execute the mutation
+
+        try {
+          const mutationResponse = await client.query({
+            data: {
+              query: UpdateMetafieldMutation,
+              variables: Metafieldvariables,
+            },
+          });
+
+          console.log('update mutation response ******************', Object(mutationResponse).body.data.productUpdate.userErrors)
+
+
+        } catch (error) {
+          console.error('erorrrrrr with update metafield =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
+        }
+
+      }
+
+    })
+
+
+
+
+
+  }
+
+})
+
+
+
+// const client = new shopify.api.clients.Graphql({ session });
+
+
+app.get(`/api/getReviews/:shop/:handle/:page`, (req, res) => {
 
   var settingData;
   var reviewPerpage;
@@ -102,36 +345,36 @@ app.get(`/api/getReviews/:shop/:id/:page`, (req, res) => {
   var length;
   var averageRating;
   const shop = JSON.parse(req.params.shop).toLowerCase();
-  const productId = req.params.id;
+  const productHandle = (req.params.handle);
   const pageNumber = Number(req.params.page);
-  console.log('page number ***********', pageNumber)
+
   const detailsTable = shop + '_details'
   const settingsTable = shop + '_settings'
-  const type =['starIconColor','reviewListingLayout', 'reviewListingText' , 'reviewFormText' , 'badgeText'];
+  const type = ['starIconColor', 'reviewListingLayout', 'reviewListingText', 'reviewFormText', 'badgeText'];
   const typeValue = type.map(itm => `'${itm}'`).join(', ');
-  const   settingsQuery=`SELECT type , settings FROM ${settingsTable} WHERE type IN (${typeValue})`;
-  const totoalDataquery = ` SELECT starRating , reviewTitle , userName , datePosted , reviewDescription , reply  FROM ${detailsTable} WHERE productid=${productId} AND reviewStatus='Published'`
+  const settingsQuery = `SELECT type , settings FROM ${settingsTable} WHERE type IN (${typeValue})`;
+  const totoalDataquery = ` SELECT starRating , reviewTitle , userName , datePosted , reviewDescription , reply  FROM ${detailsTable} WHERE productHandle=${productHandle} AND reviewStatus='Published'`
 
 
 
   con.query(settingsQuery, (err, results) => {
     if (err) {
-      console.error('Error fetching data',err);
+      console.error('Error fetching data', err);
       return;
     }
     const transformedData = results.map(item => {
       const settingsObj = JSON.parse(item.settings);
       return { [item.type]: settingsObj };
     });
-    
-    settingData=transformedData
-    reviewPerpage=(transformedData.filter((itm)=>(itm.reviewListingLayout)).map((itm)=>itm.reviewListingLayout.reviewPerpage).join(''))
-    
+
+    settingData = transformedData
+    reviewPerpage = (transformedData.filter((itm) => (itm.reviewListingLayout)).map((itm) => itm.reviewListingLayout.reviewPerpage).join(''))
+
     const limit = Number(reviewPerpage);
     const offset = Number((pageNumber - 1) * limit);
-  
-    const query = ` SELECT id ,starRating , reviewTitle , userName , datePosted , reviewDescription , reply , isInappropriate FROM ${detailsTable} WHERE productid=${productId} AND reviewStatus='Published' LIMIT ${limit} OFFSET ${offset}`;
-    
+
+    const query = ` SELECT id ,starRating , reviewTitle , userName , datePosted , reviewDescription , reply , isInappropriate FROM ${detailsTable} WHERE productHandle=${productHandle} AND reviewStatus='Published' LIMIT ${limit} OFFSET ${offset}`;
+
 
     con.query(totoalDataquery, (err, results) => {
       if (err) {
@@ -144,27 +387,27 @@ app.get(`/api/getReviews/:shop/:id/:page`, (req, res) => {
       let totalRating = rating.forEach((itm) => {
         sum += itm;
       })
-       averageRating = sum / length;
-    
-       
-      if(length < (limit+offset)){
-        isLastPage=true
+      averageRating = sum / length;
+
+
+      if (length < (limit + offset)) {
+        isLastPage = true
       }
-      else{
-        isLastPage=false
+      else {
+        isLastPage = false
       }
     });
 
-    
-  con.query(query, (err, results) => {
-    if (err) {
-      console.error('Error retrieving data', err);
-      return;
-    }
-    res.send(JSON.stringify({ reviews: results, length: length, averageRating: averageRating , settingData : settingData , isLastPage: isLastPage}));
 
+    con.query(query, (err, results) => {
+      if (err) {
+        console.error('Error retrieving data', err);
+        return;
+      }
+      res.send(JSON.stringify({ reviews: results, length: length, averageRating: averageRating, settingData: settingData, isLastPage: isLastPage }));
+
+    });
   });
-});
   //
 })
 
@@ -175,43 +418,43 @@ app.get("/api/checkReviewsOnload/:shop", async (_req, res) => {
   const shop = JSON.parse(_req.params.shop).toLowerCase();
   const settingsTable = shop + '_settings';
 
-  const query =`SELECT settings from ${settingsTable} Where type ='reviewListingLayout' `;
+  const query = `SELECT settings from ${settingsTable} Where type ='reviewListingLayout' `;
 
   con.query(query, (err, results) => {
     if (err) {
-      console.error('Error fetching onload details',err);
+      console.error('Error fetching onload details', err);
       return;
     }
-    else{
-      let data=(results.map((itm)=>itm.settings))
-      let onLoad=(JSON.parse(data).reviewOnload)
-     res.status(200).send(onLoad)
+    else {
+      let data = (results.map((itm) => itm.settings))
+      let onLoad = (JSON.parse(data).reviewOnload)
+      res.status(200).send(onLoad)
 
     }
-    
+
   });
 });
 
 
-app.get("/api/reportInappropriate/:shop/:id",(req,res)=>{
+app.get("/api/reportInappropriate/:shop/:id", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
-  const reviewTable=shop+'_review';
-  const detailsTable=shop+'_details';
-  const Id= req.params.id;
+  const reviewTable = shop + '_review';
+  const detailsTable = shop + '_details';
+  const Id = req.params.id;
 
 
-  console.log(reviewTable , detailsTable , Id)
-  const query=`UPDATE ${reviewTable} SET isInappropriate = 1 WHERE id = ${Id}; UPDATE ${detailsTable} SET isInappropriate = 1 WHERE id = ${Id}`
+
+  const query = `UPDATE ${reviewTable} SET isInappropriate = 1 WHERE id = ${Id}; UPDATE ${detailsTable} SET isInappropriate = 1 WHERE id = ${Id}`
   con.query(query, (err, results) => {
     if (err) {
-      console.error('Error fetching onload details',err);
+      console.error('Error fetching onload details', err);
       return;
     }
-    else{
-     res.status(200).send(JSON.stringify(results))
+    else {
+      res.status(200).send(JSON.stringify(results))
     }
-    
+
   });
 
 
@@ -219,26 +462,26 @@ app.get("/api/reportInappropriate/:shop/:id",(req,res)=>{
 
 // extension apis for rating extension ***************
 
-  // fetch review count and rating 
+// fetch review count and rating 
 
-  app.get("/api/getReviewCount/:shop/:id",(req,res)=>{
+app.get("/api/getReviewCount/:shop/:handle", (req, res) => {
 
-    const shop = JSON.parse(req.params.shop).toLowerCase();
-    const Id= req.params.id;
-    const reviewTable=shop+'_review';
-    var averageRating;
-    var length;
-  
-    console.log(reviewTable  , Id)
-  
-    const query=` SELECT starRating , reviewTitle FROM ${reviewTable} WHERE productid=${Id} AND reviewStatus='Published'`;
+  const shop = JSON.parse(req.params.shop).toLowerCase();
+  const handle = req.params.handle;
+  const reviewTable = shop + '_review';
+  var averageRating;
+  var length;
 
-    con.query(query, (err, results) => {
-      if (err) {
-        console.error('Error fetching onload details',err);
-        return;
-      }
-      else{
+
+
+  const query = ` SELECT starRating , reviewTitle FROM ${reviewTable} WHERE productHandle=${handle} AND reviewStatus='Published'`;
+
+  con.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching reviews', err);
+      return;
+    }
+    else {
       //  res.status(200).send(JSON.stringify(results))
       let sum = 0;
       let rating = results.map((itm) => itm.starRating)
@@ -246,37 +489,37 @@ app.get("/api/reportInappropriate/:shop/:id",(req,res)=>{
       let totalRating = rating.forEach((itm) => {
         sum += itm;
       })
-       averageRating = sum / length;
-     res.status(200).send(JSON.stringify({averageRating : averageRating , reviewCount : length}))
+      averageRating = sum / length;
+      res.status(200).send(JSON.stringify({ averageRating: averageRating, reviewCount: length }))
 
-      }
-    });
-  })
+    }
+  });
+})
 
-  // get star color from settings
-  app.get("/api/starColor/:shop",(req,res)=>{
+// get star color from settings
+app.get("/api/starColor/:shop", (req, res) => {
 
-    const shop = JSON.parse(req.params.shop).toLowerCase();
-    const settingTable = shop+'_settings';
+  const shop = JSON.parse(req.params.shop).toLowerCase();
+  const settingTable = shop + '_settings';
 
-    const query=` SELECT settings FROM ${settingTable} WHERE type='starIconColor'`;
+  const query = ` SELECT settings FROM ${settingTable} WHERE type='starIconColor'`;
 
-    con.query(query, (err, results) => {
-      if (err) {
-        console.error('Error fetching onload details',err);
-        return;
-      }
-      else{
+  con.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching onload details', err);
+      return;
+    }
+    else {
 
-      let data=(JSON.parse(results[0].settings))
-      let color=(data.customColor)
-   
-      res.status(200).send(JSON.stringify({color:color}))
-    
+      let data = (JSON.parse(results[0].settings))
+      let color = (data.customColor)
 
-      }
-    });
-  })
+      res.status(200).send(JSON.stringify({ color: color }))
+
+
+    }
+  });
+})
 
 
 

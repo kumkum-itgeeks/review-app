@@ -8,7 +8,6 @@ import shopify from '../shopify.js';
 import { con } from '../index.js';
 
 
-
 const totalReviews = (req, res) => {
     const status = req.params.status;
     const shop = res.locals.shopify.session.shop;

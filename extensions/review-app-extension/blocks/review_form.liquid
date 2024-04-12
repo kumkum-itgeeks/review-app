@@ -3,6 +3,10 @@
 {% assign productId = product.id %}
 {% assign shopName = shop.name %}
 {% assign productName = product.title %}
+{% assign producthandle= product.handle %}
+{% assign metaRating = product.metafields.itgeeks_reviews.average_rating.value %}
+
+
 
 
 <head>
@@ -68,7 +72,7 @@
         <textarea  rows='10'  id='reviewBodyInput' placeholder='Write your comments here' class='input-box' ></textarea>
         <span id='bodyErr' class='err'></span>
         <div id='submit-btn'>
-            <button type='submit' onclick="handleSubmit(event,{{productId}},'{{shopName}}','{{productName}}')" class='btn button' ><b id='submit-btn-title'>Submit Review</b></button>
+            <button type='submit' onclick="handleSubmit(event,{{productId}},'{{shopName}}','{{productName}}' ,'{{producthandle}}')" class='btn button' ><b id='submit-btn-title'>Submit Review</b></button>
         </div>
     </form>
     </div>
@@ -78,9 +82,9 @@
     </div>
     
     <div id='pagination-section'>
-      <button onclick="setPrev('{{ shopName }}', {{ productId }} , event )" id='prev-btn' class='pagination-btn btn button'>Prev</button>
+      <button onclick="setPrev('{{ shopName }}', '{{ producthandle }}' , event )" id='prev-btn' class='pagination-btn btn button'>Prev</button>
       <input type='number' id='page-number-display' value='1'/>
-      <button onclick="setNext('{{ shopName }}', {{ productId }} , event)" id='next-btn' class='pagination-btn btn button'>Next</button>
+      <button onclick="setNext('{{ shopName }}', '{{ producthandle }}' , event)" id='next-btn' class='pagination-btn btn button'>Next</button>
     </div>
    
    
@@ -91,7 +95,7 @@
   </script>
   <script>
      document.addEventListener('DOMContentLoaded', function() {
-      getOnloadReviewsSetting('{{ shopName }}', {{ productId }} ); // Replace with Liquid variables
+      getOnloadReviewsSetting('{{ shopName }}', '{{producthandle}}' , '{{metaRating}}' ); // Replace with Liquid variables
     });
   </script>
 

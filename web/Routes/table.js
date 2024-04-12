@@ -7,7 +7,7 @@ router.get('/createReviewTable', TableController.createReviewsTable);
 
 router.get('/createDetailTable', TableController.createDetailTable);
 
-router.get('/createMetaField', TableController.createMetafield);
+router.get('/createMetaField/:id/:rating', TableController.createMetafield);
 
 router.get('/getMetafields', TableController.getMetafields);
 

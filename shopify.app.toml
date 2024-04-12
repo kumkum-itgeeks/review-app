@@ -2,7 +2,7 @@
 
 client_id = "c8b76d8cdccd39ae45b847901d4b4fb3"
 name = "reviews"
-application_url = "https://cells-flour-privileges-cube.trycloudflare.com"
+application_url = "https://warriors-paul-simulation-kept.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://cells-flour-privileges-cube.trycloudflare.com/auth/callback",
-  "https://cells-flour-privileges-cube.trycloudflare.com/auth/shopify/callback",
-  "https://cells-flour-privileges-cube.trycloudflare.com/api/auth/callback"
+  "https://warriors-paul-simulation-kept.trycloudflare.com/auth/callback",
+  "https://warriors-paul-simulation-kept.trycloudflare.com/auth/shopify/callback",
+  "https://warriors-paul-simulation-kept.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

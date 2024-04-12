@@ -5,7 +5,7 @@ var isthisLastPage;
 var starsettingColor;
 var shopName;
  let PageNumber = document.getElementById('page-number-display').value;
-const URL = `https://cells-flour-privileges-cube.trycloudflare.com`
+const URL = `https://warriors-paul-simulation-kept.trycloudflare.com`
 
 // dom content loaded********
 
@@ -80,9 +80,9 @@ document.addEventListener('DOMContentLoaded', function () {
 // sending formdata****
 
 
-function addReviews(obj, shop) {
+function addReviews(obj, shop , handle ,id) {
 
-  fetch(`${URL}/api/addReviews/${JSON.stringify(obj)}/${JSON.stringify(shop)}`)
+  fetch(`${URL}/api/addReviews/${JSON.stringify(obj)}/${JSON.stringify(shop)}/${JSON.stringify(handle)}/${id}`)
     .then(res => res.json())
     .then(data => console.log(data))
 
@@ -91,7 +91,7 @@ function addReviews(obj, shop) {
 // checking if to show reviews on load**** (according to app setting)
 
 
-function getOnloadReviewsSetting(shop, pid) {
+function getOnloadReviewsSetting(shop, handle) {
 
 
   fetch(`${URL}/api/checkReviewsOnload/${JSON.stringify(shop)}`)
@@ -110,7 +110,7 @@ function getOnloadReviewsSetting(shop, pid) {
         document.getElementById('pagination-section').style.display = 'none'
 
       }
-      getReviews(shop, pid, PageNumber);
+      getReviews(shop, handle, PageNumber);
     }
     )
 }
@@ -135,9 +135,9 @@ function changeReviewDisplay(e) {
 
 // get review list *****
 
-function getReviews(shop, pid, page) {
+function getReviews(shop, handle, page) {
 
-  fetch(`${URL}/api/getReviews/${JSON.stringify(shop)}/${pid}/${page}`)
+  fetch(`${URL}/api/getReviews/${JSON.stringify(shop)}/${JSON.stringify(handle)}/${page}`)
     .then(res => res.json())
     .then(data => {
       setReviewInfo(data, shop)
@@ -146,7 +146,7 @@ function getReviews(shop, pid, page) {
 }
 
 // pagination functionality ********
-function setPrev(shop, pid, e) {
+function setPrev(shop,  handle, e) {
   e.preventDefault();
   console.log('prev')
   PageNumber == 1 ?
@@ -156,14 +156,12 @@ function setPrev(shop, pid, e) {
   document.getElementById('next-btn').disabled = false
 
   PageNumber -= 1
-  getReviews(shop, pid, PageNumber)
-
-
+  getReviews(shop, handle, PageNumber)
 
 
 }
 
-function setNext(shop, pid, e) {
+function setNext(shop, handle, e) {
 
   e.preventDefault();
 
@@ -176,7 +174,7 @@ function setNext(shop, pid, e) {
     document.getElementById('prev-btn').disabled = false
 
     PageNumber = PageNumber + 1;
-    getReviews(shop, pid, PageNumber)
+    getReviews(shop, handle, PageNumber)
   }
 
   console.log('page=>', PageNumber)
@@ -215,7 +213,9 @@ const setReviewInfo = (data, shop) => {
  
   document.getElementById('review-listing').innerHTML = dataDistructure(data, shop),
     document.getElementById('average-rating').innerHTML = `<div class='rating' >${stars.map((star) => {
-      return data.averageRating >= star ? '<a href="#" class="review-list-star">&#9733;</a>' : '<a href="#">&#9733;</a>';
+      return data.averageRating >= star ? '<a href="#" class="review-list-star">&#9733;</a>' : 
+      Number(data.averageRating) + 0.5 >= star ? '<a href="#" id="half-stars">&#9733;</a>':
+      '<a href="#">&#9733;</a>';
     }).join('')}<div class='rating' >`;
 
   setSettings(data);
@@ -236,6 +236,8 @@ function setSettings(data) {
   starColorData = settingData.filter((itm) => (itm.starIconColor))
   let star = document.getElementsByClassName('review-list-star');
   let ratingStar = document.querySelectorAll('.star');
+  let halfStars = document.getElementById('half-stars')
+  halfStars.style.setProperty('--star-color', (starColorData.map((itm) => itm.starIconColor.customColor)));
 
   starsettingColor=(starColorData[0].starIconColor.customColor)
 
@@ -443,7 +445,7 @@ ${stars.map((star) => {
     ${(authorInformation).replace('${itm.userName}', itm?.userName).replace('${itm.datePosted}', formatDate(itm?.datePosted))}
     <p id='review-list-description'> ${itm.reviewDescription} </p>
     <div class='report-section'>
-    <a href='#' class='report-review' id='target-id-${itm.id}' style="color:#28282ABF" onclick="reportReview(event,'${shop}',${itm.id} , '${reportedText}')"> 
+    <a href='#' class='report-review' id='target-id-${itm.id}' style="color:#28282ABF" onclick="reportReview(event,'${shop}',${itm.id} , '${reportedText}' )"> 
     </a>
     </div>
     <br>
@@ -488,7 +490,7 @@ function handleButtonClick(e) {
 
 
 // on submit validaiton (on click of submit button only)
-function handleSubmit(e, id, shop, product) {
+function handleSubmit(e, id, shop, product , handle) {
   e.preventDefault();
   let stars = [1, 2, 3, 4, 5]
   let isEmailValid = false;
@@ -642,12 +644,13 @@ function handleSubmit(e, id, shop, product) {
       StarRating: currentRating,
       Email: email,
       productid: id,
-      productHandle: product,
+      productHandle: handle,
+      productTitle: product,
       location: location
     }
 
     //api function for adding formdata **
-    addReviews(dataObj, shop);
+    addReviews(dataObj, shop , handle , id);
 
 
     //thanks you message after submitting form **

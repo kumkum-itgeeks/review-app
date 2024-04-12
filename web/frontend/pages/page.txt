@@ -125,3 +125,14 @@ loading spinner and loading skeleton
 10/04/24
 
 * display star rating and rating count extension started 
+
+11/04/24
+
+* created metfields for each product for average rating
+
+
+12/04/24
+
+* create average_rating and review_count metafields if not exists
+* update both metafields on posting new review 
+* displayed in theme

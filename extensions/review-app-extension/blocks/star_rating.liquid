@@ -2,7 +2,9 @@
 
 {% assign pid = product.id %}
 {% assign shop= shop.name %}
-
+{% assign handle= product.handle %}
+{% assign metafieldRating = product.metafields.itgeeks_reviews.average_rating.value %}
+{% assign metafieldCount = product.metafields.itgeeks_reviews.review_count %}
 <html>
   <head>
     <title>
@@ -11,9 +13,11 @@
   <body>
     <div id='info-section' onclick='scrollToReviews()'>
       <div id='review-rating-section'>
+      <div>
+        <p id='rating-count-block'></p>
+      </div>
          <div id="review-list">
         </div>
-      </div>
       <div id='review-count-section'>
         <p id='review-count-block'></p>
       </div>
@@ -27,8 +31,9 @@
   </script>
     <script>
      document.addEventListener('DOMContentLoaded', function() {
-      test('{{ shop }}', {{ pid }} ); 
+      test('{{ shop }}', '{{handle}}' , '{{metafieldRating}}', '{{metafieldCount}}'); 
     });
+    console.log('{{metafieldCount}}','hereff')
   </script>
 
 {% schema %}

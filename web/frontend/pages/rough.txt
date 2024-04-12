@@ -1,74 +1,19 @@
 
 
-product page  bug ...
 
-pagination ......
+metafields
 
-err field common ....
+average count 
 
-review count ....
+half star rating 
 
-star input color ......
+padding , margin 
 
-report innaprpriate review ...
+inappropriate handle set
 
+///////
 
-report inappropriate app functionality ...
+metafield condition for create 
 
-star icon color in setting ..
-
-star color theme color ...
-
-loading in extensions ...
-
-
-app setting discription ...
-
-setting page dynamic functions
-
-
-
-  if (SearchValue.length <= 0) {
-        //check if selected all reviews as filter
-        if (status == 'All Reviews') {
-           
-                con.query(`SELECT * FROM ${reviewTable} WHERE productid = ${id} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-           
-        }
-        else if (status == 'Spam') {
-
-                con.query(`SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 AND productid = ${id} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-        
-        }
-        else {
-
-                con.query(`SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' AND productid = ${id} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-        }
-    }
-    else {
-        if (status == 'All Reviews') {
-
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND productid = ${id} ORDER BY ${sortStr}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-      
-        }
-        else {
-                con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND  reviewStatus='${status}' AND productid = ${id} ORDER BY ${sortStr}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-                    if (err) throw err;
-                    res.send(JSON.stringify(result));
-                })
-       
-        }
-    }
+correct decimal value 
 
