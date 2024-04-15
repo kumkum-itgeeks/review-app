@@ -83,7 +83,7 @@ export default function Details() {
   }
 
   function checkForInappropriate(data) {
-    let isInappropriate = (data[0].isInappropriate)
+    let isInappropriate = (data[0]?.isInappropriate)
     isInappropriate === 1 ?
       setShowWarning(1)
       :
@@ -134,6 +134,12 @@ const dissmissInappropriate=()=>{
   }
   //*******useEffects********
 
+  useEffect(()=>{
+    if(!Id || Id===''){
+      Navigate("/")
+      show("click 'Details' for further details !  ", { duration: 2000 })
+    }
+  },[])
 
   useEffect(() => {
     setStatusLoading(true)

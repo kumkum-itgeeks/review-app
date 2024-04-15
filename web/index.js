@@ -14,6 +14,7 @@ import detailsRoute from './Routes/details.js'
 import settingsRoute from './Routes/settings.js'
 import { GraphQLClient } from 'graphql-request'
 
+
 import bodyParser from "body-parser";
 
 
@@ -49,7 +50,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // adding reviews from extension
 
-
 app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
   const Obj = JSON.parse(_req.params.obj);
@@ -83,7 +83,7 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
           console.error('Error inserting reviews', err);
           return;
         }
-        res.send(JSON.stringify('Data inserted successfully'));
+        // res.send(JSON.stringify('Data inserted successfully'));
         await avgRating()
 
       });
@@ -94,7 +94,7 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
           console.error('Error inserting reviews', err);
           return;
         }
-        res.send(JSON.stringify('Data inserted successfully'));
+        // res.send(JSON.stringify('Data inserted successfully'));
         await avgRating()
 
       });
@@ -550,6 +550,7 @@ app.use("/api/*", shopify.validateAuthenticatedSession(), getShopName);
 app.use(express.json());
 
 
+
 async function getShopName(req, res, next) {
 
   const shop = await res.locals.shopify.session.shop;
@@ -608,6 +609,79 @@ app.use('/api/settings', settingsRoute);
 
 ////
 
+// const createReviewsTable = async (_req, res) => {
+
+//   const shop = res.locals.shopify.session.shop;
+//   let shopLowercase = shop.toLowerCase();
+//   let removeSuffix = shopLowercase.replace(".myshopify.com", "");
+//   let shopName = removeSuffix.replace("-", "_");
+//   let tableName = shopName + '_review'
+
+//   var sql = `CREATE TABLE IF NOT EXISTS ${tableName}  (
+//       id INT NOT NULL AUTO_INCREMENT,
+//       reviewTitle VARCHAR(200),
+//       reviewDescription LONGTEXT,
+//       userName VARCHAR(255),
+//       productid VARCHAR(100),
+//       productHandle VARCHAR(255),
+//       productTitle VARCHAR(255),
+//       Email VARCHAR(255) ,
+//       location VARCHAR(255) ,
+//       datePosted DATE DEFAULT NOW(),
+//       reviewStatus VARCHAR(255) DEFAULT 'Unpublished', 
+//       isSpam BOOLEAN DEFAULT 0,
+//       isInappropriate BOOLEAN DEFAULT 0,
+//       starRating INT(5),
+//       created_at TIMESTAMP NOT NULL,
+//       updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+//       data JSON,
+//       PRIMARY KEY (id)
+//       )`;
+//   con.query(sql, function (err, result) {
+//     if (err) throw err;
+//     console.log(JSON.stringify("Review Table created"));
+//     res.send(result);
+//   });
+
+// }
+// createReviewsTable();
+
+// /////
+// const createDetailTable = async (_req, res) => {
+
+//   const shop =  res.locals.shopify.session.shop;
+//   let shopLowercase = shop.toLowerCase();
+//   let removeSuffix = shopLowercase.replace(".myshopify.com", "");
+//   let shopName = removeSuffix.replace("-", "_");
+//   let tableName = shopName + '_details'
+
+//   var sql = `CREATE TABLE IF NOT EXISTS ${tableName}  (
+//       id INT NOT NULL AUTO_INCREMENT,
+//       reviewTitle VARCHAR(200),
+//       reviewDescription LONGTEXT,
+//       userName VARCHAR(255),
+//       productid VARCHAR(100),
+//       productHandle VARCHAR(255),
+//       productTitle VARCHAR(255),
+//       Email VARCHAR(255) ,
+//       location VARCHAR(255) ,
+//       datePosted DATE DEFAULT NOW(),
+//       isSpam BOOLEAN DEFAULT 0,
+//       isInappropriate BOOLEAN DEFAULT 0,
+//       reviewStatus VARCHAR(255) DEFAULT 'Unpublished',
+//       starRating INT(5),
+//       reply LONGTEXT,
+//       created_at TIMESTAMP NOT NULL,
+//       updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+//       PRIMARY KEY (id)
+//       )`;
+//   con.query(sql, function (err, result) {
+//     if (err) throw err;
+//     res.send(JSON.stringify('detail table created'));
+//   });
+
+// }
+// createDetailTable();
 
 /////
 
@@ -641,7 +715,7 @@ app.use(serveStatic(STATIC_PATH, { index: false }));
 app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
 
   // const shop = res.locals.shopify.session.shop;
-
+  
   return res
     .status(200)
     .set("Content-Type", "text/html")

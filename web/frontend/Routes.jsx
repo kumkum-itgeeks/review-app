@@ -1,4 +1,5 @@
 import { Routes as ReactRouterRoutes, Route } from "react-router-dom";
+import Product from "./pages/product";
 
 /**
  * File-based routing.
@@ -21,11 +22,13 @@ export default function Routes({ pages }) {
   ));
 
   const NotFound = routes.find(({ path }) => path === "/notFound").component;
+  const Details = routes.find(({ path }) => path === "/details").component;
 
   return (
     <ReactRouterRoutes>
       {routeComponents}
       <Route path="*" element={<NotFound />} />
+      <Route path="details/:id" element={<Details/>} />
     </ReactRouterRoutes>
   );
 }

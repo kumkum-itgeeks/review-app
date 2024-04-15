@@ -136,3 +136,9 @@ loading spinner and loading skeleton
 * create average_rating and review_count metafields if not exists
 * update both metafields on posting new review 
 * displayed in theme
+
+15/04/24
+
+* Export reviews completed 
+* import reviews design
+* user can download example csv template 

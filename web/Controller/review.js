@@ -303,9 +303,20 @@ const getAllProductReviews = (req, res) => {
         }));
     })
 
+}
 
+const getReviewsForExport=(req,res)=>{
+
+    const reviewTable = req.shopname + '_details';
+    
+    const query = `SELECT productHandle , reviewStatus , starRating , reviewTitle , userName , Email , location , reviewDescription , reply , datePosted  FROM ${reviewTable}`;
+    con.query(query, function (err, result) {
+        if (err) {
+        console.error('error fetching reviews',err)
+    }
+        res.send(JSON.stringify(result));
+    })
 
 }
 
-
-export default { getAllReviews, getProductReviews, totalReviews, getReviews, deleteReview, UnSpamReview, publishReview, unpublishReview, getAllProductReviews }
+export default { getAllReviews, getProductReviews, totalReviews, getReviews, deleteReview, UnSpamReview, publishReview, unpublishReview, getAllProductReviews , getReviewsForExport}

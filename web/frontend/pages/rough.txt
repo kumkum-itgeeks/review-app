@@ -1,19 +1,30 @@
 
 
 
-metafields
+metafields ...
 
-average count 
+average count ...
 
-half star rating 
+half star rating ...
 
-padding , margin 
+padding , margin ...
 
-inappropriate handle set
+inappropriate handle set 
 
 ///////
 
-metafield condition for create 
+metafield condition for create ...
 
-correct decimal value 
+correct decimal value ...
+ 
+////
 
+
+
+///////////
+
+tables creation on app installation 
+
+setting table 
+
+//////////

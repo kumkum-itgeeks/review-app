@@ -5,7 +5,7 @@ var isthisLastPage;
 var starsettingColor;
 var shopName;
  let PageNumber = document.getElementById('page-number-display').value;
-const URL = `https://warriors-paul-simulation-kept.trycloudflare.com`
+const URL = `https://questionnaire-philips-estonia-bible.trycloudflare.com`
 
 // dom content loaded********
 
@@ -237,7 +237,7 @@ function setSettings(data) {
   let star = document.getElementsByClassName('review-list-star');
   let ratingStar = document.querySelectorAll('.star');
   let halfStars = document.getElementById('half-stars')
-  halfStars.style.setProperty('--star-color', (starColorData.map((itm) => itm.starIconColor.customColor)));
+  halfStars?.style.setProperty('--star-color', (starColorData.map((itm) => itm.starIconColor.customColor)));
 
   starsettingColor=(starColorData[0].starIconColor.customColor)
 

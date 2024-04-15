@@ -1,4 +1,4 @@
-const myUrl = `https://warriors-paul-simulation-kept.trycloudflare.com`
+const myUrl = `https://questionnaire-philips-estonia-bible.trycloudflare.com`
 
    function test(shop, handle , avgRating , count) {
     fetch(`${myUrl}/api/getReviewCount/${JSON.stringify(shop)}/${JSON.stringify(handle)}`)
@@ -18,7 +18,7 @@ const myUrl = `https://warriors-paul-simulation-kept.trycloudflare.com`
     console.log('herer')
     let activeStars=document.getElementsByClassName('active-star');
     let halfStar=document.getElementById('half-star');
-    halfStar.style.setProperty('--star-color', color);
+    halfStar?.style.setProperty('--star-color', color);
 
     for (var i = 0; i < activeStars.length; i++) {
         activeStars[i].style.color = color;

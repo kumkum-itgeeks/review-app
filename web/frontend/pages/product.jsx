@@ -10,7 +10,7 @@ import { useTranslation, Trans } from "react-i18next";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { useAuthenticatedFetch } from "../hooks";
 import { useState, useCallback, useEffect } from 'react';
-import { useNavigate } from "@shopify/app-bridge-react";
+import { useNavigate , useToast} from "@shopify/app-bridge-react";
 import { StarFilledIcon, StarIcon } from '@shopify/polaris-icons';
 import '../css/index.css'
 import emptyStar from '../assets/star-regular.svg'
@@ -52,7 +52,13 @@ export default function Product() {
 
 
   useEffect(() => {
-    getProduct();
+    if(!Id || Id===''){
+      Navigate("/")
+      show("click on product from details page !  ", { duration: 2000 })
+    }
+    else{
+      getProduct();
+    }
   }, [])
 
   useEffect(() => {
@@ -92,6 +98,7 @@ export default function Product() {
 
   //********variables********
 
+  const { show } = useToast();
   const { t } = useTranslation();
   const Url = window.location.search;
   const params = new URLSearchParams(Url);

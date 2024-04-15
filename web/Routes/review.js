@@ -19,6 +19,9 @@ router.get('/PublishReview/:id', reviewController.publishReview)
 
 router.get('/unpublishReview/:id', reviewController.unpublishReview)
 
+router.get('/exportReviews/', reviewController.getReviewsForExport)
+
+
 // router.get('/productReviews/:id', reviewController.getProductReviews)
 
 

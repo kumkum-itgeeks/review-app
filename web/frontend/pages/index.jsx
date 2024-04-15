@@ -1,16 +1,16 @@
 import {
-  Text, Page, Button,  IndexTable, IndexFilters, useSetIndexFiltersMode, useIndexResourceState, 
-  Badge, useBreakpoints, Box, Link, InlineStack, Image, Pagination,BlockStack
+  Text, Page, Button, IndexTable, IndexFilters, useSetIndexFiltersMode, useIndexResourceState,
+  Badge, useBreakpoints, Box, Link, InlineStack, Image, Pagination, BlockStack, DropZone,
+  Tag, Modal, Checkbox, Thumbnail
 } from "@shopify/polaris";
 import { ImportIcon, ExportIcon } from '@shopify/polaris-icons';
 import { useTranslation, Trans } from "react-i18next";
 import { useAuthenticatedFetch } from "../hooks";
-import { useState, useCallback, useEffect } from 'react';
-import { useNavigate , useToast } from "@shopify/app-bridge-react";
+import React, { useState, useCallback, useEffect, Component } from 'react';
+import { useNavigate, useToast } from "@shopify/app-bridge-react";
 import emptyStar from '../assets/star-regular.svg'
 import solidStar from '../assets/star-solid.svg'
-import '../css/index.css'
-
+import '../css/index.css';
 
 
 export default function HomePage() {
@@ -21,6 +21,8 @@ export default function HomePage() {
   const [selected, setSelected] = useState(0);
   const [totalRows, setTotalRows] = useState('');
   const [tableData, setTableData] = useState([]);
+  const [file, setFile] = useState([]);
+  const [fileName, setFileName] = useState();
   const [pageNumber, setPageNumber] = useState(1);
   const [queryValue, setQueryValue] = useState('');
   const [taggedWith, setTaggedWith] = useState('');
@@ -28,7 +30,9 @@ export default function HomePage() {
   const [moneySpent, setMoneySpent] = useState(undefined,);
   const [accountStatus, setAccountStatus] = useState(undefined,);
   const [reviewStatus, setReviewStatus] = useState('All Reviews');
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const [sortSelected, setSortSelected] = useState(['starRating desc']);
+  const [checked, setChecked] = useState(false);
   const [itemStrings, setItemStrings] = useState([
     'All Reviews',
     'Published',
@@ -68,7 +72,7 @@ export default function HomePage() {
 
   //********variables********
 
-  const {show}=useToast();
+  const { show } = useToast();
   const { t } = useTranslation();
   const stars = [1, 2, 3, 4, 5];
   const star = 3;
@@ -91,6 +95,7 @@ export default function HomePage() {
     return date.toLocaleDateString('en-US', options);
   }
 
+
   const createMetafield = () => {
     fetch('/api/table/createReviewTable')
       .then(res => res.json())
@@ -98,28 +103,98 @@ export default function HomePage() {
     console.log('err')
   }
 
+  const downloadTemplate = () => {
+    console.log('csv downlaoad')
+    // Fetch the CSV file from a URL
+    fetch('../assets/example-template.csv')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.text();
+      })
+      .then(csvData => {
+        //  console.log('CSV data loaded:', csvData);
+
+        // Proceed with downloading the CSV data
+        let blob = new Blob([csvData], { type: 'text/csv' });
+        let url = window.URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = 'itgeeks-template.csv';
+        document.body.appendChild(a);
+        a.click();
+
+        // Clean up
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(error => {
+        console.error('Error fetching CSV file:', error);
+      });
+  }
+
+  const ExportReview = () => {
+    fetch('/api/review/exportReviews')
+      .then(res => res.json())
+      .then(jsonData => {
+        // Convert JSON data to CSV
+        let csvData = jsonToCsv(jsonData); //
+        // Create a CSV file and allow the user to download it
+        let blob = new Blob([csvData], { type: 'text/csv' });
+        let url = window.URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = 'itgeeks-reviews.csv';
+        document.body.appendChild(a);
+        a.click();
+      })
+      .catch(error => console.error(error));
+
+  }
+
+  function jsonToCsv(jsonData) {
+    let csv = '';
+    // Get the headers
+    let headers = Object.keys(jsonData[0]);
+    csv += headers.join(',') + '\n';
+    // Add the data
+    jsonData.forEach(function (row) {
+      let data = headers.map(header => JSON.stringify(row[header])).join(','); // Add JSON.stringify statement
+      csv += data + '\n';
+    });
+    // console.log(csv) //csv data console 
+    return csv;
+  }
+
+  const handleDropZoneDrop = useCallback(
+    (_dropFiles, acceptedFiles, _rejectedFiles) =>
+      setFile(acceptedFiles[0]),
+    [],
+  );
+
   const deleteReview = () => {
     fetch(`/api/review/deleteReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => {getAllReviews(),show(' review deleted ', {duration: 2000})});
+      .then(data => { getAllReviews(), show(' review deleted ', { duration: 2000 }) });
   }
 
   const unSpamReview = () => {
     fetch(`/api/review/unSpam/${selectedResources}`)
       .then(res => res.json())
-      .then(data => {getAllReviews(),show(' review unspammed! ', {duration: 2000})});
+      .then(data => { getAllReviews(), show(' review unspammed! ', { duration: 2000 }) });
   }
 
   const publishReview = () => {
     fetch(`/api/review/publishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => {getAllReviews(),show(' review published! ', {duration: 2000})});
+      .then(data => { getAllReviews(), show(' review published! ', { duration: 2000 }) });
   }
 
   const unpublishReview = () => {
     fetch(`/api/review/unpublishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => {getAllReviews(),show(' review unpublished! ', {duration: 2000})});
+      .then(data => { getAllReviews(), show(' review unpublished! ', { duration: 2000 }) });
   }
 
   const createTable = () => {
@@ -156,6 +231,10 @@ export default function HomePage() {
     }
   }
 
+  const handleCheckbox = useCallback(
+    (newChecked) => setChecked(newChecked),
+    [],
+  );
 
   const onHandleCancel = () => { };
 
@@ -196,6 +275,10 @@ export default function HomePage() {
   ]);
 
   //********data variables**********
+
+  const validImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
+
+  const fileUpload = !file && <DropZone.FileUpload />;
 
   const tabs = itemStrings.map((item, index) => ({
     content: item,
@@ -324,6 +407,7 @@ export default function HomePage() {
     }
   ];
 
+
   return (
     <>
       <Page
@@ -331,12 +415,12 @@ export default function HomePage() {
         secondaryActions={[
           {
             content: 'Import reviews',
-            onAction: () => console.log('import reviews'),
+            onAction: () => setIsModalOpen(true),
             icon: ImportIcon
           },
           {
             content: 'Export',
-            onAction: () => console.log('import reviews'),
+            onAction: () => ExportReview(),
             icon: ExportIcon
           },
         ]}
@@ -345,66 +429,105 @@ export default function HomePage() {
 
         <BlockStack gap={400}>
 
-        <Box as="div">
-        <IndexFilters
-          sortOptions={sortOptions}
-          sortSelected={sortSelected}
-          queryValue={queryValue}
-          queryPlaceholder="Start typing to search for reviews..."
-          onQueryChange={handleFiltersQueryChange}
-          onQueryClear={() => setQueryValue('')}
-          onSort={setSortSelected}
-          cancelAction={{
-            onAction: onHandleCancel,
-            disabled: false,
-            loading: false,
-          }}
-          tabs={tabs}
-          selected={selected}
-          onSelect={setSelected}
-          filters={[]}
-          appliedFilters={appliedFilters}
-          onClearAll={handleFiltersClearAll}
-          mode={mode}
-          setMode={setMode}
-          loading={Loading}
+          <Box as="div">
+            <IndexFilters
+              sortOptions={sortOptions}
+              sortSelected={sortSelected}
+              queryValue={queryValue}
+              queryPlaceholder="Start typing to search for reviews..."
+              onQueryChange={handleFiltersQueryChange}
+              onQueryClear={() => setQueryValue('')}
+              onSort={setSortSelected}
+              cancelAction={{
+                onAction: onHandleCancel,
+                disabled: false,
+                loading: false,
+              }}
+              tabs={tabs}
+              selected={selected}
+              onSelect={setSelected}
+              filters={[]}
+              appliedFilters={appliedFilters}
+              onClearAll={handleFiltersClearAll}
+              mode={mode}
+              setMode={setMode}
+              loading={Loading}
 
-        />
-        <IndexTable
-          condensed={useBreakpoints().smDown}
-          resourceName={resourceName}
-          itemCount={tableData.length}
-          promotedBulkActions={promotedBulkActions}
-          selectedItemsCount={
-            allResourcesSelected ? 'All' : selectedResources.length
-          }
-          onSelectionChange={handleSelectionChange}
-          headings={[
-            { title: 'Rating' },
-            { title: 'Review' },
-            { title: 'Date' },
-            { title: 'Status' },
-            { title: '' },
+            />
+            <IndexTable
+              condensed={useBreakpoints().smDown}
+              resourceName={resourceName}
+              itemCount={tableData.length}
+              promotedBulkActions={promotedBulkActions}
+              selectedItemsCount={
+                allResourcesSelected ? 'All' : selectedResources.length
+              }
+              onSelectionChange={handleSelectionChange}
+              headings={[
+                { title: 'Rating' },
+                { title: 'Review' },
+                { title: 'Date' },
+                { title: 'Status' },
+                { title: '' },
+              ]}
+            >
+              {rowMarkup}
+            </IndexTable>
+
+          </Box>
+          <InlineStack align="center">
+            <Pagination
+              hasPrevious={prevPage}
+              onPrevious={() => {
+                pageNumber != 1 ? (setPageNumber(pageNumber - 1)) : '';
+              }}
+              hasNext={nextPage}
+              onNext={() => {
+                !isLastPage ? (setPageNumber(pageNumber + 1)) : '';
+              }}
+            />
+          </InlineStack>
+        </BlockStack>
+        <Modal
+          // activator={activator}
+          size="small"
+          open={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title="Import reviews by CSV file"
+          primaryAction={{
+            content: 'import reviews',
+            onAction: () => { setIsModalOpen(false) }
+          }}
+          secondaryActions={[
+            {
+              content: 'cancel',
+              onAction: () => {setIsModalOpen(false), setFile([])}
+            }
           ]}
         >
-          {rowMarkup}
-        </IndexTable>
 
-        </Box>
-        <InlineStack align="center">
-        <Pagination
-          hasPrevious={prevPage}
-          onPrevious={() => {
-            pageNumber != 1 ? (setPageNumber(pageNumber - 1)) : '';
-          }}
-          hasNext={nextPage}
-          onNext={() => {
-            !isLastPage ? (setPageNumber(pageNumber + 1)) : '';
-          }}
-        />
-        </InlineStack>
-        </BlockStack>
-        
+          <Box padding={400} >
+            <InlineStack gap={100} blockAlign="center">
+              <DropZone
+                onDrop={handleDropZoneDrop}
+                outline={false}
+              >
+                {fileUpload}
+                <DropZone.FileUpload />
+              </DropZone>
+
+              <Text as="p">{file.name ? file.name : 'No file choosen '}</Text>
+            </InlineStack>
+            <Text variant="headingMd" as='h4' fontWeight="regular">
+              Download our <Button variant="plain" onClick={() => downloadTemplate()} target="_blank"> CSV template </Button> to see an example of the required format.
+            </Text>
+            <Checkbox
+              label="Import using month/day/year date format"
+              checked={checked}
+              onChange={handleCheckbox}
+            />
+          </Box>
+        </Modal>
       </Page>
     </>
   );

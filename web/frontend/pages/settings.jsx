@@ -997,9 +997,9 @@ export default function Settings() {
           ]}
              />
              {/* <Toast content="Success!" duration={2000}/> */}
-            <Button size='large' onClick={()=>setIsModalOpen(true)}> Reset all settings to default</Button>
-            <Button size='large'> Export deleted reviews</Button>
-            <Button size='large' onClick={() => saveSettings()}> Save </Button>
+            <Button size='large' onClick={()=>setIsModalOpen(true)} tone='critical' variant='primary'> Reset all settings to default</Button>
+            {/* <Button size='large'> Export deleted reviews</Button> */}
+            <Button size='large' onClick={() => saveSettings()} tone='success' variant='primary'> Save </Button>
           </InlineStack>
         </BlockStack>
       </Page>
