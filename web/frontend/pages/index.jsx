@@ -22,10 +22,12 @@ export default function HomePage() {
   const [totalRows, setTotalRows] = useState('');
   const [tableData, setTableData] = useState([]);
   const [file, setFile] = useState([]);
-  const [fileName, setFileName] = useState();
+  const [fileStatus, setFileStatus] = useState('');
+  const [importDisabled, setImportDisabled] = useState(true);
   const [pageNumber, setPageNumber] = useState(1);
   const [queryValue, setQueryValue] = useState('');
   const [taggedWith, setTaggedWith] = useState('');
+  const [importLoading, setImportLoading] = useState(false);
   const [recordsPerPage, setRecordsPerPage] = useState(3);
   const [moneySpent, setMoneySpent] = useState(undefined,);
   const [accountStatus, setAccountStatus] = useState(undefined,);
@@ -39,6 +41,18 @@ export default function HomePage() {
     'Unpublished',
     'Spam',
   ]);
+  const [reviewObj, setReviewObj] = useState({
+    Email: "",
+    datePosted: "",
+    location: "",
+    productHandle: "",
+    reply: "",
+    reviewDescription: "",
+    reviewStatus: "",
+    reviewTitle: "",
+    starRating: "",
+    userName: ""
+  })
 
 
   //********useEffects********
@@ -49,6 +63,15 @@ export default function HomePage() {
     setPageNumber(1);
   }, [reviewStatus])
 
+  useEffect(() => {
+    fileStatus == 1 ?
+      setImportDisabled(() => false)
+      :
+      fileStatus == 0 ?
+        setImportDisabled(() => true)
+        :
+        setImportDisabled(() => true)
+  }, [fileStatus])
 
   useEffect(() => {
     setLoading(true)
@@ -101,6 +124,83 @@ export default function HomePage() {
       .then(res => res.json())
       .then(data => console.log(data));
     console.log('err')
+  }
+
+  // Function to convert CSV text to JSON
+  function convertCSVtoJson(csvText) {
+    const lines = csvText.split('\n');
+    const headers = lines[0].split(',');
+    const jsonArray = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const data = lines[i].split(',');
+      const entry = {};
+
+      for (let j = 0; j < headers.length; j++) {
+        entry[headers[j].trim()] = data[j] !== undefined ? data[j].trim() : ''; // Handle undefined values
+      }
+
+      jsonArray.push(entry);
+    }
+
+    return jsonArray;
+  }
+
+  const importReviews = () => {
+    const reader = new FileReader();
+    var ImportedReview;
+    // Event listener for file reading completion
+    reader.onload = async (e) => {
+      const contents = e.target.result;
+      ImportedReview = convertCSVtoJson(contents);
+      console.log('CSV file contents:', ImportedReview);
+      setImportLoading(true)
+      await checkProduct(ImportedReview)
+    };
+    // Read the file as text
+    reader.readAsText(file);
+
+  }
+
+  async function checkProduct(review) {
+
+    let productHandle = review.map((itm) => itm.productHandle)
+    let IdArr = [];
+    fetch(`/api/review/checkProduct/${productHandle}`)
+      .then(res => res.json())
+      .then(data => {
+        data.map(async (obj , ind) => {
+          let { idExists, pid } = obj;
+          if (idExists == true) {
+            IdArr.push(pid.slice(22))
+            console.log(ind)
+          }
+          else {
+            setImportLoading(false)
+            productHandle.splice(ind,1)
+            // console.log(ind)
+            console.log('product not exists')
+          }
+        })
+       addReview(review , productHandle , IdArr);
+        // console.log("IdArr", IdArr)
+      });
+    // addReview(review , productHandle , data?.pid);
+
+  }
+
+  function addReview(review, handle, pidArr) {
+    // let id = (pid.slice(22))
+    console.log(pidArr)
+    console.log(handle)
+    console.log(review)
+    fetch(`/api/review/addImportedReview/${JSON.stringify(review)}/${JSON.stringify(handle)}/${JSON.stringify(pidArr)}`)
+    .then(res => res.json())
+    .then(data => {console.log(data) ,
+      setImportLoading(false) ,
+      show(' review Imported !', { duration: 2000 })
+    })
+
   }
 
   const downloadTemplate = () => {
@@ -176,7 +276,7 @@ export default function HomePage() {
   const deleteReview = () => {
     fetch(`/api/review/deleteReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), show(' review deleted ', { duration: 2000 }) });
+      .then(data => { getAllReviews(), show(' review deleted ', { duration: 2000 }), updateMetafield() });
   }
 
   const unSpamReview = () => {
@@ -188,15 +288,20 @@ export default function HomePage() {
   const publishReview = () => {
     fetch(`/api/review/publishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), show(' review published! ', { duration: 2000 }) });
+      .then(data => { getAllReviews(), show(' review published! ', { duration: 2000 }), updateMetafield() });
   }
 
   const unpublishReview = () => {
     fetch(`/api/review/unpublishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), show(' review unpublished! ', { duration: 2000 }) });
+      .then(data => { getAllReviews(), show(' review unpublished! ', { duration: 2000 }), updateMetafield() });
   }
 
+  const updateMetafield = () => {
+    fetch(`/api/table/updateMetafields/${selectedResources}`)
+      .then(res => res.json())
+      .then(data => { console.log(data) });
+  }
   const createTable = () => {
     fetch('/api/table/createDetailTable')
       .then(res => res.json())
@@ -408,6 +513,9 @@ export default function HomePage() {
   ];
 
 
+  //************* conditonal statements *******************
+
+
   return (
     <>
       <Page
@@ -424,7 +532,6 @@ export default function HomePage() {
             icon: ExportIcon
           },
         ]}
-
       >
 
         <BlockStack gap={400}>
@@ -496,12 +603,13 @@ export default function HomePage() {
           title="Import reviews by CSV file"
           primaryAction={{
             content: 'import reviews',
-            onAction: () => { setIsModalOpen(false) }
+            onAction: () => { importReviews() },
+            disabled: importDisabled
           }}
           secondaryActions={[
             {
               content: 'cancel',
-              onAction: () => {setIsModalOpen(false), setFile([])}
+              onAction: () => { setIsModalOpen(false), setFile([]), setFileStatus('') }
             }
           ]}
         >
@@ -511,26 +619,39 @@ export default function HomePage() {
               <DropZone
                 onDrop={handleDropZoneDrop}
                 outline={false}
+                type="file"
+                accept=".csv"
+                onDropAccepted={() => setFileStatus(1)}
+                onDropRejected={() => setFileStatus(0)}
               >
-                {fileUpload}
+                {/* {fileUpload} */}
                 <DropZone.FileUpload />
               </DropZone>
 
-              <Text as="p">{file.name ? file.name : 'No file choosen '}</Text>
+              <Text as="p">
+                {
+                  fileStatus === 1 ?
+                    `${file?.name} (selected)`
+                    :
+                    fileStatus === 0 ?
+                      `Select correct file type (CSV)`
+                      :
+                      `No file choosen`
+                }
+              </Text>
             </InlineStack>
             <Text variant="headingMd" as='h4' fontWeight="regular">
               Download our <Button variant="plain" onClick={() => downloadTemplate()} target="_blank"> CSV template </Button> to see an example of the required format.
             </Text>
-            <Checkbox
+            {/*<Checkbox
               label="Import using month/day/year date format"
               checked={checked}
               onChange={handleCheckbox}
-            />
+            />*/}
           </Box>
         </Modal>
       </Page>
     </>
   );
-
 
 }

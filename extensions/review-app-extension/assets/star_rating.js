@@ -1,4 +1,4 @@
-const myUrl = `https://questionnaire-philips-estonia-bible.trycloudflare.com`
+const myUrl = `https://neighbors-assembled-analysis-holiday.trycloudflare.com`
 
    function test(shop, handle , avgRating , count) {
     fetch(`${myUrl}/api/getReviewCount/${JSON.stringify(shop)}/${JSON.stringify(handle)}`)
@@ -23,6 +23,7 @@ const myUrl = `https://questionnaire-philips-estonia-bible.trycloudflare.com`
     for (var i = 0; i < activeStars.length; i++) {
         activeStars[i].style.color = color;
       }
+
   }
 
   function setData(data , shop , avgRating , count){

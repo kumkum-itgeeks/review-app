@@ -2,7 +2,7 @@
 
 client_id = "c8b76d8cdccd39ae45b847901d4b4fb3"
 name = "reviews"
-application_url = "https://questionnaire-philips-estonia-bible.trycloudflare.com"
+application_url = "https://curriculum-para-encyclopedia-too.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://questionnaire-philips-estonia-bible.trycloudflare.com/auth/callback",
-  "https://questionnaire-philips-estonia-bible.trycloudflare.com/auth/shopify/callback",
-  "https://questionnaire-philips-estonia-bible.trycloudflare.com/api/auth/callback"
+  "https://curriculum-para-encyclopedia-too.trycloudflare.com/auth/callback",
+  "https://curriculum-para-encyclopedia-too.trycloudflare.com/auth/shopify/callback",
+  "https://curriculum-para-encyclopedia-too.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

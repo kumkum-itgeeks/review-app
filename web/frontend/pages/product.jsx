@@ -103,6 +103,7 @@ export default function Product() {
   const Url = window.location.search;
   const params = new URLSearchParams(Url);
   const Id = params.get('id');
+  const updateid = params.get('updateid');
   const stars = [1, 2, 3, 4, 5];
   const star = 3;
   const fetch = useAuthenticatedFetch();
@@ -135,11 +136,16 @@ export default function Product() {
       .then(data => console.log(data));
   }
 
+    const updateMetafield=()=>{
+    fetch(`/api/table/updateMetafields/${updateid}`)
+      .then(res => res.json())
+      .then(data => { console.log(data)});
+  }
   const deleteReview = () => {
 
     fetch(`/api/review/deleteReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => getAllReviews());
+      .then(data => {getAllReviews() , updateMetafield()});
   }
 
   const unSpamReview = () => {
@@ -153,7 +159,7 @@ export default function Product() {
     
     fetch(`/api/review/publishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => getAllReviews());
+      .then(data => {getAllReviews() , updateMetafield()});
 
   }
 
@@ -161,7 +167,7 @@ export default function Product() {
    
     fetch(`/api/review/unpublishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => getAllReviews());
+      .then(data => {getAllReviews() , updateMetafield()});
   }
 
   const createTable = () => {
@@ -272,6 +278,9 @@ export default function Product() {
     handleQueryValueRemove,
     handleTaggedWithRemove,
   ]);
+
+    
+
 
   //********data variables**********
 

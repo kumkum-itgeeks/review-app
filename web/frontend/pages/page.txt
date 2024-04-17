@@ -142,3 +142,8 @@ loading spinner and loading skeleton
 * Export reviews completed 
 * import reviews design
 * user can download example csv template 
+
+16/04/24
+
+* updating metafields from app dashboard changes 
+* import started 

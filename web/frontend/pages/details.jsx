@@ -22,7 +22,7 @@ export default function Details() {
   const [cardLoading, setCardLoading] = useState(true);
   const [statusLoading, setStatusLoading] = useState(true);
   const [productLoading, setProductLoading] = useState(true);
-  const [metafields, setMetaFields] = useState();
+  // const [metafields, setMetaFields] = useState();
   const [productDescription, setProductDescription] = useState()
   const [published, setPublish] = useState(0);
   const [unpublished, setUnpublished] = useState(0);
@@ -55,7 +55,7 @@ export default function Details() {
   const deleteReview = () => {
     fetch(`/api/review/deleteReview/${Id}`)
       .then(res => res.json())
-      .then(data => { getReviewDetails(), show(' review deleted ', { duration: 2000 }) });
+      .then(data => { getReviewDetails(), show(' review deleted ', { duration: 2000 }) , updateMetafield() , Navigate("/") });
   }
 
   const publishReview = () => {
@@ -64,11 +64,11 @@ export default function Details() {
       .then(data => getReviewDetails());
   }
 
-  const getMetafields = () => {
-    fetch('/api/table/getMetafields')
-      .then(res => res.json())
-      .then(data => setMetaFields(data));
-  }
+  // const getMetafields = () => {
+  //   fetch('/api/table/getMetafields')
+  //     .then(res => res.json())
+  //     .then(data => setMetaFields(data));
+  // }
 
   const handleTextFieldChange = useCallback(
     (value) => setTextFieldValue(value),
@@ -100,7 +100,10 @@ const dissmissInappropriate=()=>{
   const changeStatus = () => {
     fetch(`api/details/changeStatus/${Id}/${review.reviewStatus}`)
       .then(res => res.json())
-      .then(data => { setStatus(data), show(` review ${review.reviewStatus == 'Published' ? 'unpublished' : 'published'} `, { duration: 2000 }), console.log(status) })
+      .then(data => { 
+        setStatus(data),
+         show(` review ${review.reviewStatus == 'Published' ? 'unpublished' : 'published'} `, { duration: 2000 }), 
+         updateMetafield() })
 
   }
 
@@ -132,6 +135,13 @@ const dissmissInappropriate=()=>{
       .then(data => setProductDescription(data))
 
   }
+
+  
+  const updateMetafield=()=>{
+    fetch(`/api/table/updateMetafields/${Id}`)
+      .then(res => res.json())
+      .then(data => { console.log(data)});
+  }
   //*******useEffects********
 
   useEffect(()=>{
@@ -152,9 +162,6 @@ const dissmissInappropriate=()=>{
       <>
         {
           getProductDetails()}
-        {
-          getMetafields()
-        }
         {
           getProductReviewDetails()
         }
@@ -303,7 +310,7 @@ const dissmissInappropriate=()=>{
               </Box>
             </Grid.Cell>
             <Grid.Cell columnSpan={{ xs: 4, sm: 4, md: 4, lg: 4, xl: 4 }} >
-              <Box background="bg-surface" borderColor="border" borderWidth="025" padding={600} minHeight="235px" onClick={() => Navigate(`/product/?id=${review.productid}`)}>
+              <Box background="bg-surface" borderColor="border" borderWidth="025" padding={600} minHeight="235px" onClick={() => Navigate(`/product/?id=${review.productid}&updateid=${Id}`)}>
                 {
                   productLoading ? <>
                     <BlockStack gap={600}>

@@ -52,6 +52,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
+  
   const Obj = JSON.parse(_req.params.obj);
   const shop = JSON.parse(_req.params.shop).toLowerCase();
   const handle = _req.params.handle;
@@ -237,7 +238,8 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
         }
         `
         
-        
+        //****************** updating my metafield *************************/
+
         const metafieldsWithId = [
           {
             id: `${RatingMetaId}`,
@@ -250,8 +252,6 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
             
           },
         ];
-        
-        //****************** updating my metafield *************************/
 
         // Define the GraphQL mutation
         const UpdateMetafieldMutation = `mutation productUpdate($input: ProductInput!) {

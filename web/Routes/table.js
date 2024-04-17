@@ -9,7 +9,7 @@ router.get('/createDetailTable', TableController.createDetailTable);
 
 router.get('/createMetaField/:id/:rating', TableController.createMetafield);
 
-router.get('/getMetafields', TableController.getMetafields);
+router.get('/updateMetafields/:id', TableController.updateMetafields);
 
 router.get('/createSettingsTable', TableController.createSettingsTable);
 
