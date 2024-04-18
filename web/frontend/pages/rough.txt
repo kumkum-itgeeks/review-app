@@ -309,3 +309,48 @@ const addImportedReview=async(req,res)=>{
 
 
 // }
+
+
+
+
+
+
+
+
+
+
+/////////////////////////////
+
+
+
+      try {
+        var mutationResponse
+        filteredIds.map(async(id, ind)=>{
+
+           mutationResponse = await client.query({
+            data: {
+              query: UpdateMetafieldMutation,
+              variables:  {
+                id: `gid://shopify/Product/${id}`, // Use the correct product ID here
+                metafields:[
+                  {
+                    id: RatingMetaId[ind],
+                    value: Number(averageRating[ind]).toFixed(1),
+                    
+                  },
+                  {
+                    id: ReviewCountId[ind],
+                    value: length[ind].toString()
+                  }
+                ]
+              },
+            },
+          });
+        })
+
+        console.log('update mutation response ******************', Object(mutationResponse).body.data.productUpdate.userErrors)
+
+
+      } catch (error) {
+        console.error('erorrrrrr with update metafield =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
+      }

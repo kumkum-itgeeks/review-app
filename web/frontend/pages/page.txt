@@ -147,3 +147,8 @@ loading spinner and loading skeleton
 
 * updating metafields from app dashboard changes 
 * import started 
+
+17/04/24
+
+* import functionality for multiple reviews
+* updating metafields on importing single review

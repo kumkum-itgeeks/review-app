@@ -5,7 +5,7 @@ var isthisLastPage;
 var starsettingColor;
 var shopName;
  let PageNumber = document.getElementById('page-number-display').value;
-const URL = `https://neighbors-assembled-analysis-holiday.trycloudflare.com`
+const URL = `https://mime-pdas-samoa-pastor.trycloudflare.com`
 
 // dom content loaded********
 

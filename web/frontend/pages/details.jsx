@@ -123,14 +123,14 @@ const dissmissInappropriate=()=>{
   const getProductDetails = () => {
 
     setProductLoading(true)
-    fetch(`api/details/getProductDetails/${review.productid}`)
+    fetch(`api/details/getProductDetails/${review?.productid}`)
       .then(res => res.json())
       .then(data => setProduct(data))
 
   }
 
   const getProductReviewDetails = () => {
-    fetch(`api/details/getProductReviewDetails/${review.productid}`)
+    fetch(`api/details/getProductReviewDetails/${review?.productid}`)
       .then(res => res.json())
       .then(data => setProductDescription(data))
 

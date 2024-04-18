@@ -194,7 +194,14 @@ export default function HomePage() {
     console.log(pidArr)
     console.log(handle)
     console.log(review)
-    fetch(`/api/review/addImportedReview/${JSON.stringify(review)}/${JSON.stringify(handle)}/${JSON.stringify(pidArr)}`)
+    fetch('/api/review/addImportedReview', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({review, handle, pidArr }),
+    })
     .then(res => res.json())
     .then(data => {console.log(data) ,
       setImportLoading(false) ,
@@ -202,6 +209,20 @@ export default function HomePage() {
     })
 
   }
+
+  // function addReview(review, handle, pidArr) {
+  //   // let id = (pid.slice(22))
+  //   console.log(pidArr)
+  //   console.log(handle)
+  //   console.log(review)
+  //   fetch(`/api/review/addImportedReview/${JSON.stringify(review)}/${JSON.stringify(handle)}/${JSON.stringify(pidArr)}`)
+  //   .then(res => res.json())
+  //   .then(data => {console.log(data) ,
+  //     setImportLoading(false) ,
+  //     show(' review Imported !', { duration: 2000 })
+  //   })
+
+  // }
 
   const downloadTemplate = () => {
     console.log('csv downlaoad')

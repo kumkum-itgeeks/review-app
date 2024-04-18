@@ -1,4 +1,4 @@
-const myUrl = `https://neighbors-assembled-analysis-holiday.trycloudflare.com`
+const myUrl = `https://mime-pdas-samoa-pastor.trycloudflare.com`
 
    function test(shop, handle , avgRating , count) {
     fetch(`${myUrl}/api/getReviewCount/${JSON.stringify(shop)}/${JSON.stringify(handle)}`)

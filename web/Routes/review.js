@@ -23,7 +23,8 @@ router.get('/exportReviews/', reviewController.getReviewsForExport)
 
 router.get('/checkProduct/:handle', reviewController.checkProduct)
 
-router.get('/addImportedReview/:obj/:handle/:id', reviewController.addImportedReview)
+// router.get('/addImportedReview/:obj/:handle/:id', reviewController.addImportedReview)
+router.post('/addImportedReview/', reviewController.addImportedReview)
 
 
 // router.get('/productReviews/:id', reviewController.getProductReviews)
