@@ -325,7 +325,7 @@ const checkProduct = async (req, res) => {
   const handleArr = (req.params.handle).split(',');
   const session = res.locals.shopify.session;
   var client = new shopify.api.clients.Graphql({ session });
-  // console.log("handleArr==>", handleArr)
+
   const promises = handleArr.map((handle) => client.query({
     data: {
       "query": `query getProductIdFromHandle($handle: String!) {
@@ -341,14 +341,13 @@ const checkProduct = async (req, res) => {
   )
 
   const data = await Promise.all(promises);
-  // const dataArr = data.map((itm)=>itm)
+
   let IdArr = data.map((itm) => Object(itm)?.body?.data?.productByHandle?.id)
 
   var ResponseArr = [];
 
   IdArr?.map((Id) => {
 
-    // let myId= Object(data).body.data.productByHandle.id;
     if (Id === undefined || Id === null || Id === '' || !Id) {
       ResponseArr.push({ idExists: false, pid: null })
     }
@@ -364,14 +363,9 @@ const checkProduct = async (req, res) => {
 const addImportedReview = async (req, res) => {
 
   const shop = req.shopname;
-  // const ObjArray = JSON.parse(req.params.obj);
-  // const handle = JSON.parse(req.params.handle);
-  // const Id = JSON.parse(req.params.id);
   const ObjArray = (req.body.review);
   const handle = (req.body.handle);
   const Id = (req.body.pidArr);
-  // console.log('ID===>', (Obj))
-  // return;
   const reviewTable = shop + '_review'
   const detailsTable = shop + '_details'
   const settingsTable = shop + '_settings'
@@ -390,14 +384,14 @@ const addImportedReview = async (req, res) => {
     Columns = (Object.keys(obj))
     Data = Object.values(obj)
     DataValue = Data.map(cat => `'${cat}'`).join(', ');
-    // console.log('Data valuee===>', DataValue);
+
     const query = `INSERT INTO ${reviewTable} (${Columns} , productid) VALUES (${DataValue} , '${Id[ind]}');INSERT INTO ${detailsTable} (${Columns} , productid) VALUES (${DataValue} , '${Id[ind]}')`
     con.query(query, async (err, results) => {
       if (err) {
         console.error('Error inserting reviews', err);
         return;
       }
-      // res.send(JSON.stringify('Data inserted successfully'));
+
       else {
         if (ind === (ObjArray.length) - 1) {
           await removeDuplicateHandles()
@@ -412,16 +406,14 @@ const addImportedReview = async (req, res) => {
       index) => handle.indexOf(item) === index);
     await avgRating(filteredHandles)
   }
-  // console.log(removeDuplicates(arr));
-
 
 
   async function avgRating(filteredHandles) {
 
     //************** fetching average rating from db to store in metafield */
-    // console.log(filteredHandles, 'handles**************')
+
     filteredHandles.map((itm, ind) => {
-      // console.log(itm,"itm *********")
+
       const getAveragequery = ` SELECT starRating , reviewTitle FROM ${reviewTable} WHERE productHandle='${itm}' AND reviewStatus='Published'`;
       con.query(getAveragequery, async (err, results) => {
         if (err) {
@@ -437,11 +429,11 @@ const addImportedReview = async (req, res) => {
             sum += itm;
           })
           averageRating.push((sum / dataLength).toFixed(1));
-          // console.log("averageRating====>>>>", averageRating)
+
           if (ind === (filteredHandles.length) - 1) {
             await removeDuplicateIds()
           }
-          // await metafieldFunctionality()
+
 
         }
       });
@@ -453,54 +445,13 @@ const addImportedReview = async (req, res) => {
       index) => Id.indexOf(item) === index);
     await metafieldFunctionality(filteredIds)
   }
-  // return;
+
   async function metafieldFunctionality(filteredIds) {
 
-    //           console.log("averageRating====>>>>", averageRating)
-    // return;
+
     var RatingMetaId;
     var ReviewCountId;
 
-    // return;
-    // const getRatingMetaIdQuery = `query {
-    //   product(id: "gid://shopify/Product/${Id}") {
-    //     metafield(namespace: "itgeeks_reviews", key: "average_rating") {
-    //       id
-    //     }
-    //   }
-    // }`
-
-    // const getCountMetaIdQuery = `query {
-    //   product(id: "gid://shopify/Product/${Id}") {
-    //     metafield(namespace: "itgeeks_reviews", key: "review_count") {
-    //       id
-    //     }
-    //   }
-    // }`
-
-    // Execute the rating  mutation
-    // try {
-    //   Id.map(async(itm,ind)=>{
-    //     const response = await client.query({
-    //       data: {
-    //         query: `query {
-    //           product(id: "gid://shopify/Product/${itm}") {
-    //             metafield(namespace: "itgeeks_reviews", key: "average_rating") {
-    //               id
-    //             }
-    //           }
-    //         }`,
-    //       },
-    //     });
-
-    //     const myData = await response?.body;
-
-    //     RatingMetaId = await (Object(myData)?.data?.product?.metafield?.id);
-
-    //     console.log(RatingMetaId,"**************ratingn id meta")
-    //   })
-
-    // } catch (error) {
     try {
       const promises = filteredIds.map(async (itm) => {
         const response = await client.query({
@@ -522,7 +473,6 @@ const addImportedReview = async (req, res) => {
       const RatingMetaIds = await Promise.all(promises);
       RatingMetaId = (RatingMetaIds)
 
-      // console.log(RatingMetaId, "**************ratingn id meta");
     } catch (error) {
       console.error('erorrrrrr=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
     }
@@ -549,33 +499,9 @@ const addImportedReview = async (req, res) => {
       const countMetaIds = await Promise.all(promises);
       ReviewCountId = (countMetaIds)
 
-      // console.log(ReviewCountId, "**************count id meta");
     } catch (error) {
       console.error('erorrrrrr=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
     }
-
-    // return;
-    // Execute the count  mutation
-    // try {
-    //   const response = await client.query({
-    //     data: {
-    //       query: `query {
-    //         product(id: "gid://shopify/Product/${Id}") {
-    //           metafield(namespace: "itgeeks_reviews", key: "review_count") {
-    //             id
-    //           }
-    //         }
-    //       }`,
-    //     },
-    //   });
-
-    //   const myData = await response.body;
-
-    //   ReviewCountId = (Object(myData).data.product.metafield.id);
-
-    // } catch (error) {
-    //   console.error('erorrrrrr=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
-    // }
 
 
     //****************** creating metafield *************************/
@@ -619,82 +545,8 @@ mutation {
 }
 `;
 
-
-    // const createMetafieldMutations = `
-    // mutation {
-    //   productUpdate(
-    //     input : {
-    //       id: "gid://shopify/Product/${Id}",
-    //       metafields: [
-    //         {
-    //           namespace: "itgeeks_reviews",
-    //           key: "average_rating",
-    //           value: "${averageRating?.toFixed(1)}",
-    //           type: "number_decimal",
-    //         },
-    //         {
-    //           namespace: "itgeeks_reviews",
-    //           key: "review_count",
-    //           value: "${length}",
-    //           type: "integer",
-    //         }
-    //       ]
-    //     }) {
-    //       product {
-    //         metafields(first: 3) {
-    //           edges {
-    //             node {
-    //               namespace
-    //               key
-    //               value
-    //             }
-    //           }
-    //         }
-    //       }
-    //     }
-    //   }
-    //   `
-
     //****************** updating my metafield *************************/
 
-    // const metafieldsWithId = [
-    //   {
-    //     id: `${RatingMetaId}`,
-    //     value: `${averageRating?.toFixed(1)}`, // Default value for review count
-
-    //   },
-    //   {
-    //     id: `${ReviewCountId}`,
-    //     value: `${length}`, // Default value for review count
-
-    //   },
-    // ];
-    // const metafieldsWithId = [];
-
-    // RatingMetaId.forEach(async (ratingId, index) => {
-    //   const reviewId = ReviewCountId[index];
-    //   const avgRating = averageRating[index].toFixed(1);
-    //   const mylength = length[index];
-
-    //   const metafield = {
-    //     id: ratingId,
-    //     value: avgRating,
-    //   };
-
-    //   metafieldsWithId.push(metafield);
-
-    //   const countMetafield = {
-    //     id: reviewId,
-    //     value: mylength.toString(),
-    //   };
-
-    //   metafieldsWithId.push(countMetafield);
-    // });
-
-    // console.log(metafieldsWithId, 'metaidddd with data******************');
-
-
-    // Define the GraphQL mutation
     const UpdateMetafieldMutation = `mutation productUpdate($input: ProductInput!) {
     productUpdate(input: $input) {
     product {
@@ -716,419 +568,108 @@ mutation {
     }
     }`;
 
-    // Prepare the variables for the mutation
-    // const Metafieldvariables = {
-    //   input: {
-    //     id: `gid://shopify/Product/${Id}`, // Replace with actual product ID
-    //     metafields: metafieldsWithId,
-    //   },
-    // };
-
-    // const metafieldsWithIds = [];
-    // var productId=[];
-    // var Metafieldvariables;
-
-    // RatingMetaId.forEach(async(ratingId, index) => {
-    //   const myreviewCountId = await ReviewCountId[index];
-    //   const myaverageRating = await averageRating[index];
-    //   const mylength = await length[index];
-    //   productId.push(filteredIds[index]); // Product ID corresponding to the metafields
-
-    //   metafieldsWithIds.push({
-    //     id: ratingId,
-    //     value: Number(myaverageRating).toFixed(1),
-
-    //   });
-
-    //   metafieldsWithIds.push({
-    //     id: myreviewCountId,
-    //     value: mylength.toString()
-    //   });
-    //   // console.log(metafieldsWithIds, "datas***********")
-    //   await generateWholeVariable()
-    // });
-
-    // // Construct the mutation input object
-
-    // async function generateWholeVariable(){
-    //   Metafieldvariables = {
-    //    input: {
-    //      id: `gid://shopify/Product/${productId}`, // Use the correct product ID here
-    //      metafields:(metafieldsWithIds)
-    //    },
-    //  };
-
-    //  await PerformMetaFunctionality();
-    // }
-
-
     PerformMetaFunctionality();
     async function PerformMetaFunctionality() {
 
-      // console.log((Metafieldvariables), 'herererere')
+      RatingMetaId.map(async(id , ind)=>{
 
-      //   let resss= filteredIds.map(async(id, ind)=>{
-
-      //      [   {
-      //          id: `gid://shopify/Product/${id}`, // Use the correct product ID here
-      //          metafields:[
-      //            {
-      //              id: RatingMetaId[ind],
-      //              value: Number(averageRating[ind]).toFixed(1),
-
-      //            },
-      //            {
-      //              id: ReviewCountId[ind],
-      //              value: length[ind].toString()
-      //            }
-      //          ]
-      //        }
-      //       ]
-      //  })
-      //   console.log(resss)
-
-
-      // return;
-
-      // ************ checking if metafield exists or not //
-      if (RatingMetaId === null || RatingMetaId === '' || RatingMetaId === undefined || ReviewCountId === null || ReviewCountId === '' || ReviewCountId === undefined) {
-
-        console.log(' creating metafield **********************************************')
-        try {
-          const createResponse = await client.query({
-            data: {
-              query: createMetafieldMutation
-            }
-          });
-
-          console.log('create mutation response ******************', Object(createResponse).body.data.productUpdate.userErrors)
-
-        } catch (error) {
-          console.error('erorrrrrr with create metafield =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
-        }
-      }
-
-      else {
-        // Execute the mutation
-        try {
-          const mutationResponses = await Promise.all(filteredIds.map(async (id, ind) => {
-            console.log(id, 'piddd.......')
-            const response = await client.query({
+        // ************ checking if metafield exists or not //
+        if (id === null || id === '' || id === undefined ) {
+  
+          console.log(' creating metafield **********************************************')
+          try {
+            const createResponse = await client.query({
               data: {
-                query: UpdateMetafieldMutation,
-                variables: {
-                  input: {
-                    id: `gid://shopify/Product/${id}`, // Use the correct product ID here
-                    metafields: [
-                      {
-                        id: `${(RatingMetaId[ind])}`,
-                        value: `${Number(averageRating[ind]).toFixed(1)}`,
-                      },
-                      {
-                        id: `${(ReviewCountId[ind])}`,
-                        value: `${(length[ind])}`
+                query: `
+                mutation {
+               
+                    productUpdate: productUpdate(
+                      input: {
+                        id: "gid://shopify/Product/${filteredIds[ind]}",
+                        metafields: [
+                          {
+                            namespace: "itgeeks_reviews",
+                            key: "average_rating",
+                            value: "${Number(averageRating[ind]).toFixed(1)}",
+                            type: "number_decimal"
+                          },
+                          {
+                            namespace: "itgeeks_reviews",
+                            key: "review_count",
+                            value: "${length[ind]}",
+                            type: "integer"
+                          }
+                        ]
                       }
-                    ]
-
-                  }
+                    ) {
+                      product {
+                        metafields(first: 3) {
+                          edges {
+                            node {
+                              namespace
+                              key
+                              value
+                            }
+                          }
+                        }
+                      }
+                    }
+                 
                 }
+                `
               }
             });
-            return response; // Return the response from each query
-          }));
-
-          console.log('Mutation responses:', mutationResponses.map((Res) => Object(Res).body.data.productUpdate.userErrors));
-        } catch (error) {
-          console.error('Error updating metafields:', error.message);
+  
+            console.log('create mutation user Errors ===>', Object(createResponse).body.data.productUpdate.userErrors)
+  
+          } catch (error) {
+            console.error('erorrrrrr with create metafield ===>>>', error.message);
+          }
         }
+  
+        else {
+          // Execute the update  mutation
+          try {
+            const mutationResponses = await Promise.all(filteredIds.map(async (data) => {
+              console.log(filteredIds[ind], 'piddd.......')
+              const response = await client.query({
+                data: {
+                  query: UpdateMetafieldMutation,
+                  variables: {
+                    input: {
+                      id: `gid://shopify/Product/${filteredIds[ind]}`, // Use the correct product ID here
+                      metafields: [
+                        {
+                          id: `${(id)}`,
+                          value: `${Number(averageRating[ind]).toFixed(1)}`,
+                        },
+                        {
+                          id: `${(ReviewCountId[ind])}`,
+                          value: `${(length[ind])}`
+                        }
+                      ]
+  
+                    }
+                  }
+                }
+              });
+              return response; // Return the response from each query
+            }));
+  
+            console.log('Update Mutation UserErros ==>>:', mutationResponses.map((Res) => Object(Res).body.data.productUpdate.userErrors));
+          } catch (error) {
+            console.error('Error updating metafields ==>>:', error.message);
+          }
+  
+        }
+      })
 
-      }
 
     }
 
-    // })
-
   }
 
-
 }
-// const addImportedReview=async(req,res)=>{
 
-//   const Obj = JSON.parse(req.params.obj);
-//   const shop = req.shopname;
-//   const handle = req.params.handle;
-//   const Id = req.params.id;
-//   const reviewTable = shop + '_review'
-//   const detailsTable = shop + '_details'
-//   const settingsTable = shop + '_settings'
-//   var averageRating;
-//   var length;
-//   const Columns = (Object.keys(Obj))
-//   const Data = Object.values(Obj)
-//   const DataValue = Data.map(cat => `'${cat}'`).join(', ');
-
-//   const checkStatus = `Select settings FROM ${settingsTable} Where type='autopublish'`;
-//   const query = `INSERT INTO ${reviewTable} (${Columns} , productid) VALUES (${DataValue} , '${Id}');INSERT INTO ${detailsTable} (${Columns} , productid) VALUES (${DataValue} , '${Id}')`
-//   const enabledQuery = `INSERT INTO ${reviewTable} (${Columns} , reviewStatus) VALUES (${DataValue}, 'Published');INSERT INTO ${detailsTable} (${Columns} , reviewStatus) VALUES (${DataValue},'Published')`
-
-//   // con.query(checkStatus, (err, results) => {
-//   //   if (err) {
-//   //     console.error('Error inserting reviews', err);
-//   //     return;
-//   //   }
-//   //   let settingObj = (JSON.parse(results[0].settings));
-//   //   var reviewStatus = (settingObj.autopublish)
-
-//   //   if (reviewStatus === 'enabled') {
-//   //     con.query(enabledQuery, async (err, results) => {
-//   //       if (err) {
-//   //         console.error('Error inserting reviews', err);
-//   //         return;
-//   //       }
-//   //       // res.send(JSON.stringify('Data inserted successfully'));
-//   //       await avgRating()
-
-//   //     });
-//   //   }
-//   //   else {
-//       con.query(query, async (err, results) => {
-//         if (err) {
-//           console.error('Error inserting reviews', err);
-//           return;
-//         }
-//         // res.send(JSON.stringify('Data inserted successfully'));
-//         await avgRating()
-
-//       });
-//   //   }
-//   // });
-
-//   async function avgRating() {
-
-//     //************** fetching average rating from db to store in metafield */
-//     const getAveragequery = ` SELECT starRating , reviewTitle FROM ${reviewTable} WHERE productHandle=${handle} AND reviewStatus='Published'`;
-//     con.query(getAveragequery, async (err, results) => {
-//       if (err) {
-//         console.error('Error fetching reviews', err);
-//         return;
-//       }
-//       else {
-//         let sum = 0;
-//         let rating = results.map((itm) => itm.starRating)
-//         length = results.length
-//         let totalRating = rating.forEach((itm) => {
-//           sum += itm;
-//         })
-//         averageRating = sum / length;
-//         await metafieldFunctionality()
-
-//       }
-//     });
-//   }
-
-//   async function metafieldFunctionality() {
-
-//     //****************** getting session data *******************/
-//     let completeShop = shop + '.myshopify.com';
-//     var session;
-//     var RatingMetaId;
-//     var ReviewCountId;
-
-//     let getSessionQuery = `Select * from shopify_sessions WHERE shop='${completeShop}'`
-//     con.query(getSessionQuery, async (err, results) => {
-//       if (err) {
-//         console.error('err fetching session ', err)
-
-//       }
-
-
-//       session = results[0];
-
-//       let version = shopify.api.config.apiVersion
-//       let endpoint = `https://${shop}.myshopify.com/admin/api/${version}/graphql.json`;
-
-//       const client = new shopify.api.clients.Graphql({ session });
-
-
-//       //****************************** retrieving metafield id ************************
-
-
-
-//       const getRatingMetaIdQuery = `query {
-//       product(id: "gid://shopify/Product/${Id}") {
-//         metafield(namespace: "itgeeks_reviews", key: "average_rating") {
-//           id
-//         }
-//       }
-//     }`
-
-//       const getCountMetaIdQuery = `query {
-//       product(id: "gid://shopify/Product/${Id}") {
-//         metafield(namespace: "itgeeks_reviews", key: "review_count") {
-//           id
-//         }
-//       }
-//     }`
-
-
-//       // Execute the rating  mutation
-//       try {
-//         const response = await client.query({
-//           data: {
-//             query: getRatingMetaIdQuery,
-//           },
-//         });
-
-//         const myData = await response.body;
-
-//         RatingMetaId = (Object(myData).data.product.metafield.id);
-
-//       } catch (error) {
-//         console.error('erorrrrrr=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
-//       }
-
-//       // Execute the count  mutation
-//       try {
-//         const response = await client.query({
-//           data: {
-//             query: getCountMetaIdQuery,
-//           },
-//         });
-
-//         const myData = await response.body;
-
-//         ReviewCountId = (Object(myData).data.product.metafield.id);
-
-//       } catch (error) {
-//         console.error('erorrrrrr=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
-//       }
-
-//       //****************** creating metafield *************************/
-
-//       const createMetafieldMutation = `
-//       mutation {
-//         productUpdate(
-//           input : {
-//             id: "gid://shopify/Product/${Id}",
-//             metafields: [
-//               {
-//                 namespace: "itgeeks_reviews",
-//                 key: "average_rating",
-//                 value: "${averageRating?.toFixed(1)}",
-//                 type: "number_decimal",
-//               },
-//               {
-//                 namespace: "itgeeks_reviews",
-//                 key: "review_count",
-//                 value: "${length}",
-//                 type: "integer",
-//               }
-//             ]
-//           }) {
-//             product {
-//               metafields(first: 3) {
-//                 edges {
-//                   node {
-//                     namespace
-//                     key
-//                     value
-//                   }
-//                 }
-//               }
-//             }
-//           }
-//         }
-//         `
-
-//         //****************** updating my metafield *************************/
-
-//         const metafieldsWithId = [
-//           {
-//             id: `${RatingMetaId}`,
-//             value: `${averageRating?.toFixed(1)}`, // Default value for review count
-
-//           },
-//           {
-//             id: `${ReviewCountId}`,
-//             value: `${length}`, // Default value for review count
-
-//           },
-//         ];
-
-//         // Define the GraphQL mutation
-//         const UpdateMetafieldMutation = `mutation productUpdate($input: ProductInput!) {
-//     productUpdate(input: $input) {
-//     product {
-//     id
-//     metafields(first: 10) {
-//     edges {
-//     node {
-//     namespace
-//     key
-//     value
-//     }
-//     }
-//     }
-//     }
-//     userErrors {
-//     field
-//     message
-//     }
-//     }
-//     }`;
-
-//       // Prepare the variables for the mutation
-//       const Metafieldvariables = {
-//         input: {
-//           id: `gid://shopify/Product/${Id}`, // Replace with actual product ID
-//           metafields: metafieldsWithId,
-//         },
-//       };
-
-
-//       // ************ checking if metafield exists or not //
-//       if (RatingMetaId === null || RatingMetaId === '' || RatingMetaId === undefined || ReviewCountId === null || ReviewCountId === '' || ReviewCountId === undefined ) {
-
-//         console.log(' creating metafield **********************************************')
-//         try {
-//           const createResponse = await client.query({
-//             data: {
-//               query: createMetafieldMutation
-//             }
-//           });
-
-//           console.log('create mutation response ******************', Object(createResponse).body.data.productUpdate.userErrors)
-
-//         } catch (error) {
-//           console.error('erorrrrrr with create metafield =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
-//         }
-//       }
-
-//       else {
-//         // Execute the mutation
-
-//         try {
-//           const mutationResponse = await client.query({
-//             data: {
-//               query: UpdateMetafieldMutation,
-//               variables: Metafieldvariables,
-//             },
-//           });
-
-//           console.log('update mutation response ******************', Object(mutationResponse).body.data.productUpdate.userErrors)
-
-
-//         } catch (error) {
-//           console.error('erorrrrrr with update metafield =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
-//         }
-
-//       }
-
-//     })
-
-//   }
-
-
-// }
 
 export default { getAllReviews, getProductReviews, totalReviews, getReviews, deleteReview, UnSpamReview, publishReview, unpublishReview, getAllProductReviews, getReviewsForExport, checkProduct, addImportedReview } 

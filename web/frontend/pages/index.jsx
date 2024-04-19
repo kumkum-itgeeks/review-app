@@ -303,7 +303,7 @@ export default function HomePage() {
   const unSpamReview = () => {
     fetch(`/api/review/unSpam/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), show(' review unspammed! ', { duration: 2000 }) });
+      .then(data => { getAllReviews(), show(' review unspammed! ', { duration: 2000 }) , updateMetafield()});
   }
 
   const publishReview = () => {
@@ -318,6 +318,23 @@ export default function HomePage() {
       .then(data => { getAllReviews(), show(' review unpublished! ', { duration: 2000 }), updateMetafield() });
   }
 
+  // const updateMetafield = () => {
+  //   // let productHandle = review.map((itm) => itm.productHandle)
+  //   // let pidArr = review.map((itm) => itm.productid)
+  //   // console.log(productHandle , 'handle')
+  //   // console.log(pidArr , 'pid arr')
+
+  //   // fetch('/api/table/updateMetafields', {
+  //   //   method: 'POST',
+  //   //   headers: {
+  //   //     Accept: 'application/json',
+  //   //     'Content-Type': 'application/json'
+  //   //   },
+  //   //   body: JSON.stringify({ handle, pidArr }),
+  //   // })
+  //   // .then(res => res.json())
+  //   // .then(data => {console.log(data)})
+  // }
   const updateMetafield = () => {
     fetch(`/api/table/updateMetafields/${selectedResources}`)
       .then(res => res.json())
