@@ -4,17 +4,24 @@ check import create metafield functionality ...
 
 update metafields in bulk from dashboard ...
 
-show loading while importing reviews
+show loading while importing reviews ...
 
 create log of errors
 
-setting table
+searching by description 
 
 create table on app installation 
+
+setting table
 
 dashboard tick ui bug
 
 /////////////////////////////
+
+
+
+
+/////////
 metafields ...
 
 average count ...

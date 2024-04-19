@@ -301,7 +301,7 @@ const dissmissInappropriate=()=>{
                             (review?.location) ? <Text>,  from {review.location} </Text> : ''
                           }
 
-                          <Text><Link removeUnderline>{review ? `( ${review.Email} )` : ''}</Link></Text>
+                          <><Button variant="plain">{review ? `( ${review.Email} )` : ''}</Button></>
                         </InlineStack>
                       </BlockStack>
                     </>

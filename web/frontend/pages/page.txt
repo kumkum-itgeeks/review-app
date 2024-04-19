@@ -158,3 +158,9 @@ loading spinner and loading skeleton
 * updating metafields for multiple reviews import
 * import functionality completed 
 
+19/04/24
+
+* create metafield if review on new product imports 
+* update metafields in bulk from dashboard
+* show loading while importing reviews
+* import file status

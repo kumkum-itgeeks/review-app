@@ -390,9 +390,9 @@ export default function Product() {
         </IndexTable.Cell>
         <IndexTable.Cell>
           <Text >
-            <Link removeUnderline >
+            <Button variant='plain' >
               {reviewTitle}
-            </Link>
+            </Button>
           </Text>
           <Box maxWidth="200px">
             <Text truncate>
@@ -400,7 +400,7 @@ export default function Product() {
             </Text>
           </Box>
           <Text>
-            -{userName} on <Link removeUnderline>{productHandle}</Link>
+            -{userName} on <Button variant='plain'>{productHandle}</Button>
           </Text>
         </IndexTable.Cell>
         <IndexTable.Cell>{formatDate(datePosted)}</IndexTable.Cell>

@@ -6,6 +6,7 @@ import shopify from '../shopify.js';
 // import api from '../shop.js';
 // const {detailTable,reviewTable}=api
 import { con } from '../index.js';
+import logger from '../frontend/assets/logger.js';
 
 
 const totalReviews = (req, res) => {
@@ -346,9 +347,11 @@ const checkProduct = async (req, res) => {
 
   var ResponseArr = [];
 
-  IdArr?.map((Id) => {
+  IdArr?.map((Id , ind) => {
 
     if (Id === undefined || Id === null || Id === '' || !Id) {
+      logger.error(`Error importing review at Line : ${ind}`);
+
       ResponseArr.push({ idExists: false, pid: null })
     }
     else {
@@ -571,11 +574,11 @@ mutation {
     PerformMetaFunctionality();
     async function PerformMetaFunctionality() {
 
-      RatingMetaId.map(async(id , ind)=>{
+      RatingMetaId.map(async (id, ind) => {
 
         // ************ checking if metafield exists or not //
-        if (id === null || id === '' || id === undefined ) {
-  
+        if (id === null || id === '' || id === undefined) {
+
           console.log(' creating metafield **********************************************')
           try {
             const createResponse = await client.query({
@@ -619,14 +622,14 @@ mutation {
                 `
               }
             });
-  
+
             console.log('create mutation user Errors ===>', Object(createResponse).body.data.productUpdate.userErrors)
-  
+
           } catch (error) {
             console.error('erorrrrrr with create metafield ===>>>', error.message);
           }
         }
-  
+
         else {
           // Execute the update  mutation
           try {
@@ -648,19 +651,22 @@ mutation {
                           value: `${(length[ind])}`
                         }
                       ]
-  
                     }
                   }
                 }
               });
               return response; // Return the response from each query
             }));
-  
+
             console.log('Update Mutation UserErros ==>>:', mutationResponses.map((Res) => Object(Res).body.data.productUpdate.userErrors));
+            await res.status(200).send(JSON.stringify({ message: 'Review imported succesfully' }))
+
           } catch (error) {
             console.error('Error updating metafields ==>>:', error.message);
+            // await res.send(JSON.stringify({message:'error while updating metafields'}))
+
           }
-  
+
         }
       })
 

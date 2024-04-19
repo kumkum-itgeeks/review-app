@@ -274,7 +274,7 @@ const updateMetafields = async (req, res) => {
         console.error('erorrrrrr=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
       }
   
-      //********* retrieveing count meta id  *****************/
+      //********* retrieveing count meta id  *****************//
       try {
         const promises = filteredIds.map(async (itm) => {
           const response = await client.query({

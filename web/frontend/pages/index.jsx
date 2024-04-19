@@ -1,7 +1,8 @@
 import {
   Text, Page, Button, IndexTable, IndexFilters, useSetIndexFiltersMode, useIndexResourceState,
   Badge, useBreakpoints, Box, Link, InlineStack, Image, Pagination, BlockStack, DropZone,
-  Tag, Modal, Checkbox, Thumbnail
+  Tag, Modal, Checkbox, Thumbnail,
+  Spinner
 } from "@shopify/polaris";
 import { ImportIcon, ExportIcon } from '@shopify/polaris-icons';
 import { useTranslation, Trans } from "react-i18next";
@@ -11,6 +12,8 @@ import { useNavigate, useToast } from "@shopify/app-bridge-react";
 import emptyStar from '../assets/star-regular.svg'
 import solidStar from '../assets/star-solid.svg'
 import '../css/index.css';
+// import winston from "winston";
+// import logger from "../assets/logger";
 
 
 export default function HomePage() {
@@ -106,11 +109,12 @@ export default function HomePage() {
   };
   const appliedFilters = [];
   const Navigate = useNavigate();
-  const totalData = tableData.length;
+  const totalData = tableData?.length;
   const totalPages = totalRows / recordsPerPage;
   const isLastPage = totalData !== recordsPerPage || pageNumber == totalPages || totalPages == 1;
 
   //*******functions**********
+
 
   function formatDate(dateString) {
     const options = { month: 'short', day: 'numeric', year: 'numeric' };
@@ -147,6 +151,7 @@ export default function HomePage() {
   }
 
   const importReviews = () => {
+    setImportLoading(true)
     const reader = new FileReader();
     var ImportedReview;
     // Event listener for file reading completion
@@ -154,7 +159,6 @@ export default function HomePage() {
       const contents = e.target.result;
       ImportedReview = convertCSVtoJson(contents);
       console.log('CSV file contents:', ImportedReview);
-      setImportLoading(true)
       await checkProduct(ImportedReview)
     };
     // Read the file as text
@@ -169,60 +173,48 @@ export default function HomePage() {
     fetch(`/api/review/checkProduct/${productHandle}`)
       .then(res => res.json())
       .then(data => {
-        data.map(async (obj , ind) => {
+        data.map(async (obj, ind) => {
           let { idExists, pid } = obj;
           if (idExists == true) {
             IdArr.push(pid.slice(22))
             console.log(ind)
           }
           else {
+
+            productHandle.splice(ind, 1)
             setImportLoading(false)
-            productHandle.splice(ind,1)
-            // console.log(ind)
             console.log('product not exists')
+            // logger.error(`Error importing review at Line : ${ind}`);
           }
         })
-       addReview(review , productHandle , IdArr);
-        // console.log("IdArr", IdArr)
+        addReview(review, productHandle, IdArr);
+
       });
-    // addReview(review , productHandle , data?.pid);
 
   }
 
   function addReview(review, handle, pidArr) {
     // let id = (pid.slice(22))
-    console.log(pidArr)
-    console.log(handle)
-    console.log(review)
+    // console.log(pidArr)
+    // console.log(handle)
+    // console.log(review)
     fetch('/api/review/addImportedReview', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({review, handle, pidArr }),
+      body: JSON.stringify({ review, handle, pidArr }),
     })
-    .then(res => res.json())
-    .then(data => {console.log(data) ,
-      setImportLoading(false) ,
-      show(' review Imported !', { duration: 2000 })
-    })
+      .then(res => res.json())
+      .then(data => {
+        console.log(data),
+          setImportLoading(false),
+          setFileStatus('')
+        show(' review Imported !', { duration: 2000 })
+      })
 
   }
-
-  // function addReview(review, handle, pidArr) {
-  //   // let id = (pid.slice(22))
-  //   console.log(pidArr)
-  //   console.log(handle)
-  //   console.log(review)
-  //   fetch(`/api/review/addImportedReview/${JSON.stringify(review)}/${JSON.stringify(handle)}/${JSON.stringify(pidArr)}`)
-  //   .then(res => res.json())
-  //   .then(data => {console.log(data) ,
-  //     setImportLoading(false) ,
-  //     show(' review Imported !', { duration: 2000 })
-  //   })
-
-  // }
 
   const downloadTemplate = () => {
     console.log('csv downlaoad')
@@ -235,7 +227,6 @@ export default function HomePage() {
         return response.text();
       })
       .then(csvData => {
-        //  console.log('CSV data loaded:', csvData);
 
         // Proceed with downloading the CSV data
         let blob = new Blob([csvData], { type: 'text/csv' });
@@ -284,7 +275,6 @@ export default function HomePage() {
       let data = headers.map(header => JSON.stringify(row[header])).join(','); // Add JSON.stringify statement
       csv += data + '\n';
     });
-    // console.log(csv) //csv data console 
     return csv;
   }
 
@@ -295,15 +285,16 @@ export default function HomePage() {
   );
 
   const deleteReview = () => {
+    updateMetafield();
     fetch(`/api/review/deleteReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), show(' review deleted ', { duration: 2000 }), updateMetafield() });
+      .then(data => { getAllReviews(), show(' review deleted ', { duration: 2000 }) });
   }
 
   const unSpamReview = () => {
     fetch(`/api/review/unSpam/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), show(' review unspammed! ', { duration: 2000 }) , updateMetafield()});
+      .then(data => { getAllReviews(), show(' review unspammed! ', { duration: 2000 }), updateMetafield() });
   }
 
   const publishReview = () => {
@@ -318,23 +309,6 @@ export default function HomePage() {
       .then(data => { getAllReviews(), show(' review unpublished! ', { duration: 2000 }), updateMetafield() });
   }
 
-  // const updateMetafield = () => {
-  //   // let productHandle = review.map((itm) => itm.productHandle)
-  //   // let pidArr = review.map((itm) => itm.productid)
-  //   // console.log(productHandle , 'handle')
-  //   // console.log(pidArr , 'pid arr')
-
-  //   // fetch('/api/table/updateMetafields', {
-  //   //   method: 'POST',
-  //   //   headers: {
-  //   //     Accept: 'application/json',
-  //   //     'Content-Type': 'application/json'
-  //   //   },
-  //   //   body: JSON.stringify({ handle, pidArr }),
-  //   // })
-  //   // .then(res => res.json())
-  //   // .then(data => {console.log(data)})
-  // }
   const updateMetafield = () => {
     fetch(`/api/table/updateMetafields/${selectedResources}`)
       .then(res => res.json())
@@ -446,7 +420,7 @@ export default function HomePage() {
     useIndexResourceState(tableData);
 
 
-  const rowMarkup = tableData.map(
+  const rowMarkup = tableData?.map(
     (
       { id, starRating, reviewTitle, reviewDescription, datePosted, reviewStatus, userName, productHandle, isSpam },
       index,
@@ -475,9 +449,9 @@ export default function HomePage() {
         </IndexTable.Cell>
         <IndexTable.Cell>
           <Text >
-            <Link removeUnderline >
+            <Button variant="plain">
               {reviewTitle}
-            </Link>
+            </Button>
           </Text>
           <Box maxWidth="200px">
             <Text truncate>
@@ -485,7 +459,7 @@ export default function HomePage() {
             </Text>
           </Box>
           <Text>
-            -{userName} on <Link removeUnderline>{productHandle}</Link>
+            -{userName} on <Button variant="plain">{productHandle}</Button>
           </Text>
         </IndexTable.Cell>
         <IndexTable.Cell>{formatDate(datePosted)}</IndexTable.Cell>
@@ -523,7 +497,8 @@ export default function HomePage() {
           <Button onClick={(event) => {
             event.stopPropagation();
             Navigate(`/details/?id=${id}`);
-          }}>
+          }}
+          >
             Details
           </Button>
         </IndexTable.Cell>
@@ -600,9 +575,10 @@ export default function HomePage() {
 
             />
             <IndexTable
+              hasZebraStriping={false}
               condensed={useBreakpoints().smDown}
               resourceName={resourceName}
-              itemCount={tableData.length}
+              itemCount={tableData?.length}
               promotedBulkActions={promotedBulkActions}
               selectedItemsCount={
                 allResourcesSelected ? 'All' : selectedResources.length
@@ -634,7 +610,6 @@ export default function HomePage() {
           </InlineStack>
         </BlockStack>
         <Modal
-          // activator={activator}
           size="small"
           open={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -651,32 +626,46 @@ export default function HomePage() {
             }
           ]}
         >
+          
 
           <Box padding={400} >
             <InlineStack gap={100} blockAlign="center">
-              <DropZone
-                onDrop={handleDropZoneDrop}
-                outline={false}
-                type="file"
-                accept=".csv"
-                onDropAccepted={() => setFileStatus(1)}
-                onDropRejected={() => setFileStatus(0)}
-              >
-                {/* {fileUpload} */}
-                <DropZone.FileUpload />
-              </DropZone>
 
-              <Text as="p">
-                {
-                  fileStatus === 1 ?
-                    `${file?.name} (selected)`
-                    :
-                    fileStatus === 0 ?
-                      `Select correct file type (CSV)`
-                      :
-                      `No file choosen`
-                }
-              </Text>
+              {
+                importLoading === true ?
+                  <>
+                    <Spinner size="medium" />
+                    <Text as="p">
+                      Importing Reviews ...
+                    </Text>
+                  </>
+                  :
+                  <>
+                    <DropZone
+                      onDrop={handleDropZoneDrop}
+                      outline={false}
+                      type="file"
+                      accept=".csv"
+                      onDropAccepted={() => setFileStatus(1)}
+                      onDropRejected={() => setFileStatus(0)}
+                    >
+                      {/* {fileUpload} */}
+                      <DropZone.FileUpload />
+                    </DropZone>
+
+                    <Text as="p">
+                      {
+                        fileStatus === 1 ?
+                          `${file?.name} (selected)`
+                          :
+                          fileStatus === 0 ?
+                            `Select correct file type (CSV)`
+                            :
+                            `No file choosen`
+                      }
+                    </Text>
+                  </>
+              }
             </InlineStack>
             <Text variant="headingMd" as='h4' fontWeight="regular">
               Download our <Button variant="plain" onClick={() => downloadTemplate()} target="_blank"> CSV template </Button> to see an example of the required format.

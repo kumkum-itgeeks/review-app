@@ -9,7 +9,7 @@ import { con } from '../index.js';
 
 
 const getAllDetails = async (req, res) => {
-    const id=req.params.id;
+    const id=req.params?.id;
     const shop = res.locals.shopify.session.shop;
     let shopLowercase = shop.toLowerCase();
     let removeSuffix = shopLowercase.replace(".myshopify.com", "");
@@ -75,7 +75,7 @@ const postReply=async(req,res)=>{
 
 
 const getShopifyProductDetails=async(req,res)=>{
-    const id=req.params.id;
+    const id=req.params?.id;
     
     const session = res.locals.shopify.session;
 
@@ -114,11 +114,11 @@ const getShopifyProductDetails=async(req,res)=>{
         
   }`
   const response = await client.query({data: queryString});
-  res.send(JSON.stringify(response.body.data.product));
+  res.status(200).send(JSON.stringify(response.body.data.product));
 }
 
 const getProductReviewDetails=(req,res)=>{
-  const id=req.params.id;
+  const id=req.params?.id;
   const shop = res.locals.shopify.session.shop;
     let shopLowercase = shop.toLowerCase();
     let removeSuffix = shopLowercase.replace(".myshopify.com", "");
@@ -128,7 +128,7 @@ const getProductReviewDetails=(req,res)=>{
     const query=`SELECT * FROM ${detailTable} WHERE productid = ${id}`
     con.query(query,function(err,result){
       if (err) throw err;
-      res.send(JSON.stringify(result))
+      res.status(200).send(JSON.stringify(result))
 
   })
 
