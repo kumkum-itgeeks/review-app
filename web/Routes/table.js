@@ -9,9 +9,11 @@ router.get('/createDetailTable', TableController.createDetailTable);
 
 router.get('/createMetaField/:id/:rating', TableController.createMetafield);
 
-router.get('/updateMetafields/:id', TableController.updateMetafields);
+router.get('/updateMetafields/:id/:pid/:handle', TableController.updateMetafields);
 
 router.get('/createSettingsTable', TableController.createSettingsTable);
+
+router.get('/createDeletedReviewsTable', TableController.createDeletedReviewsTable);
 
 export default router;
 

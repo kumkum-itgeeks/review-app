@@ -21,9 +21,10 @@ router.get('/unpublishReview/:id', reviewController.unpublishReview)
 
 router.get('/exportReviews/', reviewController.getReviewsForExport)
 
+router.get('/exportDeletedReviews/', reviewController.getDeletedReviewsForExport)
+
 router.get('/checkProduct/:handle', reviewController.checkProduct)
 
-// router.get('/addImportedReview/:obj/:handle/:id', reviewController.addImportedReview)
 router.post('/addImportedReview/', reviewController.addImportedReview)
 
 

@@ -2,7 +2,7 @@
 
 client_id = "c8b76d8cdccd39ae45b847901d4b4fb3"
 name = "reviews"
-application_url = "https://enhancement-widescreen-handles-gs.trycloudflare.com"
+application_url = "https://boards-sweet-collect-brian.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://enhancement-widescreen-handles-gs.trycloudflare.com/auth/callback",
-  "https://enhancement-widescreen-handles-gs.trycloudflare.com/auth/shopify/callback",
-  "https://enhancement-widescreen-handles-gs.trycloudflare.com/api/auth/callback"
+  "https://boards-sweet-collect-brian.trycloudflare.com/auth/callback",
+  "https://boards-sweet-collect-brian.trycloudflare.com/auth/shopify/callback",
+  "https://boards-sweet-collect-brian.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

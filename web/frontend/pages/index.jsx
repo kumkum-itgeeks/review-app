@@ -27,6 +27,7 @@ export default function HomePage() {
   const [file, setFile] = useState([]);
   const [fileStatus, setFileStatus] = useState('');
   const [importDisabled, setImportDisabled] = useState(true);
+  const [importErrors , setImportErrors]= useState([]);
   const [pageNumber, setPageNumber] = useState(1);
   const [queryValue, setQueryValue] = useState('');
   const [taggedWith, setTaggedWith] = useState('');
@@ -67,18 +68,23 @@ export default function HomePage() {
   }, [reviewStatus])
 
   useEffect(() => {
-    fileStatus == 1 ?
-      setImportDisabled(() => false)
-      :
-      fileStatus == 0 ?
+    if(fileStatus == 1) {
+      setImportDisabled(() => false),
+      setImportErrors([])
+    }
+      else if (fileStatus == 0) {
         setImportDisabled(() => true)
-        :
+      }
+      else{
+
         setImportDisabled(() => true)
+      }
   }, [fileStatus])
 
   useEffect(() => {
     setLoading(true)
     getAllReviews();
+   
   }, [queryValue, pageNumber, sortSelected, reviewStatus,])
 
   useEffect(() => {
@@ -88,6 +94,10 @@ export default function HomePage() {
   useEffect(() => {
     setLoading(false)
   }, [tableData])
+
+  // useEffect(() => {
+  //  removeSelectedResources(selectedResources);
+  // }, [pageNumber])
 
 
   useEffect(() => {
@@ -101,6 +111,7 @@ export default function HomePage() {
   const { show } = useToast();
   const { t } = useTranslation();
   const stars = [1, 2, 3, 4, 5];
+  const importErrorsArray = [];
   const star = 3;
   const fetch = useAuthenticatedFetch();
   const { mode, setMode } = useSetIndexFiltersMode();
@@ -115,6 +126,23 @@ export default function HomePage() {
 
   //*******functions**********
 
+  const ExportDeletedReviews=()=>{
+    fetch('/api/review/exportDeletedReviews')
+      .then(res => res.json())
+      .then(jsonData => {
+        // Convert JSON data to CSV
+        let csvData = jsonToCsv(jsonData); //
+        // Create a CSV file and allow the user to download it
+        let blob = new Blob([csvData], { type: 'text/csv' });
+        let url = window.URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = 'itgeeks-deleted-reviews.csv';
+        document.body.appendChild(a);
+        a.click();
+      })
+      .catch(error => console.error(error));
+  }
 
   function formatDate(dateString) {
     const options = { month: 'short', day: 'numeric', year: 'numeric' };
@@ -167,7 +195,8 @@ export default function HomePage() {
   }
 
   async function checkProduct(review) {
-
+    setFileStatus('')
+    setImportErrors([])
     let productHandle = review.map((itm) => itm.productHandle)
     let IdArr = [];
     fetch(`/api/review/checkProduct/${productHandle}`)
@@ -182,22 +211,24 @@ export default function HomePage() {
           else {
 
             productHandle.splice(ind, 1)
+            review.splice(ind,1)
             setImportLoading(false)
+            importErrorsArray.push(Number(ind)+2)
+            setImportErrors(...[importErrorsArray])
+            setFileStatus('')
             console.log('product not exists')
             // logger.error(`Error importing review at Line : ${ind}`);
           }
         })
-        addReview(review, productHandle, IdArr);
+         addReview(review, productHandle, IdArr);
 
       });
 
   }
 
   function addReview(review, handle, pidArr) {
-    // let id = (pid.slice(22))
-    // console.log(pidArr)
-    // console.log(handle)
-    // console.log(review)
+   
+    review?.length ?
     fetch('/api/review/addImportedReview', {
       method: 'POST',
       headers: {
@@ -210,9 +241,16 @@ export default function HomePage() {
       .then(data => {
         console.log(data),
           setImportLoading(false),
-          setFileStatus('')
-        show(' review Imported !', { duration: 2000 })
+          setFileStatus(''),
+        show(' review Imported !', { duration: 2000 }),
+        getAllReviews()
       })
+      .catch((err)=>{
+        console.log('error :' , err)
+        show(' error importing reviews !', { duration: 2000 })
+      })
+      :
+      show(' error importing reviews !', { duration: 2000 })
 
   }
 
@@ -280,39 +318,43 @@ export default function HomePage() {
 
   const handleDropZoneDrop = useCallback(
     (_dropFiles, acceptedFiles, _rejectedFiles) =>
-      setFile(acceptedFiles[0]),
+      setFile(acceptedFiles[0]) ,
+      
     [],
-  );
+  )
 
   const deleteReview = () => {
-    updateMetafield();
+    
     fetch(`/api/review/deleteReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), show(' review deleted ', { duration: 2000 }) });
+      .then(data => { getAllReviews(), show(' review deleted ', { duration: 2000 }) , updateMetafield(data) , clearSelection()});
   }
 
   const unSpamReview = () => {
     fetch(`/api/review/unSpam/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), show(' review unspammed! ', { duration: 2000 }), updateMetafield() });
+      .then(data => { getAllReviews(), show(' review unspammed! ', { duration: 2000 }), updateMetafield() , clearSelection()  });
   }
 
   const publishReview = () => {
     fetch(`/api/review/publishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), show(' review published! ', { duration: 2000 }), updateMetafield() });
+      .then(data => { getAllReviews(), show(' review published! ', { duration: 2000 }), updateMetafield() , clearSelection() });
   }
 
   const unpublishReview = () => {
     fetch(`/api/review/unpublishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), show(' review unpublished! ', { duration: 2000 }), updateMetafield() });
+      .then(data => { getAllReviews(), show(' review unpublished! ', { duration: 2000 }), updateMetafield() , clearSelection()});
   }
 
-  const updateMetafield = () => {
-    fetch(`/api/table/updateMetafields/${selectedResources}`)
+  const updateMetafield = (data) => {
+
+    const productHandle = data?.productHandle;
+    const productid = data?.productid;
+    fetch(`/api/table/updateMetafields/${selectedResources}/${productid}/${productHandle}`)
       .then(res => res.json())
-      .then(data => { console.log(data) });
+      .then(data => { console.log(data) })
   }
   const createTable = () => {
     fetch('/api/table/createDetailTable')
@@ -416,7 +458,7 @@ export default function HomePage() {
   ];
 
 
-  const { selectedResources, allResourcesSelected, handleSelectionChange } =
+  const { selectedResources, allResourcesSelected, handleSelectionChange ,clearSelection , removeSelectedResources} =
     useIndexResourceState(tableData);
 
 
@@ -528,7 +570,7 @@ export default function HomePage() {
 
   //************* conditonal statements *******************
 
-
+// console.log('selected', selected)
   return (
     <>
       <Page
@@ -543,6 +585,11 @@ export default function HomePage() {
             content: 'Export',
             onAction: () => ExportReview(),
             icon: ExportIcon
+          },
+          {
+            content: 'Export deleted reviews',
+            onAction: () => ExportDeletedReviews(),
+            icon: ExportIcon 
           },
         ]}
       >
@@ -612,33 +659,42 @@ export default function HomePage() {
         <Modal
           size="small"
           open={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() =>{ setIsModalOpen(false) , setFile([]), setFileStatus('') , setImportErrors([])}}
           title="Import reviews by CSV file"
           primaryAction={{
             content: 'import reviews',
-            onAction: () => { importReviews() },
+            onAction: () => { importReviews()  },
             disabled: importDisabled
           }}
           secondaryActions={[
             {
               content: 'cancel',
-              onAction: () => { setIsModalOpen(false), setFile([]), setFileStatus('') }
+              onAction: () => { setIsModalOpen(false), setFile([]), setFileStatus('') , setImportErrors([])}
             }
           ]}
         >
           
 
           <Box padding={400} >
+          {
+            importErrors?.map((lineNumber)=>{
+              return <Text>Line {lineNumber} - Error : could not find product ! </Text>
+            })
+           
+          }
             <InlineStack gap={100} blockAlign="center">
 
               {
                 importLoading === true ?
                   <>
-                    <Spinner size="medium" />
+                  
+                    <Spinner size="small" />
                     <Text as="p">
                       Importing Reviews ...
                     </Text>
+                    
                   </>
+                  
                   :
                   <>
                     <DropZone
@@ -649,7 +705,6 @@ export default function HomePage() {
                       onDropAccepted={() => setFileStatus(1)}
                       onDropRejected={() => setFileStatus(0)}
                     >
-                      {/* {fileUpload} */}
                       <DropZone.FileUpload />
                     </DropZone>
 
@@ -670,11 +725,6 @@ export default function HomePage() {
             <Text variant="headingMd" as='h4' fontWeight="regular">
               Download our <Button variant="plain" onClick={() => downloadTemplate()} target="_blank"> CSV template </Button> to see an example of the required format.
             </Text>
-            {/*<Checkbox
-              label="Import using month/day/year date format"
-              checked={checked}
-              onChange={handleCheckbox}
-            />*/}
           </Box>
         </Modal>
       </Page>

@@ -126,13 +126,66 @@ const deleteReview = (req, res) => {
   let shopName = removeSuffix.replace("-", "_");
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
+  let deletdReviewTable = shopName + '_deleted_reviews'
+  var productId = [];
+  var producthandle = [];
+  var totalData;
 
 
+  const getHandleQuery = ` SELECT * FROM ${detailTable} WHERE id IN (${id})`
   const query = `DELETE FROM ${reviewTable} WHERE id IN (${id}) ; DELETE FROM ${detailTable} WHERE id IN (${id})`
-  con.query(query, function (err, result) {
+  // var saveReviewsQuery = `INSERT INTO ${deletdReviewTable} (${columns}) VALUES ${values}`;
+  // const saveReviewsQuery = `INSERT INTO ${deletdReviewTable} ${totalData}`
+
+  con.query(getHandleQuery, function async(err, result) {
     if (err) throw err;
-    res.send(JSON.stringify(result));
+    // res.send(JSON.stringify(result));
+    else {
+      totalData = result;
+      result.map(async(obj) => {
+        const { productid, productHandle } = obj;
+        producthandle.push(productHandle);
+        productId.push(productid);
+      })
+      saveDeletedReviews();
+    }
   })
+
+  async function saveDeletedReviews() {
+  
+        totalData?.map((obj, ind) => {
+
+          let Columns = (Object.keys(obj))
+          let Data = Object.values(obj)
+          let DataValue = Data.map(cat => `'${cat}'`).join(', ');
+
+          const query = `INSERT INTO ${deletdReviewTable} (${Columns}) VALUES (${DataValue});`
+          con.query(query, async (err, results) => {
+            if (err) {
+              console.error('Error inserting reviews', err);
+              return;
+            }
+      
+            else {
+              if (ind === (totalData.length) - 1) {
+                await deleteReview()
+              }
+            }
+      
+          });
+        })
+       
+      }
+  
+
+  
+
+  async function deleteReview() {
+    con.query(query, function (err, result) {
+      if (err) throw err;
+      res.send(JSON.stringify({ productid: productId, productHandle: producthandle }));
+    })
+  }
 
 }
 
@@ -319,6 +372,19 @@ const getReviewsForExport = (req, res) => {
   })
 
 }
+const getDeletedReviewsForExport = (req, res) => {
+
+  const deletedReviewTable = req.shopname + '_deleted_reviews';
+
+  const query = `SELECT productHandle , reviewStatus , starRating , reviewTitle , userName , Email , location , reviewDescription , reply , datePosted  FROM ${deletedReviewTable}`;
+  con.query(query, function (err, result) {
+    if (err) {
+      console.error('error fetching reviews', err)
+    }
+    res.send(JSON.stringify(result));
+  })
+
+}
 
 const checkProduct = async (req, res) => {
 
@@ -347,7 +413,7 @@ const checkProduct = async (req, res) => {
 
   var ResponseArr = [];
 
-  IdArr?.map((Id , ind) => {
+  IdArr?.map((Id, ind) => {
 
     if (Id === undefined || Id === null || Id === '' || !Id) {
       logger.error(`Error importing review at Line : ${ind}`);
@@ -678,4 +744,4 @@ mutation {
 }
 
 
-export default { getAllReviews, getProductReviews, totalReviews, getReviews, deleteReview, UnSpamReview, publishReview, unpublishReview, getAllProductReviews, getReviewsForExport, checkProduct, addImportedReview } 
+export default { getAllReviews, getProductReviews, totalReviews, getReviews, deleteReview, getDeletedReviewsForExport , UnSpamReview, publishReview, unpublishReview, getAllProductReviews, getReviewsForExport, checkProduct, addImportedReview } 

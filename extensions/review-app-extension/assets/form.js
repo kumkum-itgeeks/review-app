@@ -5,7 +5,7 @@ var isthisLastPage;
 var starsettingColor;
 var shopName;
  let PageNumber = document.getElementById('page-number-display').value;
-const URL = `https://mime-pdas-samoa-pastor.trycloudflare.com`
+const URL = `https://boards-sweet-collect-brian.trycloudflare.com`
 
 // dom content loaded********
 

@@ -84,6 +84,7 @@ loading spinner and loading skeleton
 * api for published reviews on the product 
 * showing dynamic listing for reviews
 
+//////////////
 
 01/04/24
 
@@ -92,8 +93,6 @@ loading spinner and loading skeleton
 * display average rating and review count
 * autopublish review setting complete
 
-
-//////////////
 
 02/04/24
 
@@ -164,3 +163,9 @@ loading spinner and loading skeleton
 * update metafields in bulk from dashboard
 * show loading while importing reviews
 * import file status
+
+22/04/24
+
+* Export deleted reviews completed .
+* loading while importing reviews .
+* show review import error description , if any.
