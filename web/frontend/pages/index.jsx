@@ -32,6 +32,7 @@ export default function HomePage() {
   const [pageNumber, setPageNumber] = useState(1);
   const [queryValue, setQueryValue] = useState('');
   const [taggedWith, setTaggedWith] = useState('');
+  const [lastPage , setLastPage]= useState(false)
   const [importLoading, setImportLoading] = useState(false);
   const [recordsPerPage, setRecordsPerPage] = useState(3);
   const [moneySpent, setMoneySpent] = useState(undefined,);
@@ -110,24 +111,24 @@ export default function HomePage() {
 
 
   useEffect(() => {
-    // !isLastPage ? setNextPage(true) : setNextPage(false)
-    // pageNumber != 1 ? setPrevPage(true) : setPrevPage(false)
-    if(pageNumber===1 && !isLastPage){
-      setPrevPage(false)
-      setNextPage(true)
-    }
-    else if(pageNumber===1 && isLastPage){
-      setPrevPage(false)
-      setNextPage(false)
-    }
-    else if(pageNumber!=1 && !isLastPage){
-      setPrevPage(true)
-      setNextPage(true)
-    }
-    else if(isLastPage && pageNumber!=1){
-      setPrevPage(true)
-      setNextPage(false)
-    }
+    !isLastPage ? setNextPage(true) : setNextPage(true)
+    pageNumber != 1 ? setPrevPage(true) : setPrevPage(false)
+    // if(pageNumber===1 && !isLastPage){
+    //   setPrevPage(false)
+    //   setNextPage(true)
+    // }
+    // else if(pageNumber===1 && isLastPage){
+    //   setPrevPage(false)
+    //   setNextPage(false)
+    // }
+    // else if(pageNumber!=1 && !isLastPage){
+    //   setPrevPage(true)
+    //   setNextPage(true)
+    // }
+    // else if(isLastPage && pageNumber!=1){
+    //   setPrevPage(true)
+    //   setNextPage(false)
+    // }
   }, [pageNumber, queryValue, sortSelected, reviewStatus])
 
 
@@ -147,7 +148,7 @@ export default function HomePage() {
   const Navigate = useNavigate();
   const totalData = tableData?.length;
   const totalPages = totalRows / recordsPerPage;
-  const isLastPage = totalData !== recordsPerPage || pageNumber === totalPages || totalPages === 1;
+  const isLastPage = totalData !== recordsPerPage || pageNumber == totalPages || totalPages == 1;
 
   //*******functions**********
 
@@ -729,8 +730,8 @@ export default function HomePage() {
 
           <Box padding={400} >
             {
-              importErrors?.map((lineNumber) => {
-                return <Text>Line {lineNumber} - Error : could not find product ! </Text>
+              importErrors?.map((lineNumber,ind) => {
+                return <Text key={ind}>Line {lineNumber} - Error : could not find product ! </Text>
               })
 
             }

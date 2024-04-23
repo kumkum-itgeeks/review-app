@@ -64,11 +64,7 @@ export default function Details() {
       .then(data => getReviewDetails());
   }
 
-  // const getMetafields = () => {
-  //   fetch('/api/table/getMetafields')
-  //     .then(res => res.json())
-  //     .then(data => setMetaFields(data));
-  // }
+
 
   const handleTextFieldChange = useCallback(
     (value) => setTextFieldValue(value),
@@ -206,7 +202,8 @@ const dissmissInappropriate=()=>{
     >
 
       <BlockStack gap='300'>
-        <Button variant="plain" onClick={() => changeStatus()} textAlign="start" size="large" >
+        <Box maxWidth="100px">
+        <Button variant="secondary" onClick={() => changeStatus()} textAlign="start" size="large" fullWidth='false'>
           {
             review ?
               review.reviewStatus == 'Published' ?
@@ -215,6 +212,7 @@ const dissmissInappropriate=()=>{
               : ""
           }
         </Button>
+        </Box>
         {
           showWarning?
         <Banner onDismiss={() => {dissmissInappropriate()}} tone="warning">
@@ -345,7 +343,7 @@ const dissmissInappropriate=()=>{
                         </InlineStack>
                       </Box>
                       {/* <Text variant="bodyLg" as="p">{metafields ? `${metafields[2].node.value} (reviews)` : ""}</Text> */}
-                      <Text variant="bodyLg" as="p">{productDescription ? `${published} (reviews)` : ""}</Text>
+                      <Text variant="bodyLg" as="p">{productDescription ? `${published} reviews` : ""}</Text>
 
                     </>
                 }

@@ -1,9 +1,0 @@
-
-
-create table on app installation ...
-setting table ...
-dashboard tick ui bug 
-searching by description 
-console errors
-
-//////////

@@ -2,7 +2,7 @@
 
 client_id = "c8b76d8cdccd39ae45b847901d4b4fb3"
 name = "reviews"
-application_url = "https://heroes-judges-setting-solo.trycloudflare.com"
+application_url = "https://feb-portland-dr-continues.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://heroes-judges-setting-solo.trycloudflare.com/auth/callback",
-  "https://heroes-judges-setting-solo.trycloudflare.com/auth/shopify/callback",
-  "https://heroes-judges-setting-solo.trycloudflare.com/api/auth/callback"
+  "https://feb-portland-dr-continues.trycloudflare.com/auth/callback",
+  "https://feb-portland-dr-continues.trycloudflare.com/auth/shopify/callback",
+  "https://feb-portland-dr-continues.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
