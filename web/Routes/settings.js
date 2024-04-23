@@ -3,7 +3,7 @@ import settingController from "../Controller/settings.js";
 
 const router=express.Router();
 
-router.post('/addSettingsData',settingController.addSettings);
+router.get('/addSettingsData',settingController.addSettings);
 
 router.get('/getSettings',settingController.getSettings);
 

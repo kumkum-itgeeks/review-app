@@ -1,4 +1,4 @@
-const myUrl = `https://boards-sweet-collect-brian.trycloudflare.com`
+const myUrl = `https://games-showtimes-patch-substances.trycloudflare.com`
 
    function test(shop, handle , avgRating , count) {
     fetch(`${myUrl}/api/getReviewCount/${JSON.stringify(shop)}/${JSON.stringify(handle)}`)

@@ -57,9 +57,9 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
   const shop = JSON.parse(_req.params.shop).toLowerCase();
   const handle = _req.params.handle;
   const Id = _req.params.id;
-  const reviewTable = shop + '_review'
-  const detailsTable = shop + '_details'
-  const settingsTable = shop + '_settings'
+  const reviewTable = (shop).replaceAll("-","_").trim() + '_review'
+  const detailsTable = (shop).replaceAll("-","_").trim() + '_details'
+  const settingsTable = (shop).replaceAll("-","_").trim() + '_settings'
   var averageRating;
   var length;
   const Columns = (Object.keys(Obj))
@@ -348,8 +348,8 @@ app.get(`/api/getReviews/:shop/:handle/:page`, (req, res) => {
   const productHandle = (req.params.handle);
   const pageNumber = Number(req.params.page);
 
-  const detailsTable = shop + '_details'
-  const settingsTable = shop + '_settings'
+  const detailsTable = (shop).replaceAll("-","_").trim() + '_details'
+  const settingsTable = (shop).replaceAll("-","_").trim() + '_settings'
   const type = ['starIconColor', 'reviewListingLayout', 'reviewListingText', 'reviewFormText', 'badgeText'];
   const typeValue = type.map(itm => `'${itm}'`).join(', ');
   const settingsQuery = `SELECT type , settings FROM ${settingsTable} WHERE type IN (${typeValue})`;
@@ -416,7 +416,7 @@ app.get(`/api/getReviews/:shop/:handle/:page`, (req, res) => {
 
 app.get("/api/checkReviewsOnload/:shop", async (_req, res) => {
   const shop = JSON.parse(_req.params.shop).toLowerCase();
-  const settingsTable = shop + '_settings';
+  const settingsTable = (shop).replaceAll("-","_").trim() + '_settings';
 
   const query = `SELECT settings from ${settingsTable} Where type ='reviewListingLayout' `;
 
@@ -439,8 +439,8 @@ app.get("/api/checkReviewsOnload/:shop", async (_req, res) => {
 app.get("/api/reportInappropriate/:shop/:id", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
-  const reviewTable = shop + '_review';
-  const detailsTable = shop + '_details';
+  const reviewTable = (shop).replaceAll("-","_").trim() + '_review';
+  const detailsTable = (shop).replaceAll("-","_").trim() + '_details';
   const Id = req.params.id;
 
 
@@ -468,7 +468,7 @@ app.get("/api/getReviewCount/:shop/:handle", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
   const handle = req.params.handle;
-  const reviewTable = shop + '_review';
+  const reviewTable = (shop).replaceAll("-","_").trim() + '_review';
   var averageRating;
   var length;
 
@@ -500,7 +500,7 @@ app.get("/api/getReviewCount/:shop/:handle", (req, res) => {
 app.get("/api/starColor/:shop", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
-  const settingTable = shop + '_settings';
+  const settingTable = (shop).replaceAll("-","_").trim() + '_settings';
 
   const query = ` SELECT settings FROM ${settingTable} WHERE type='starIconColor'`;
 
@@ -556,7 +556,7 @@ async function getShopName(req, res, next) {
   const shop = await res.locals.shopify.session.shop;
   let shopLowercase = shop.toLowerCase();
   let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  let shopName = removeSuffix.replace("-", "_");
+  let shopName = removeSuffix.replaceAll("-", "_").trim();
   req.shopname = shopName;
 
   next()
@@ -564,34 +564,6 @@ async function getShopName(req, res, next) {
   // res.json({ shop, reviewTable });
 }
 
-app.get('/api/createReviewTable', async (_req, res) => {
-
-  const shop = res.locals.shopify.session.shop;
-  let shopLowercase = shop.toLowerCase();
-  let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  let shopName = removeSuffix.replace("-", "_");
-  let tableName = shopName + '_reviewss'
-
-  var sql = `CREATE TABLE IF NOT EXISTS ${tableName}  (
-    id INT NOT NULL AUTO_INCREMENT,
-    reviewTitle VARCHAR(200),
-    reviewDescription LONGTEXT,
-    userName VARCHAR(255),
-    productid INT(100),
-    productHandle VARCHAR(255),
-    datePosted DATE DEFAULT NOW(),
-    reviewStatus VARCHAR(255),
-    starRating VARCHAR(255),
-    data JSON,
-    PRIMARY KEY (id)
-    )`;
-  con.query(sql, function (err, result) {
-    if (err) throw err;
-    console.log("Table created");
-    res.send(result);
-  });
-
-})
 
 // review middleware
 app.use('/api/review', reviewRoutes);
@@ -608,82 +580,6 @@ app.use('/api/settings', settingsRoute);
 
 
 ////
-
-// const createReviewsTable = async (_req, res) => {
-
-//   const shop = res.locals.shopify.session.shop;
-//   let shopLowercase = shop.toLowerCase();
-//   let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-//   let shopName = removeSuffix.replace("-", "_");
-//   let tableName = shopName + '_review'
-
-//   var sql = `CREATE TABLE IF NOT EXISTS ${tableName}  (
-//       id INT NOT NULL AUTO_INCREMENT,
-//       reviewTitle VARCHAR(200),
-//       reviewDescription LONGTEXT,
-//       userName VARCHAR(255),
-//       productid VARCHAR(100),
-//       productHandle VARCHAR(255),
-//       productTitle VARCHAR(255),
-//       Email VARCHAR(255) ,
-//       location VARCHAR(255) ,
-//       datePosted DATE DEFAULT NOW(),
-//       reviewStatus VARCHAR(255) DEFAULT 'Unpublished', 
-//       isSpam BOOLEAN DEFAULT 0,
-//       isInappropriate BOOLEAN DEFAULT 0,
-//       starRating INT(5),
-//       created_at TIMESTAMP NOT NULL,
-//       updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-//       data JSON,
-//       PRIMARY KEY (id)
-//       )`;
-//   con.query(sql, function (err, result) {
-//     if (err) throw err;
-//     console.log(JSON.stringify("Review Table created"));
-//     res.send(result);
-//   });
-
-// }
-// createReviewsTable();
-
-// /////
-// const createDetailTable = async (_req, res) => {
-
-//   const shop =  res.locals.shopify.session.shop;
-//   let shopLowercase = shop.toLowerCase();
-//   let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-//   let shopName = removeSuffix.replace("-", "_");
-//   let tableName = shopName + '_details'
-
-//   var sql = `CREATE TABLE IF NOT EXISTS ${tableName}  (
-//       id INT NOT NULL AUTO_INCREMENT,
-//       reviewTitle VARCHAR(200),
-//       reviewDescription LONGTEXT,
-//       userName VARCHAR(255),
-//       productid VARCHAR(100),
-//       productHandle VARCHAR(255),
-//       productTitle VARCHAR(255),
-//       Email VARCHAR(255) ,
-//       location VARCHAR(255) ,
-//       datePosted DATE DEFAULT NOW(),
-//       isSpam BOOLEAN DEFAULT 0,
-//       isInappropriate BOOLEAN DEFAULT 0,
-//       reviewStatus VARCHAR(255) DEFAULT 'Unpublished',
-//       starRating INT(5),
-//       reply LONGTEXT,
-//       created_at TIMESTAMP NOT NULL,
-//       updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-//       PRIMARY KEY (id)
-//       )`;
-//   con.query(sql, function (err, result) {
-//     if (err) throw err;
-//     res.send(JSON.stringify('detail table created'));
-//   });
-
-// }
-// createDetailTable();
-
-/////
 
 app.get("/api/products/count", async (_req, res) => {
   const countData = await shopify.api.rest.Product.count({

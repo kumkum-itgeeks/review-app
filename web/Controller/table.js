@@ -24,10 +24,7 @@ const createSettingsTable = (req, res) => {
 }
 const createReviewsTable = async (_req, res) => {
 
-  const shop = await res.locals.shopify.session.shop;
-  let shopLowercase = shop.toLowerCase();
-  let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  let shopName = removeSuffix.replace("-", "_");
+  const shopName = _req.shopname;
   let tableName = shopName + '_review'
 
   var sql = `CREATE TABLE IF NOT EXISTS ${tableName}  (
@@ -51,19 +48,20 @@ const createReviewsTable = async (_req, res) => {
       PRIMARY KEY (id)
       )`;
   con.query(sql, function (err, result) {
-    if (err) throw err;
-    console.log(JSON.stringify("Review Table created"));
-    res.send(result);
+    if (err) {
+      console.error('error creating review table =>>' , err)
+    }
+    else{
+      console.log(JSON.stringify("Review Table created"))
+      res.send(JSON.stringify({message: " review table created"}));
+    }
   });
 
 }
 
 const createDetailTable = async (_req, res) => {
 
-  const shop = await res.locals.shopify.session.shop;
-  let shopLowercase = shop.toLowerCase();
-  let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  let shopName = removeSuffix.replace("-", "_");
+  const shopName = _req.shopname;
   let tableName = shopName + '_details'
 
   var sql = `CREATE TABLE IF NOT EXISTS ${tableName}  (
@@ -87,8 +85,13 @@ const createDetailTable = async (_req, res) => {
       PRIMARY KEY (id)
       )`;
   con.query(sql, function (err, result) {
-    if (err) throw err;
-    res.send(JSON.stringify('detail table created'));
+    if (err){
+      console.error('error creating details table', err)
+    }
+    else{
+      res.send(JSON.stringify({message: " details table created"}));
+    }
+
   });
 
 }
@@ -422,8 +425,12 @@ const createDeletedReviewsTable = async(req, res)=>{
     PRIMARY KEY (id)
     )`;
 con.query(sql, function (err, result) {
-  if (err) throw err;
-  res.send(JSON.stringify({message:'export deletd review table created'}));
-});
+  if (err) {
+    console.error('error creating delted review table ' , err)
+  }
+  else{
+    res.send(JSON.stringify({message:'export deletd review table created'}));
+  }
+})
 }
 export default { createReviewsTable, createDetailTable, createMetafield, updateMetafields, createSettingsTable , createDeletedReviewsTable}

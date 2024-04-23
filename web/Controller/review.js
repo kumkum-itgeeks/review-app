@@ -11,10 +11,7 @@ import logger from '../frontend/assets/logger.js';
 
 const totalReviews = (req, res) => {
   const status = req.params.status;
-  const shop = res.locals.shopify.session.shop;
-  let shopLowercase = shop.toLowerCase();
-  let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  let shopName = removeSuffix.replace("-", "_");
+  const shopName = req.shopname
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
   if (status == 'All') {
@@ -50,10 +47,7 @@ const getAllReviews = (req, res) => {
   const limit = 3;
   const offset = (pageNumber - 1) * limit;
   const sortStr = sortSelected.toString();
-  const shop = res.locals.shopify.session.shop;
-  let shopLowercase = shop.toLowerCase();
-  let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  let shopName = removeSuffix.replace("-", "_");
+  const shopName = req.shopname;
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
 
@@ -104,10 +98,11 @@ const getAllReviews = (req, res) => {
 
 const getReviews = (req, res) => {
   const status = req.params.status;
-  const shop = res.locals.shopify.session.shop;
-  let shopLowercase = shop.toLowerCase();
-  let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  let shopName = removeSuffix.replace("-", "_");
+  // const shop = res.locals.shopify.session.shop;
+  // let shopLowercase = shop.toLowerCase();
+  // let removeSuffix = shopLowercase.replace(".myshopify.com", "");
+  // let shopName = removeSuffix.replace("-", "_");
+  const shopName = req.shopname
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
 
@@ -120,10 +115,7 @@ const getReviews = (req, res) => {
 
 const deleteReview = (req, res) => {
   const id = req.params.id;
-  const shop = res.locals.shopify.session.shop;
-  let shopLowercase = shop.toLowerCase();
-  let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  let shopName = removeSuffix.replace("-", "_");
+  const shopName = req.shopname
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
   let deletdReviewTable = shopName + '_deleted_reviews'
@@ -134,8 +126,7 @@ const deleteReview = (req, res) => {
 
   const getHandleQuery = ` SELECT * FROM ${detailTable} WHERE id IN (${id})`
   const query = `DELETE FROM ${reviewTable} WHERE id IN (${id}) ; DELETE FROM ${detailTable} WHERE id IN (${id})`
-  // var saveReviewsQuery = `INSERT INTO ${deletdReviewTable} (${columns}) VALUES ${values}`;
-  // const saveReviewsQuery = `INSERT INTO ${deletdReviewTable} ${totalData}`
+
 
   con.query(getHandleQuery, function async(err, result) {
     if (err) throw err;
@@ -191,10 +182,11 @@ const deleteReview = (req, res) => {
 
 const UnSpamReview = (req, res) => {
   const id = req.params.id;
-  const shop = res.locals.shopify.session.shop;
-  let shopLowercase = shop.toLowerCase();
-  let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  let shopName = removeSuffix.replace("-", "_");
+  // const shop = res.locals.shopify.session.shop;
+  // let shopLowercase = shop.toLowerCase();
+  // let removeSuffix = shopLowercase.replace(".myshopify.com", "");
+  // let shopName = removeSuffix.replace("-", "_");
+  const shopName = req.shopname;
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
 
@@ -208,10 +200,11 @@ const UnSpamReview = (req, res) => {
 
 const publishReview = (req, res) => {
   const id = req.params.id;
-  const shop = res.locals.shopify.session.shop;
-  let shopLowercase = shop.toLowerCase();
-  let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  let shopName = removeSuffix.replace("-", "_");
+  // const shop = res.locals.shopify.session.shop;
+  // let shopLowercase = shop.toLowerCase();
+  // let removeSuffix = shopLowercase.replace(".myshopify.com", "");
+  // let shopName = removeSuffix.replace("-", "_");
+  let shopName= req.shopname;
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
 
@@ -225,10 +218,11 @@ const publishReview = (req, res) => {
 
 const unpublishReview = (req, res) => {
   const id = req.params.id;
-  const shop = res.locals.shopify.session.shop;
-  let shopLowercase = shop.toLowerCase();
-  let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  let shopName = removeSuffix.replace("-", "_");
+  // const shop = res.locals.shopify.session.shop;
+  // let shopLowercase = shop.toLowerCase();
+  // let removeSuffix = shopLowercase.replace(".myshopify.com", "");
+  // let shopName = removeSuffix.replace("-", "_");
+  let shopName= req.shopname;
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
 
@@ -241,10 +235,11 @@ const unpublishReview = (req, res) => {
 
 const getProductReviews = (req, res) => {
   const id = req.params.id;
-  const shop = res.locals.shopify.session.shop;
-  let shopLowercase = shop.toLowerCase();
-  let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  let shopName = removeSuffix.replace("-", "_");
+  // const shop = res.locals.shopify.session.shop;
+  // let shopLowercase = shop.toLowerCase();
+  // let removeSuffix = shopLowercase.replace(".myshopify.com", "");
+  // let shopName = removeSuffix.replace("-", "_");
+  let shopName= req.shopname;
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
 
@@ -253,7 +248,7 @@ const getProductReviews = (req, res) => {
     if (err) throw err;
     res.send(JSON.stringify(result));
   })
-  // res.send(JSON.stringify('product review'))
+
 }
 
 const getAllProductReviews = (req, res) => {
@@ -272,10 +267,11 @@ const getAllProductReviews = (req, res) => {
   const limit = 3;
   const offset = (pageNumber - 1) * limit;
   const sortStr = sortSelected.toString();
-  const shop = res.locals.shopify.session.shop;
-  let shopLowercase = shop.toLowerCase();
-  let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  let shopName = removeSuffix.replace("-", "_");
+  // const shop = res.locals.shopify.session.shop;
+  // let shopLowercase = shop.toLowerCase();
+  // let removeSuffix = shopLowercase.replace(".myshopify.com", "");
+  // let shopName = removeSuffix.replace("-", "_");
+  let shopName= req.shopname;
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
 

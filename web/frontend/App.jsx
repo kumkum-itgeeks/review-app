@@ -1,6 +1,7 @@
 import { BrowserRouter } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { NavigationMenu } from "@shopify/app-bridge-react";
+
 import Routes from "./Routes";
 
 import {
@@ -20,6 +21,7 @@ export default function App() {
       <BrowserRouter>
         <AppBridgeProvider>
           <QueryProvider>
+            {/* <CreateTables> */}
             <NavigationMenu
               navigationLinks={[
                 {
@@ -37,6 +39,7 @@ export default function App() {
               ]}
             />
             <Routes pages={pages} />
+            {/* </CreateTables> */}
           </QueryProvider>
         </AppBridgeProvider>
       </BrowserRouter>

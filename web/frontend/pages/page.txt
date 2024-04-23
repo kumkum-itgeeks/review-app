@@ -169,3 +169,8 @@ loading spinner and loading skeleton
 * Export deleted reviews completed .
 * loading while importing reviews .
 * show review import error description , if any.
+
+23/04/24
+
+* database table creation functionality for any store.
+* default settings
