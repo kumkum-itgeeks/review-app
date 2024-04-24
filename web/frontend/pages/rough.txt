@@ -1,0 +1,6 @@
+
+
+* remove file selected brackets
+* remove links from description and title
+* no review found detailed description 
+* loading on products page

@@ -1,8 +1,9 @@
 import {
   Text, Page, Button, IndexTable, IndexFilters, useSetIndexFiltersMode, useIndexResourceState,
   Badge, useBreakpoints, Box, Link, InlineStack, Image, Pagination, BlockStack, DropZone,
-  Tag, Modal, Checkbox, Thumbnail,EmptySearchResult,Spinner
+  Tag, Modal, Checkbox, Thumbnail, EmptySearchResult, Spinner
 } from "@shopify/polaris";
+
 import { ImportIcon, ExportIcon } from '@shopify/polaris-icons';
 import { useTranslation, Trans } from "react-i18next";
 import { useAuthenticatedFetch } from "../hooks";
@@ -11,8 +12,6 @@ import { useNavigate, useToast } from "@shopify/app-bridge-react";
 import emptyStar from '../assets/star-regular.svg'
 import solidStar from '../assets/star-solid.svg'
 import '../css/index.css';
-// import winston from "winston";
-// import logger from "../assets/logger";
 
 
 export default function HomePage() {
@@ -25,14 +24,14 @@ export default function HomePage() {
   const [tableData, setTableData] = useState([]);
   const [file, setFile] = useState([]);
   const [fileStatus, setFileStatus] = useState('');
-  const [bulkSelectCount , setBulkSelectCount] =useState();
+  const [bulkSelectCount, setBulkSelectCount] = useState();
   const [importDisabled, setImportDisabled] = useState(true);
   const [importErrors, setImportErrors] = useState([]);
   const [tableCreated, setTableCreated] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [queryValue, setQueryValue] = useState('');
   const [taggedWith, setTaggedWith] = useState('');
-  const [lastPage , setLastPage]= useState(false)
+  const [lastPage, setLastPage] = useState(false)
   const [importLoading, setImportLoading] = useState(false);
   const [recordsPerPage, setRecordsPerPage] = useState(3);
   const [moneySpent, setMoneySpent] = useState(undefined,);
@@ -63,15 +62,15 @@ export default function HomePage() {
 
   //********useEffects********
 
-  useEffect(() => {
-    createAllTables()
-    
-  }, [])
+  // useEffect(() => {
+  //   createAllTables()
+
+  // }, [])
 
   useEffect(() => {
-    tableCreated ?
+    // tableCreated ?
       getTotalRows()
-      : ''
+      // : ''
     setPageNumber(1);
   }, [reviewStatus])
 
@@ -84,16 +83,15 @@ export default function HomePage() {
       setImportDisabled(() => true)
     }
     else {
-
       setImportDisabled(() => true)
     }
   }, [fileStatus])
 
   useEffect(() => {
     setLoading(true)
-    tableCreated ?
+    // tableCreated ?
       getAllReviews()
-      : ''
+      // : ''
 
   }, [queryValue, pageNumber, sortSelected, reviewStatus,])
 
@@ -111,24 +109,29 @@ export default function HomePage() {
 
 
   useEffect(() => {
-    !isLastPage ? setNextPage(true) : setNextPage(true)
-    pageNumber != 1 ? setPrevPage(true) : setPrevPage(false)
-    // if(pageNumber===1 && !isLastPage){
-    //   setPrevPage(false)
-    //   setNextPage(true)
-    // }
-    // else if(pageNumber===1 && isLastPage){
-    //   setPrevPage(false)
-    //   setNextPage(false)
-    // }
-    // else if(pageNumber!=1 && !isLastPage){
-    //   setPrevPage(true)
-    //   setNextPage(true)
-    // }
-    // else if(isLastPage && pageNumber!=1){
-    //   setPrevPage(true)
-    //   setNextPage(false)
-    // }
+    // !isLastPage ? setNextPage(true) : setNextPage(true)
+    // pageNumber != 1 ? setPrevPage(true) : setPrevPage(false)
+    // isLastPage ? setNextPage(false) :''
+
+    if (pageNumber === 1 && !isLastPage) {
+      setNextPage(true)
+      setPrevPage(false)
+    }
+    else if (pageNumber === 1) {
+      setPrevPage(false)
+      setNextPage(true)
+    }
+    else if (pageNumber != 1 && !isLastPage) {
+      setPrevPage(true)
+      setNextPage(true)
+    }
+    else if (isLastPage && pageNumber != 1) {
+      setPrevPage(true)
+      setNextPage(false)
+    }
+    else {
+      setNextPage(true)
+    }
   }, [pageNumber, queryValue, sortSelected, reviewStatus])
 
 
@@ -152,23 +155,35 @@ export default function HomePage() {
 
   //*******functions**********
 
-  async function createAllTables() {
-    await fetch(`api/table/createReviewTable`)
+  const showToast = (message) => {
+    show(message, { duration: 2000 })
+  }
+
+  const setUpdateCount = (count, updateMessage, noUpdateMessage) => {
+    if (count === 0) {
+      showToast(`${noUpdateMessage}`)
+    }
+    else {
+      showToast(`${count} ${updateMessage}`)
+    }
+  }
+   async function createAllTables() {
+     await fetch(`api/table/createReviewTable`)
       .then((res) => res.json())
       .then((data) => console.log(data))
 
 
-    await fetch(`api/table/createDetailTable`)
+     await fetch(`api/table/createDetailTable`)
       .then((res) => res.json())
       .then((data) => console.log(data))
 
-    await fetch(`api/table/createDeletedReviewsTable`)
+     await fetch(`api/table/createDeletedReviewsTable`)
       .then((res) => res.json())
       .then((data) => { console.log(data) })
 
-    await fetch(`api/settings/addSettingsData`)
+     await fetch(`api/settings/addSettingsData`)
       .then((res) => res.json())
-      .then((data) => { console.log(data), setTableCreated(true) , getAllReviews() })
+      .then((data) => { console.log(data), getAllReviews() })
 
   }
   const ExportDeletedReviews = () => {
@@ -372,25 +387,25 @@ export default function HomePage() {
 
     fetch(`/api/review/deleteReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), show(' review deleted ', { duration: 2000 }), updateMetafield(data), clearSelection() });
+      .then(data => { getAllReviews(), showToast(selectedResources?.length > 1 ? ` ${selectedResources?.length} Reviews deleted.` : ` ${selectedResources?.length} Review deleted.`), updateMetafield(data), clearSelection() });
   }
 
   const unSpamReview = () => {
     fetch(`/api/review/unSpam/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), show(' review unspammed! ', { duration: 2000 }), updateMetafield(), clearSelection() });
+      .then(data => { getAllReviews(), setUpdateCount(Number(data.count), Number(data.count) > 1 ? 'Reviews unspammed.' : 'Review unspammed.', 'Reviews already unspammed.'), clearSelection() });
   }
 
   const publishReview = () => {
     fetch(`/api/review/publishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), show(' review published! ', { duration: 2000 }), updateMetafield(), clearSelection() });
+      .then(data => { getAllReviews(), setUpdateCount(Number(data.count), Number(data.count) > 1 ? 'Reviews published.' : 'Review published.', 'Reviews already published.'), updateMetafield(), clearSelection() });
   }
 
   const unpublishReview = () => {
     fetch(`/api/review/unpublishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), show(' review unpublished! ', { duration: 2000 }), updateMetafield(), clearSelection() });
+      .then(data => { getAllReviews(), setUpdateCount(Number(data.count), Number(data.count) > 1 ? 'Reviews unpublished.' : 'Review unpublished.', 'Reviews already unpublished.'), updateMetafield(), clearSelection() });
   }
 
   const updateMetafield = (data) => {
@@ -408,7 +423,7 @@ export default function HomePage() {
   }
 
   const getAllReviews = () => {
-    // setLoading(true);
+    setLoading(true);
     fetch('/api/review/getAllReviews', {
       method: 'POST',
       headers: {
@@ -489,15 +504,16 @@ export default function HomePage() {
     onAction: () => { setReviewStatus(item) },
     id: `${item}-${index}`,
     isLocked: index === 0,
-
   }));
 
   const emptyStateMarkup = (
-    <EmptySearchResult
-      title={'No Reviews Found !'}
-      description={'try changing the filters or search term'}
-      withIllustration
-    />
+    // <Box background="bg-fill"  minHeight="300px" paddingBlock={0} >
+      <EmptySearchResult
+        title={'No Reviews Found !'}
+        withIllustration
+        
+      />
+    // </Box>
   );
 
   const sortOptions = [
@@ -614,7 +630,7 @@ export default function HomePage() {
       onAction: () => unpublishReview(),
     },
     {
-      content: 'delete selected reviews',
+      content: 'Delete selected reviews',
       onAction: () => deleteReview(),
     }
   ];
@@ -671,7 +687,8 @@ export default function HomePage() {
               mode={mode}
               setMode={setMode}
               loading={Loading}
-
+              filteringAccessibilityTooltip="Search"
+              
             />
             <IndexTable
               hasZebraStriping={false}
@@ -693,7 +710,11 @@ export default function HomePage() {
               ]}
             >
               {rowMarkup}
+           
             </IndexTable>
+
+
+
 
           </Box>
           <InlineStack align="center">
@@ -730,7 +751,7 @@ export default function HomePage() {
 
           <Box padding={400} >
             {
-              importErrors?.map((lineNumber,ind) => {
+              importErrors?.map((lineNumber, ind) => {
                 return <Text key={ind}>Line {lineNumber} - Error : could not find product ! </Text>
               })
 

@@ -15,5 +15,7 @@ router.get('/createSettingsTable', TableController.createSettingsTable);
 
 router.get('/createDeletedReviewsTable', TableController.createDeletedReviewsTable);
 
+router.get('/checkTableExists', TableController.checkTableExists);
+
 export default router;
 

@@ -759,7 +759,7 @@ export default function Settings() {
                       autoComplete="off"
                     />
 
-                    <Text as='p' tone="subdued">
+                    <Text as='div' tone="subdued">
                       {'This field supports very basic javascript syntax .'} <Divider borderColor='transparent'/>{' here ( username = ${itm.userName} ) , ( review date = ${itm.datePosted} ) ' }
                     </Text>
 

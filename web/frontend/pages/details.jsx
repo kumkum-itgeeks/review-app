@@ -197,19 +197,19 @@ const dissmissInappropriate=()=>{
   }, [productDescription])
   return (
     <Page
-      title={review ? `${review.reviewTitle}` : ''}
-      titleMetadata={review ? `${formatDate(review.datePosted)}` : ''}
+      title={review?.reviewTitle}
+      titleMetadata={ formatDate(review?.datePosted)}
     >
 
       <BlockStack gap='300'>
         <Box maxWidth="100px">
         <Button variant="secondary" onClick={() => changeStatus()} textAlign="start" size="large" fullWidth='false'>
           {
-            review ?
-              review.reviewStatus == 'Published' ?
+           
+              review?.reviewStatus == 'Published' ?
                 'X Unpublish' :
                 <> &#x2713; {'Publish'}</>
-              : ""
+              
           }
         </Button>
         </Box>
@@ -252,33 +252,32 @@ const dissmissInappropriate=()=>{
                               :
                               <>
                                 <InlineStack>
-                                  {review ?
-                                    stars.map((itm) =>
-                                      review.starRating >= itm ?
+                                  {
+                                    stars?.map((itm) =>
+                                      review?.starRating >= itm ?
                                         <Image source={solidStar} key={itm} />
                                         :
                                         <Image source={emptyStar} key={itm} />
 
 
                                     )
-                                    : ''}
+                                    }
                                 </InlineStack>
                                 <Box minWidth="450px">
 
                                   <InlineStack align="end" gap={200}>
 
-                                    <Text>{review ? review.isSpam ? <Badge tone="critical">SPAM</Badge> : '' : ""} </Text>
-                                    <Text>{review ?
-                                      review.reviewStatus == 'Published' ?
+                                    <Text>{ review?.isSpam ? <Badge tone="critical">SPAM</Badge> : '' } </Text>
+                                    <Text>{
+                                      review?.reviewStatus == 'Published' ?
                                         <Badge tone="success" progress="complete">
-                                          {review.reviewStatus}
+                                          {review?.reviewStatus}
                                         </Badge> :
-                                        review.reviewStatus == 'Unpublished' ?
+                                        review?.reviewStatus == 'Unpublished' ?
                                           <Badge tone='warning' progress="incomplete">
-                                            {review.reviewStatus}
+                                            {review?.reviewStatus}
                                           </Badge>
                                           : ''
-                                      : ''
                                     }
                                     </Text>
                                   </InlineStack>
@@ -289,17 +288,17 @@ const dissmissInappropriate=()=>{
 
                         </InlineStack>
                         <BlockStack gap={400}>
-                          <Text variant="headingMd" as="h6" >{review ? `${review.reviewTitle}` : ''}</Text>
-                          <Text variant="bodyLg" as="p">{review ? `${review.reviewDescription}` : ''}</Text>
+                          <Text variant="headingMd" as="h6" >{review?.reviewTitle}</Text>
+                          <Text variant="bodyLg" as="p">{review?.reviewDescription}</Text>
                         </BlockStack>
                         <Divider />
                         <InlineStack>
-                          <Text>{review ? `${review.userName}` : ''}</Text>
+                          <Text>{review?.userName}</Text>
                           {
-                            (review?.location) ? <Text>,  from {review.location} </Text> : ''
+                            (review?.location) ? <Text>,  from {review?.location} </Text> : ''
                           }
 
-                          <><Button variant="plain">{review ? `( ${review.Email} )` : ''}</Button></>
+                          <><Button variant="plain">{review?.Email}</Button></>
                         </InlineStack>
                       </BlockStack>
                     </>
@@ -321,12 +320,12 @@ const dissmissInappropriate=()=>{
                     <>
                       <BlockStack gap={400} inlineAlign="start">
                         <Text variant="headingLg" as="h5" fontWeight='medium'>Product details</Text>
-                        <Thumbnail source={product ? `${product.media.edges[0].node.preview.image.originalSrc}` : ''} alt="product img" />
+                        <Thumbnail source={product?.media?.edges[0].node.preview.image.originalSrc } alt="product img" />
                       </BlockStack>
                       <Box paddingBlock={300}>
                         <Divider />
                       </Box>
-                      <Text variant="bodyLg" as="p">{product ? `${product.title}` : ''}</Text>
+                      <Text variant="bodyLg" as="p">{product?.title}</Text>
                       <Box maxWidth="100px">
                         <InlineStack>
                           {

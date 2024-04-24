@@ -1,4 +1,4 @@
-const myUrl = `https://games-showtimes-patch-substances.trycloudflare.com`
+const myUrl = `https://inputs-thee-post-intelligence.trycloudflare.com`
 
    function test(shop, handle , avgRating , count) {
     fetch(`${myUrl}/api/getReviewCount/${JSON.stringify(shop)}/${JSON.stringify(handle)}`)
@@ -15,7 +15,6 @@ const myUrl = `https://games-showtimes-patch-substances.trycloudflare.com`
 
    function setColor(data){
     const {color}=data;
-    console.log('herer')
     let activeStars=document.getElementsByClassName('active-star');
     let halfStar=document.getElementById('half-star');
     halfStar?.style.setProperty('--star-color', color);
@@ -28,7 +27,7 @@ const myUrl = `https://games-showtimes-patch-substances.trycloudflare.com`
 
   function setData(data , shop , avgRating , count){
 
-    console.log('meta avg ', avgRating)
+  
     let starss=[1,2,3,4,5]
     const {averageRating , reviewCount} = data;
 

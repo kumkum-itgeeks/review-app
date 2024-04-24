@@ -52,14 +52,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
-  
+
   const Obj = JSON.parse(_req.params.obj);
   const shop = JSON.parse(_req.params.shop).toLowerCase();
   const handle = _req.params.handle;
   const Id = _req.params.id;
-  const reviewTable = (shop).replaceAll("-","_").trim() + '_review'
-  const detailsTable = (shop).replaceAll("-","_").trim() + '_details'
-  const settingsTable = (shop).replaceAll("-","_").trim() + '_settings'
+  const reviewTable = (shop).replaceAll("-", "_").trim() + '_review'
+  const detailsTable = (shop).replaceAll("-", "_").trim() + '_details'
+  const settingsTable = (shop).replaceAll("-", "_").trim() + '_settings'
   var averageRating;
   var length;
   const Columns = (Object.keys(Obj))
@@ -202,7 +202,7 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
       }
 
       //****************** creating metafield *************************/
-      
+
       const createMetafieldMutation = `
       mutation {
         productUpdate(
@@ -237,24 +237,24 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
           }
         }
         `
-        
-        //****************** updating my metafield *************************/
 
-        const metafieldsWithId = [
-          {
-            id: `${RatingMetaId}`,
-            value: `${averageRating?.toFixed(1)}`, // Default value for review count
-            
-          },
-          {
-            id: `${ReviewCountId}`,
-            value: `${length}`, // Default value for review count
-            
-          },
-        ];
+      //****************** updating my metafield *************************/
 
-        // Define the GraphQL mutation
-        const UpdateMetafieldMutation = `mutation productUpdate($input: ProductInput!) {
+      const metafieldsWithId = [
+        {
+          id: `${RatingMetaId}`,
+          value: `${averageRating?.toFixed(1)}`, // Default value for review count
+
+        },
+        {
+          id: `${ReviewCountId}`,
+          value: `${length}`, // Default value for review count
+
+        },
+      ];
+
+      // Define the GraphQL mutation
+      const UpdateMetafieldMutation = `mutation productUpdate($input: ProductInput!) {
     productUpdate(input: $input) {
     product {
     id
@@ -285,7 +285,7 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
 
       // ************ checking if metafield exists or not //
-      if (RatingMetaId === null || RatingMetaId === '' || RatingMetaId === undefined || ReviewCountId === null || ReviewCountId === '' || ReviewCountId === undefined ) {
+      if (RatingMetaId === null || RatingMetaId === '' || RatingMetaId === undefined || ReviewCountId === null || ReviewCountId === '' || ReviewCountId === undefined) {
 
         console.log(' creating metafield **********************************************')
         try {
@@ -348,8 +348,8 @@ app.get(`/api/getReviews/:shop/:handle/:page`, (req, res) => {
   const productHandle = (req.params.handle);
   const pageNumber = Number(req.params.page);
 
-  const detailsTable = (shop).replaceAll("-","_").trim() + '_details'
-  const settingsTable = (shop).replaceAll("-","_").trim() + '_settings'
+  const detailsTable = (shop).replaceAll("-", "_").trim() + '_details'
+  const settingsTable = (shop).replaceAll("-", "_").trim() + '_settings'
   const type = ['starIconColor', 'reviewListingLayout', 'reviewListingText', 'reviewFormText', 'badgeText'];
   const typeValue = type.map(itm => `'${itm}'`).join(', ');
   const settingsQuery = `SELECT type , settings FROM ${settingsTable} WHERE type IN (${typeValue})`;
@@ -416,7 +416,7 @@ app.get(`/api/getReviews/:shop/:handle/:page`, (req, res) => {
 
 app.get("/api/checkReviewsOnload/:shop", async (_req, res) => {
   const shop = JSON.parse(_req.params.shop).toLowerCase();
-  const settingsTable = (shop).replaceAll("-","_").trim() + '_settings';
+  const settingsTable = (shop).replaceAll("-", "_").trim() + '_settings';
 
   const query = `SELECT settings from ${settingsTable} Where type ='reviewListingLayout' `;
 
@@ -439,8 +439,8 @@ app.get("/api/checkReviewsOnload/:shop", async (_req, res) => {
 app.get("/api/reportInappropriate/:shop/:id", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
-  const reviewTable = (shop).replaceAll("-","_").trim() + '_review';
-  const detailsTable = (shop).replaceAll("-","_").trim() + '_details';
+  const reviewTable = (shop).replaceAll("-", "_").trim() + '_review';
+  const detailsTable = (shop).replaceAll("-", "_").trim() + '_details';
   const Id = req.params.id;
 
 
@@ -468,7 +468,7 @@ app.get("/api/getReviewCount/:shop/:handle", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
   const handle = req.params.handle;
-  const reviewTable = (shop).replaceAll("-","_").trim() + '_review';
+  const reviewTable = (shop).replaceAll("-", "_").trim() + '_review';
   var averageRating;
   var length;
 
@@ -500,7 +500,7 @@ app.get("/api/getReviewCount/:shop/:handle", (req, res) => {
 app.get("/api/starColor/:shop", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
-  const settingTable = (shop).replaceAll("-","_").trim() + '_settings';
+  const settingTable = (shop).replaceAll("-", "_").trim() + '_settings';
 
   const query = ` SELECT settings FROM ${settingTable} WHERE type='starIconColor'`;
 
@@ -521,6 +521,268 @@ app.get("/api/starColor/:shop", (req, res) => {
   });
 })
 
+app.get("/api/checkTableExists/:shop", (req, res) => {
+
+  const shop = JSON.parse(req.params.shop).toLowerCase();
+  const reviewTable = (shop).replaceAll("-", "_").trim() + '_review';
+
+  const query = `SELECT * FROM information_schema.tables WHERE table_schema = 'reviews' AND table_name = '${reviewTable}'`;
+
+  con.query(query, function (err, tables) {
+    if (err) {
+      console.error('error checking tables', err);
+    }
+    if (tables.length > 0) {
+      res.send(JSON.stringify(true))
+    }
+    else {
+      res.send(JSON.stringify(false))
+    }
+  })
+}
+)
+
+app.get("/api/createAllTables/:shop", (req, res) => {
+
+  const shop = JSON.parse(req.params.shop).toLowerCase();
+  const shopName = ((shop).replaceAll("-", "_")).trim();
+  const reviewTable = shopName+ '_review';
+  const detailsTable = shopName + '_details'
+  const SettingsTable = shopName + '_settings'
+  const deletedTable = shopName + '_deleted_reviews'
+
+  // let tableName = shopName + '_review'
+
+  var createReviewTable = `CREATE TABLE IF NOT EXISTS ${reviewTable}  (
+      id INT NOT NULL AUTO_INCREMENT,
+      reviewTitle VARCHAR(200),
+      reviewDescription LONGTEXT,
+      userName VARCHAR(255),
+      productid VARCHAR(100),
+      productHandle VARCHAR(255),
+      productTitle VARCHAR(255),
+      Email VARCHAR(255) ,
+      location VARCHAR(255) ,
+      datePosted DATE DEFAULT NOW(),
+      reviewStatus VARCHAR(255) DEFAULT 'Unpublished', 
+      isSpam BOOLEAN DEFAULT 0,
+      isInappropriate BOOLEAN DEFAULT 0,
+      starRating INT(5),
+      created_at TIMESTAMP NOT NULL,
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+      data JSON,
+      PRIMARY KEY (id)
+      )`;
+
+  con.query(createReviewTable, function (err, tables) {
+    if (err) {
+      console.error('error creating review table', err);
+    }
+    else {
+      console.log('review table created')
+    }
+  })
+
+
+
+  var createDetailsTable = `CREATE TABLE IF NOT EXISTS ${detailsTable}  (
+      id INT NOT NULL AUTO_INCREMENT,
+      reviewTitle VARCHAR(200),
+      reviewDescription LONGTEXT,
+      userName VARCHAR(255),
+      productid VARCHAR(100),
+      productHandle VARCHAR(255),
+      productTitle VARCHAR(255),
+      Email VARCHAR(255) ,
+      location VARCHAR(255) ,
+      datePosted DATE DEFAULT NOW(),
+      isSpam BOOLEAN DEFAULT 0,
+      isInappropriate BOOLEAN DEFAULT 0,
+      reviewStatus VARCHAR(255) DEFAULT 'Unpublished',
+      starRating INT(5),
+      reply LONGTEXT,
+      created_at TIMESTAMP NOT NULL,
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+      PRIMARY KEY (id)
+      )`;
+  con.query(createDetailsTable, function (err, result) {
+    if (err) {
+      console.error('error creating details table', err)
+    }
+    else {
+      console.log( " details table created" );
+    }
+
+  });
+
+  const addSettings = async() => {
+
+    // const SettingsTable = req.shopname + '_settings';
+  
+    // if changing the json data after data is inserted once in default table  . It wont affect the data . and new data will
+    // not be inserted .
+    const jsonData =[
+      {
+        "type": "autopublish",
+        "setting": { "autopublish": "enabled" }
+      },
+      {
+        "type": "emailSettings",
+        "setting": { "sendEmail": true, "email": "yourEmail@gmail.com" }
+      },
+      {
+        "type": "starIconColor",
+        "setting": { "isThemeColor": "customcolor", "customColor": "#FFFF00" }
+      },
+      {
+        "type": "reviewListingLayout",
+        "setting": {
+          "reviewOnload": false,
+          "bordercolor": "#5A5A5A",
+          "dividercolor": "#e3e3e3",
+          "reviewListingPadding": "45",
+          "reviewPerpage": "4"
+        }
+      },
+      {
+        "type": "reviewListingText",
+        "setting": {
+          "reviewHeadline": "Customer Reviews",
+          "reviewLink": "Write a review",
+          "noReviewSummary": "No reviews yet !",
+          "reviewSummary": "Based on ${length} reviews",
+          "paginationNextLabel": "Next",
+          "paginationPrevLabel": "Previous",
+          "reportAsinappropriate": "Report review as Inappropriate",
+          "reportAsinappropriateMessage": "This review has been reported !",
+          "authorInformation": "<p><i><b>${itm.userName} </b> on <b>${itm.datePosted}</b></i></p>"
+        }
+      },
+      {
+        "type": "reviewFormText",
+        "setting": {
+          "authorEmail": "Email",
+          "emailHelpMessage": "john.smith@example.com...",
+          "emailType": "required",
+          "authorName": "Name",
+          "nameHelpMessage": "Enter your name...",
+          "nameType": "required",
+          "authorLocation": "Location",
+          "locationHelpMessage": "Enter your location",
+          "locationType": "hidden",
+          "reviewFormTitle": "Write a review",
+          "reviewRating": "Rating",
+          "reviewTitle": "Review Title",
+          "reviewTitleHelpMessage": "Give your review a title ...",
+          "reviewBody": "Body of Review",
+          "reviewBodyHelpMessage": "Write your comments heree...",
+          "submitButtton": "Submit Review",
+          "successMessage": "Thank you for submitting a review!",
+          "errorMessage": "Not all the fields have been filled out correctly!"
+        }
+      },
+      {
+        "type": "badgeText",
+        "setting": {
+          "noReviewsBadge": "No reviews",
+          "reviewsBadge": "{{product.reviews_count}} {{ product.reviews_count | pluralize: 'review', 'reviews' }}"
+        }
+      }
+    ]
+  
+    const types = jsonData.map((itm) => itm.type)
+    const settingsArray = jsonData.map((itm) => itm.setting)
+  
+    var sql = `CREATE TABLE IF NOT EXISTS ${SettingsTable}  (
+      id INT NOT NULL AUTO_INCREMENT,
+      type VARCHAR(200),
+      defaultSettings JSON,
+      settings JSON,
+      created_at TIMESTAMP NOT NULL,
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+      PRIMARY KEY (id)
+      )`;
+  
+    con.query(sql,  async (err, result) =>{
+      if (err) {
+        console.error('error creating settings table ==>>', err)
+      }
+      else{
+        
+        console.log(JSON.stringify("setting table created"));
+        // res.send(JSON.stringify({message:"setting table created"}));
+         await checkData()
+      }
+    });
+    
+  
+    async function checkData(){
+      let checkQuery = ` SELECT * from ${SettingsTable}`
+      con.query(checkQuery, async(err, results) => {
+        if (err) {
+          console.error('Error inserting data:', err);
+          return res.status(500).send('Error inserting data');
+        }
+        else{
+          if(results.length){
+           console.log(JSON.stringify({message:"setting table and correct data exists ."}));
+          }
+          else{
+            await addSettingdata()
+          }
+        }
+      });
+    }
+  
+    let query = `INSERT INTO ${SettingsTable} (type, defaultSettings , settings) VALUES ?`;
+  
+    const values = types.map((type, index) => [type, JSON.stringify(settingsArray[index]), JSON.stringify(settingsArray[index])]);
+  
+  
+    async function addSettingdata(){
+      
+      con.query(query, [values], (err, results) => {
+        if (err) {
+          console.error('Error inserting data:', err);
+          return res.status(500).send('Error inserting data');
+        }
+        console.log(JSON.stringify({message:"Data inserted in settings table "}));
+      });
+    }
+  
+  }
+  addSettings();
+
+  var createDeletedReviewTable = `CREATE TABLE IF NOT EXISTS ${deletedTable}  (
+    id INT NOT NULL AUTO_INCREMENT,
+    reviewTitle VARCHAR(200),
+    reviewDescription LONGTEXT,
+    userName VARCHAR(255),
+    productid VARCHAR(100),
+    productHandle VARCHAR(255),
+    productTitle VARCHAR(255),
+    Email VARCHAR(255) ,
+    location VARCHAR(255) ,
+    datePosted DATE DEFAULT NOW(),
+    isSpam BOOLEAN DEFAULT 0,
+    isInappropriate BOOLEAN DEFAULT 0,
+    reviewStatus VARCHAR(255) DEFAULT 'Unpublished',
+    starRating INT(5),
+    reply LONGTEXT,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    PRIMARY KEY (id)
+    )`;
+  con.query(createDeletedReviewTable, function (err, result) {
+    if (err) {
+      console.error('error creating delted review table ', err)
+    }
+    else {
+      res.send(JSON.stringify({ message: 'export deleted review table created' }));
+    }
+  })
+}
+)
 
 
 
@@ -548,6 +810,7 @@ app.post(
 app.use("/api/*", shopify.validateAuthenticatedSession(), getShopName);
 
 app.use(express.json());
+app.use("/external/*", shopify.validateAuthenticatedSession(), getShopName);
 
 
 
@@ -570,6 +833,7 @@ app.use('/api/review', reviewRoutes);
 
 //table middleware
 app.use('/api/table', tableRoutes);
+app.use('/external/table', tableRoutes);
 
 
 // details middleware
@@ -611,7 +875,7 @@ app.use(serveStatic(STATIC_PATH, { index: false }));
 app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
 
   // const shop = res.locals.shopify.session.shop;
-  
+
   return res
     .status(200)
     .set("Content-Type", "text/html")

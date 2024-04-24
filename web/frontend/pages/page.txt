@@ -174,3 +174,9 @@ loading spinner and loading skeleton
 
 * database table creation functionality for any store.
 * default settings
+
+24/04/24
+
+* app dashboard changes
+* table creation in extension 
+* reduced loading time 

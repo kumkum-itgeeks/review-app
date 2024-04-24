@@ -4,14 +4,14 @@ let currentPage = 1;
 var isthisLastPage;
 var starsettingColor;
 var shopName;
- let PageNumber = document.getElementById('page-number-display').value;
-const URL = `https://games-showtimes-patch-substances.trycloudflare.com`
+let PageNumber = document.getElementById('page-number-display').value;
+const URL = `https://inputs-thee-post-intelligence.trycloudflare.com`
 
 // dom content loaded********
 
 document.addEventListener('DOMContentLoaded', function () {
   const stars = document.querySelectorAll('.star-rating .star');
- 
+
   PageNumber = 1;
 
   stars.forEach(star => {
@@ -20,11 +20,11 @@ document.addEventListener('DOMContentLoaded', function () {
       stars.forEach(s => {
         if (s.getAttribute('data-rating') <= rating) {
           s.classList.add('active');
-          s.style.color=starsettingColor;
+          s.style.color = starsettingColor;
           s.style.opacity = '1';
         } else {
           s.style.opacity = '0.5';
-           // Fading effect for unselected stars on hover
+          // Fading effect for unselected stars on hover
         }
       });
     });
@@ -34,11 +34,11 @@ document.addEventListener('DOMContentLoaded', function () {
         stars.forEach(s => {
           if (s.getAttribute('data-rating') <= currentRating) {
             s.classList.add('active');
-            s.style.color=starsettingColor;
+            s.style.color = starsettingColor;
             s.style.opacity = '1';
           } else {
             s.classList.remove('active');
-            s.style.color='#ccc';
+            s.style.color = '#ccc';
             s.style.opacity = '0.5'; // Fading effect for unselected stars after click
           }
         });
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
         stars.forEach(s => {
           s.classList.remove('active');
           s.style.opacity = '1';
-          s.style.color='#ccc'; // Restore opacity for all stars after mouseleave
+          s.style.color = '#ccc'; // Restore opacity for all stars after mouseleave
         });
       }
     });
@@ -60,15 +60,15 @@ document.addEventListener('DOMContentLoaded', function () {
         currentRating = rating;
       }
 
-      console.log('You rated ' + currentRating + ' stars.');
+
       stars.forEach(s => {
         if (s.getAttribute('data-rating') <= currentRating) {
           s.classList.add('active');
-          s.style.color=starsettingColor;
+          s.style.color = starsettingColor;
           s.style.opacity = '1';
         } else {
           s.classList.remove('active');
-          s.style.color='#ccc';
+          s.style.color = '#ccc';
           s.style.opacity = '0.5'; // Fading effect for unselected stars after click
         }
       });
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // sending formdata****
 
 
-function addReviews(obj, shop , handle ,id) {
+function addReviews(obj, shop, handle, id) {
 
   fetch(`${URL}/api/addReviews/${JSON.stringify(obj)}/${JSON.stringify(shop)}/${JSON.stringify(handle)}/${id}`)
     .then(res => res.json())
@@ -93,26 +93,40 @@ function addReviews(obj, shop , handle ,id) {
 
 function getOnloadReviewsSetting(shop, handle) {
 
-
-  fetch(`${URL}/api/checkReviewsOnload/${JSON.stringify(shop)}`)
+  fetch(`${URL}/api/checkTableExists/${JSON.stringify(shop)}`)
     .then(res => res.json())
     .then(data => {
+      console.log('table exists ..')
       if (data === true) {
-        console.log(data)
-        document.getElementById('review-listing').style.display = 'block'
-        document.getElementById('pagination-section').style.display = 'block'
-        document.getElementById('review-count').style.textDecoration = 'none'
-        document.getElementById('review-count').style.pointerEvents = 'none'
+        getOnloadsetting()
       }
       else {
-
-        document.getElementById('review-listing').style.display = 'none'
-        document.getElementById('pagination-section').style.display = 'none'
-
+        console.log('creating tables ....')
+        fetch(`${URL}/api/createAllTables/${JSON.stringify(shop)}`)
+        .then(res => res.json())
+        .then(data =>{console.log(data), getOnloadsetting()})
       }
-      getReviews(shop, handle, PageNumber);
+    })
+
+    async function getOnloadsetting(){
+      fetch(`${URL}/api/checkReviewsOnload/${JSON.stringify(shop)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data === true) {
+          document.getElementById('review-listing').style.display = 'block'
+          document.getElementById('pagination-section').style.display = 'block'
+          document.getElementById('review-count').style.textDecoration = 'none'
+          document.getElementById('review-count').style.pointerEvents = 'none'
+        }
+        else {
+          document.getElementById('review-listing').style.display = 'none'
+          document.getElementById('pagination-section').style.display = 'none'
+        }
+        getReviews(shop, handle, PageNumber);
+      }
+      )
     }
-    )
+
 }
 
 // changing functionality  based on onload function results *****
@@ -146,9 +160,8 @@ function getReviews(shop, handle, page) {
 }
 
 // pagination functionality ********
-function setPrev(shop,  handle, e) {
+function setPrev(shop, handle, e) {
   e.preventDefault();
-  console.log('prev')
   PageNumber == 1 ?
     document.getElementById('prev-btn').disabled = true
     :
@@ -177,7 +190,6 @@ function setNext(shop, handle, e) {
     getReviews(shop, handle, PageNumber)
   }
 
-  console.log('page=>', PageNumber)
 }
 
 //report inappropriate review 
@@ -210,12 +222,12 @@ function getSettingsData(shop) {
 const setReviewInfo = (data, shop) => {
 
   let stars = [1, 2, 3, 4, 5];
- 
+
   document.getElementById('review-listing').innerHTML = dataDistructure(data, shop),
     document.getElementById('average-rating').innerHTML = `<div class='rating' >${stars.map((star) => {
-      return data.averageRating >= star ? '<a href="#" class="review-list-star">&#9733;</a>' : 
-      Number(data.averageRating) + 0.5 >= star ? '<a href="#" id="half-stars">&#9733;</a>':
-      '<a href="#">&#9733;</a>';
+      return data.averageRating >= star ? '<a href="#" class="review-list-star">&#9733;</a>' :
+        Number(data.averageRating) + 0.5 >= star ? '<a href="#" id="half-stars">&#9733;</a>' :
+          '<a href="#">&#9733;</a>';
     }).join('')}<div class='rating' >`;
 
   setSettings(data);
@@ -239,7 +251,7 @@ function setSettings(data) {
   let halfStars = document.getElementById('half-stars')
   halfStars?.style.setProperty('--star-color', (starColorData.map((itm) => itm.starIconColor.customColor)));
 
-  starsettingColor=(starColorData[0].starIconColor.customColor)
+  starsettingColor = (starColorData[0].starIconColor.customColor)
 
   for (var i = 0; i < star.length; i++) {
     star[i].style.color = (starColorData.map((itm) => itm.starIconColor.customColor));
@@ -490,7 +502,7 @@ function handleButtonClick(e) {
 
 
 // on submit validaiton (on click of submit button only)
-function handleSubmit(e, id, shop, product , handle) {
+function handleSubmit(e, id, shop, product, handle) {
   e.preventDefault();
   let stars = [1, 2, 3, 4, 5]
   let isEmailValid = false;
@@ -650,18 +662,18 @@ function handleSubmit(e, id, shop, product , handle) {
     }
 
     //api function for adding formdata **
-    addReviews(dataObj, shop , handle , id);
+    addReviews(dataObj, shop, handle, id);
 
 
     //thanks you message after submitting form **
     ThankyouMessage.style.display = 'block';
 
     //removing all errors from fields
-      var errorMessages = document.getElementsByClassName('input-box');
-      for (var i = 0; i < errorMessages.length; i++) {
-          errorMessages[i].style.borderColor = 'black';
-          errorMessages[i].style.borderWidth = "1px"
-      }
+    var errorMessages = document.getElementsByClassName('input-box');
+    for (var i = 0; i < errorMessages.length; i++) {
+      errorMessages[i].style.borderColor = 'black';
+      errorMessages[i].style.borderWidth = "1px"
+    }
 
     //removing form display after submit (can be visible after click on write review)**
     Form.style.display = 'none';
@@ -682,11 +694,11 @@ function handleSubmit(e, id, shop, product , handle) {
     currentRating = 0;
     document.getElementById('ratingErr').innerHTML = ''
 
-    let mystar=document.querySelectorAll('.star')
+    let mystar = document.querySelectorAll('.star')
 
 
     mystar.forEach((s) => {
-     s.style.color='#ccc'
+      s.style.color = '#ccc'
     })
 
   }

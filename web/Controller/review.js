@@ -14,6 +14,15 @@ const totalReviews = (req, res) => {
   const shopName = req.shopname
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
+  
+  const query = `SELECT * FROM information_schema.tables WHERE table_schema = 'reviews' AND table_name = '${reviewTable}'`;
+
+con.query(query, function (err, tables) {
+  if (err) {
+    throw err;
+  }
+
+  if (tables.length > 0) {
   if (status == 'All') {
     con.query(`SELECT * FROM ${reviewTable}`, function (err, result) {
       if (err) throw err;
@@ -36,6 +45,13 @@ const totalReviews = (req, res) => {
     })
   }
 }
+else{
+  res.status(200).send(JSON.stringify(0))
+
+}
+
+})
+}
 
 
 const getAllReviews = (req, res) => {
@@ -51,7 +67,15 @@ const getAllReviews = (req, res) => {
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
 
-  //check if search
+  const query = `SELECT * FROM information_schema.tables WHERE table_schema = 'reviews' AND table_name = '${reviewTable}'`;
+
+con.query(query, function (err, tables) {
+  if (err) {
+    throw err;
+  }
+
+  if (tables.length > 0) {
+      //check if search
   if (SearchValue.length <= 0) {
     //check if selected all reviews as filter
     if (status == 'All Reviews') {
@@ -93,6 +117,11 @@ const getAllReviews = (req, res) => {
       })
     }
   }
+  } else {
+    res.send(JSON.stringify([]));
+  }
+});
+
 }
 
 
@@ -133,7 +162,7 @@ const deleteReview = (req, res) => {
     // res.send(JSON.stringify(result));
     else {
       totalData = result;
-      result.map(async(obj) => {
+      result.map(async (obj) => {
         const { productid, productHandle } = obj;
         producthandle.push(productHandle);
         productId.push(productid);
@@ -143,33 +172,33 @@ const deleteReview = (req, res) => {
   })
 
   async function saveDeletedReviews() {
-  
-        totalData?.map((obj, ind) => {
 
-          let Columns = (Object.keys(obj))
-          let Data = Object.values(obj)
-          let DataValue = Data.map(cat => `'${cat}'`).join(', ');
+    totalData?.map((obj, ind) => {
 
-          const query = `INSERT INTO ${deletdReviewTable} (${Columns}) VALUES (${DataValue});`
-          con.query(query, async (err, results) => {
-            if (err) {
-              console.error('Error inserting reviews', err);
-              return;
-            }
-      
-            else {
-              if (ind === (totalData.length) - 1) {
-                await deleteReview()
-              }
-            }
-      
-          });
-        })
-       
-      }
-  
+      let Columns = (Object.keys(obj))
+      let Data = Object.values(obj)
+      let DataValue = Data.map(cat => `'${cat}'`).join(', ');
 
-  
+      const query = `INSERT INTO ${deletdReviewTable} (${Columns}) VALUES (${DataValue});`
+      con.query(query, async (err, results) => {
+        if (err) {
+          console.error('Error inserting reviews', err);
+          return;
+        }
+
+        else {
+          if (ind === (totalData.length) - 1) {
+            await deleteReview()
+          }
+        }
+
+      });
+    })
+
+  }
+
+
+
 
   async function deleteReview() {
     con.query(query, function (err, result) {
@@ -180,66 +209,88 @@ const deleteReview = (req, res) => {
 
 }
 
-const UnSpamReview = (req, res) => {
+const UnSpamReview = async(req, res) => {
   const id = req.params.id;
-  // const shop = res.locals.shopify.session.shop;
-  // let shopLowercase = shop.toLowerCase();
-  // let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  // let shopName = removeSuffix.replace("-", "_");
   const shopName = req.shopname;
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
-
+  let spamReviews;
 
   const query = `UPDATE ${reviewTable} SET isSpam = 0 WHERE id IN (${id}) ;UPDATE ${detailTable} SET isSpam = 0 WHERE id IN (${id}) `
-  con.query(query, function (err, result) {
-    if (err) throw err;
-    res.send(JSON.stringify(result));
+  const checkspam = `SELECT isSpam FROM ${reviewTable} WHERE id IN (${id}) AND isSpam = 1`
+  con.query(checkspam, async function (err, result) {
+    if (err) throw err; 
+    else{
+      spamReviews = result.length;
+      await updateUnspam()
+    }
   })
+
+
+  async function updateUnspam(){
+
+    con.query(query, function (err, result) {
+      if (err) throw err;
+      res.send(JSON.stringify({count : spamReviews}));
+    })
+  }
 }
 
-const publishReview = (req, res) => {
+const publishReview = async(req, res) => {
   const id = req.params.id;
-  // const shop = res.locals.shopify.session.shop;
-  // let shopLowercase = shop.toLowerCase();
-  // let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  // let shopName = removeSuffix.replace("-", "_");
-  let shopName= req.shopname;
+  let shopName = req.shopname;
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
+  var unPublished;
 
+  const checkPublish = `SELECT id FROM ${reviewTable} WHERE id IN (${id}) AND reviewStatus = 'Unpublished'`;
+  con.query(checkPublish, async function (err, result) {
+    if (err) throw err; 
+    else{
+      unPublished = result.length;
+      await publish()
+    }
+
+  })
 
   const query = `UPDATE ${reviewTable} SET reviewStatus = 'Published' WHERE id IN (${id});UPDATE ${detailTable} SET reviewStatus = 'Published' WHERE id IN (${id}) `
-  con.query(query, function (err, result) {
-    if (err) throw err;
-    res.send(JSON.stringify(result));
-  })
+  async function publish(){
+    con.query(query, function (err, result) {
+      if (err) throw err;
+      res.send(JSON.stringify({count : unPublished}));
+    })
+  }
 }
 
 const unpublishReview = (req, res) => {
   const id = req.params.id;
-  // const shop = res.locals.shopify.session.shop;
-  // let shopLowercase = shop.toLowerCase();
-  // let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  // let shopName = removeSuffix.replace("-", "_");
-  let shopName= req.shopname;
+  let shopName = req.shopname;
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
+  var published;
+
+  const checkUnpublish = `SELECT id FROM ${reviewTable} WHERE id IN (${id}) AND reviewStatus = 'Published'`;
+  con.query(checkUnpublish, async function (err, result) {
+    if (err) throw err; 
+    else{
+      published = result.length;
+      await unPublish()
+    }
+
+  })
 
   const query = `UPDATE ${reviewTable} SET reviewStatus = 'Unpublished' WHERE id IN (${id});UPDATE ${detailTable} SET reviewStatus = 'Unpublished' WHERE id IN (${id}) `
-  con.query(query, function (err, result) {
-    if (err) throw err;
-    res.send(JSON.stringify(result));
-  })
+  async function unPublish(){
+    con.query(query, function (err, result) {
+      if (err) throw err;
+      res.send(JSON.stringify({count : published}));
+    })
+  }
 }
 
 const getProductReviews = (req, res) => {
   const id = req.params.id;
-  // const shop = res.locals.shopify.session.shop;
-  // let shopLowercase = shop.toLowerCase();
-  // let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  // let shopName = removeSuffix.replace("-", "_");
-  let shopName= req.shopname;
+  let shopName = req.shopname;
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
 
@@ -267,11 +318,7 @@ const getAllProductReviews = (req, res) => {
   const limit = 3;
   const offset = (pageNumber - 1) * limit;
   const sortStr = sortSelected.toString();
-  // const shop = res.locals.shopify.session.shop;
-  // let shopLowercase = shop.toLowerCase();
-  // let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  // let shopName = removeSuffix.replace("-", "_");
-  let shopName= req.shopname;
+  let shopName = req.shopname;
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
 
@@ -740,4 +787,4 @@ mutation {
 }
 
 
-export default { getAllReviews, getProductReviews, totalReviews, getReviews, deleteReview, getDeletedReviewsForExport , UnSpamReview, publishReview, unpublishReview, getAllProductReviews, getReviewsForExport, checkProduct, addImportedReview } 
+export default { getAllReviews, getProductReviews, totalReviews, getReviews, deleteReview, getDeletedReviewsForExport, UnSpamReview, publishReview, unpublishReview, getAllProductReviews, getReviewsForExport, checkProduct, addImportedReview } 
