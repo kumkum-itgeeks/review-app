@@ -167,6 +167,20 @@ export default function HomePage() {
       showToast(`${count} ${updateMessage}`)
     }
   }
+
+  async function checkTableExistance(){
+    fetch(`/api/table/checkTableExists`)
+    .then(res => res.json())
+    .then(tableExists => {
+      console.log(tableExists)
+      if(tableExists===true){
+        console.log('table exists')
+      }
+      else{
+        createAllTables()
+      }
+    })
+  }
    async function createAllTables() {
      await fetch(`api/table/createReviewTable`)
       .then((res) => res.json())
@@ -559,17 +573,17 @@ export default function HomePage() {
         </IndexTable.Cell>
         <IndexTable.Cell>
           <Text >
-            <Button variant="plain">
+            <Text tone="magic-subdued">
               {reviewTitle}
-            </Button>
+            </Text>
           </Text>
           <Box maxWidth="200px">
             <Text truncate>
               {reviewDescription}
             </Text>
           </Box>
-          <Text>
-            -{userName} on <Button variant="plain">{productHandle}</Button>
+          <Text as="span">
+            -{userName} on <Text tone="magic-subdued" >{productHandle}</Text>
           </Text>
         </IndexTable.Cell>
         <IndexTable.Cell>{formatDate(datePosted)}</IndexTable.Cell>
@@ -646,7 +660,7 @@ export default function HomePage() {
         secondaryActions={[
           {
             content: 'Import reviews',
-            onAction: () => setIsModalOpen(true),
+            onAction: () => {setIsModalOpen(true), checkTableExistance()},
             icon: ImportIcon
           },
           {
@@ -688,6 +702,7 @@ export default function HomePage() {
               setMode={setMode}
               loading={Loading}
               filteringAccessibilityTooltip="Search"
+              hideFilters 
               
             />
             <IndexTable

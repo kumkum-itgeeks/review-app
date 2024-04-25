@@ -149,7 +149,10 @@ const dissmissInappropriate=()=>{
 
   useEffect(() => {
     setStatusLoading(true)
+    if(!Id || Id===''){}
+    else{
     getReviewDetails();
+    }
   }, [status])
 
 
@@ -203,12 +206,12 @@ const dissmissInappropriate=()=>{
 
       <BlockStack gap='300'>
         <Box maxWidth="100px">
-        <Button variant="secondary" onClick={() => changeStatus()} textAlign="start" size="large" fullWidth='false'>
+        <Button variant="primary" onClick={() => changeStatus()} textAlign="start" size="medium" fullWidth='false' tone={review?.reviewStatus == 'Published' ? "critical" : "success"}>
           {
            
               review?.reviewStatus == 'Published' ?
-                'X Unpublish' :
-                <> &#x2713; {'Publish'}</>
+                'Unpublish' :
+                'Publish'
               
           }
         </Button>
@@ -298,7 +301,7 @@ const dissmissInappropriate=()=>{
                             (review?.location) ? <Text>,  from {review?.location} </Text> : ''
                           }
 
-                          <><Button variant="plain">{review?.Email}</Button></>
+                          <><Text tone="magic-subdued">{review?.Email}</Text></>
                         </InlineStack>
                       </BlockStack>
                     </>

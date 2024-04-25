@@ -28,15 +28,11 @@ const changeStatus = async (req, res) => {
 
   const id = req.params.id;
   const status = req.params.status;
-  // const shop = res.locals.shopify.session.shop;
-  // let shopLowercase = shop.toLowerCase();
-  // let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  // let shopName = removeSuffix.replace("-", "_");
   let shopName = req.shopname;
   let detailTable = shopName + '_details'
   let reviewtable = shopName + '_review'
-  // res.send(JSON.stringify(status))
-  // return;
+ 
+ 
   if (status == 'Published') {
     const query = `UPDATE ${detailTable}  SET reviewStatus = 'Unpublished' WHERE id=${id};UPDATE ${reviewtable}  SET reviewStatus = 'Unpublished' WHERE id=${id}`
     con.query(query, function (err, result) {

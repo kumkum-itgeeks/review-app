@@ -57,9 +57,10 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
   const shop = JSON.parse(_req.params.shop).toLowerCase();
   const handle = _req.params.handle;
   const Id = _req.params.id;
-  const reviewTable = (shop).replaceAll("-", "_").trim() + '_review'
-  const detailsTable = (shop).replaceAll("-", "_").trim() + '_details'
-  const settingsTable = (shop).replaceAll("-", "_").trim() + '_settings'
+  const shopName = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim();
+  const reviewTable = shopName + '_review'
+  const detailsTable = shopName + '_details'
+  const settingsTable = shopName + '_settings'
   var averageRating;
   var length;
   const Columns = (Object.keys(Obj))
@@ -127,12 +128,14 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
   async function metafieldFunctionality() {
 
+    console.log('inside metafield functionality******')
+
     //****************** getting session data *******************/
-    let completeShop = shop + '.myshopify.com';
+    let completeShop = shop.replaceAll(" ","-") + '.myshopify.com';
     var session;
     var RatingMetaId;
     var ReviewCountId;
-
+    console.log(completeShop, 'complete shop')
     let getSessionQuery = `Select * from shopify_sessions WHERE shop='${completeShop}'`
     con.query(getSessionQuery, async (err, results) => {
       if (err) {
@@ -140,17 +143,18 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
       }
 
-
+      
       session = results[0];
+      console.log(session, 'session')
 
-      let version = shopify.api.config.apiVersion
-      let endpoint = `https://${shop}.myshopify.com/admin/api/${version}/graphql.json`;
+      // let version = shopify.api.config.apiVersion
+      // let endpoint = `https://${shop}.myshopify.com/admin/api/${version}/graphql.json`;
 
-      const client = new shopify.api.clients.Graphql({ session });
+      var client = new shopify.api.clients.Graphql({ session });
 
 
       //****************************** retrieving metafield id ************************
-
+      console.log('here ====> 1')
 
       const getRatingMetaIdQuery = `query {
       product(id: "gid://shopify/Product/${Id}") {
@@ -202,6 +206,7 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
       }
 
       //****************** creating metafield *************************/
+      console.log('here ====> 2')
 
       const createMetafieldMutation = `
       mutation {
@@ -286,8 +291,9 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
       // ************ checking if metafield exists or not //
       if (RatingMetaId === null || RatingMetaId === '' || RatingMetaId === undefined || ReviewCountId === null || ReviewCountId === '' || ReviewCountId === undefined) {
+      console.log('here ====> 3')
 
-        console.log(' creating metafield **********************************************')
+        console.log(' creating metafield ***')
         try {
           const createResponse = await client.query({
             data: {
@@ -295,10 +301,10 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
             }
           });
 
-          console.log('create mutation response ******************', Object(createResponse).body.data.productUpdate.userErrors)
+          console.log('create mutation response ********', Object(createResponse).body.data.productUpdate.userErrors)
 
         } catch (error) {
-          console.error('erorrrrrr with create metafield =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
+          console.error('erorrrrrr with create metafield =>>>>', error.message);
         }
       }
 
@@ -313,11 +319,11 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
             },
           });
 
-          console.log('update mutation response ******************', Object(mutationResponse).body.data.productUpdate.userErrors)
+          console.log('update mutation response *****', Object(mutationResponse).body.data.productUpdate.userErrors)
 
 
         } catch (error) {
-          console.error('erorrrrrr with update metafield =>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
+          console.error('erorrrrrr with update metafield =>>>', error.message);
         }
 
       }
@@ -347,9 +353,9 @@ app.get(`/api/getReviews/:shop/:handle/:page`, (req, res) => {
   const shop = JSON.parse(req.params.shop).toLowerCase();
   const productHandle = (req.params.handle);
   const pageNumber = Number(req.params.page);
-
-  const detailsTable = (shop).replaceAll("-", "_").trim() + '_details'
-  const settingsTable = (shop).replaceAll("-", "_").trim() + '_settings'
+  const shopName = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim();
+  const detailsTable = shopName + '_details'
+  const settingsTable = shopName + '_settings'
   const type = ['starIconColor', 'reviewListingLayout', 'reviewListingText', 'reviewFormText', 'badgeText'];
   const typeValue = type.map(itm => `'${itm}'`).join(', ');
   const settingsQuery = `SELECT type , settings FROM ${settingsTable} WHERE type IN (${typeValue})`;
@@ -416,7 +422,7 @@ app.get(`/api/getReviews/:shop/:handle/:page`, (req, res) => {
 
 app.get("/api/checkReviewsOnload/:shop", async (_req, res) => {
   const shop = JSON.parse(_req.params.shop).toLowerCase();
-  const settingsTable = (shop).replaceAll("-", "_").trim() + '_settings';
+  const settingsTable = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim() + '_settings';
 
   const query = `SELECT settings from ${settingsTable} Where type ='reviewListingLayout' `;
 
@@ -439,8 +445,9 @@ app.get("/api/checkReviewsOnload/:shop", async (_req, res) => {
 app.get("/api/reportInappropriate/:shop/:id", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
-  const reviewTable = (shop).replaceAll("-", "_").trim() + '_review';
-  const detailsTable = (shop).replaceAll("-", "_").trim() + '_details';
+  const shopName = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim();
+  const reviewTable =  shopName+ '_review';
+  const detailsTable = shopName + '_details';
   const Id = req.params.id;
 
 
@@ -464,17 +471,17 @@ app.get("/api/reportInappropriate/:shop/:id", (req, res) => {
 
 // fetch review count and rating 
 
-app.get("/api/getReviewCount/:shop/:handle", (req, res) => {
+app.get("/api/getBadgeDetails/:shop/:handle", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
   const handle = req.params.handle;
-  const reviewTable = (shop).replaceAll("-", "_").trim() + '_review';
+  const settingsTable = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim() + '_settings';
   var averageRating;
   var length;
 
 
 
-  const query = ` SELECT starRating , reviewTitle FROM ${reviewTable} WHERE productHandle=${handle} AND reviewStatus='Published'`;
+  const query = ` SELECT settings FROM ${settingsTable} WHERE type = 'badgeText'`;
 
   con.query(query, (err, results) => {
     if (err) {
@@ -483,14 +490,17 @@ app.get("/api/getReviewCount/:shop/:handle", (req, res) => {
     }
     else {
       //  res.status(200).send(JSON.stringify(results))
-      let sum = 0;
-      let rating = results.map((itm) => itm.starRating)
-      length = results.length
-      let totalRating = rating.forEach((itm) => {
-        sum += itm;
-      })
-      averageRating = sum / length;
-      res.status(200).send(JSON.stringify({ averageRating: averageRating, reviewCount: length }))
+      // let sum = 0;
+      // let rating = results.map((itm) => itm.starRating)
+      // length = results.length
+      // let totalRating = rating.forEach((itm) => {
+      //   sum += itm;
+      // })
+      // averageRating = sum / length;
+      let myData=(results[0].settings)
+      // let ReviewsBadge=(results[0].settings.ReviewsBadge)
+      
+      res.status(200).send(JSON.stringify(myData))
 
     }
   });
@@ -500,7 +510,7 @@ app.get("/api/getReviewCount/:shop/:handle", (req, res) => {
 app.get("/api/starColor/:shop", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
-  const settingTable = (shop).replaceAll("-", "_").trim() + '_settings';
+  const settingTable = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim() + '_settings';
 
   const query = ` SELECT settings FROM ${settingTable} WHERE type='starIconColor'`;
 
@@ -524,7 +534,7 @@ app.get("/api/starColor/:shop", (req, res) => {
 app.get("/api/checkTableExists/:shop", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
-  const reviewTable = (shop).replaceAll("-", "_").trim() + '_review';
+  const reviewTable = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim() + '_review';
 
   const query = `SELECT * FROM information_schema.tables WHERE table_schema = 'reviews' AND table_name = '${reviewTable}'`;
 
@@ -545,7 +555,7 @@ app.get("/api/checkTableExists/:shop", (req, res) => {
 app.get("/api/createAllTables/:shop", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
-  const shopName = ((shop).replaceAll("-", "_")).trim();
+  const shopName = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim();
   const reviewTable = shopName+ '_review';
   const detailsTable = shopName + '_details'
   const SettingsTable = shopName + '_settings'
@@ -617,7 +627,6 @@ app.get("/api/createAllTables/:shop", (req, res) => {
 
   const addSettings = async() => {
 
-    // const SettingsTable = req.shopname + '_settings';
   
     // if changing the json data after data is inserted once in default table  . It wont affect the data . and new data will
     // not be inserted .
@@ -653,7 +662,7 @@ app.get("/api/createAllTables/:shop", (req, res) => {
           "reviewSummary": "Based on ${length} reviews",
           "paginationNextLabel": "Next",
           "paginationPrevLabel": "Previous",
-          "reportAsinappropriate": "Report review as Inappropriate",
+          "reportAsinappropriate": "Report as Inappropriate",
           "reportAsinappropriateMessage": "This review has been reported !",
           "authorInformation": "<p><i><b>${itm.userName} </b> on <b>${itm.datePosted}</b></i></p>"
         }
@@ -685,7 +694,7 @@ app.get("/api/createAllTables/:shop", (req, res) => {
         "type": "badgeText",
         "setting": {
           "noReviewsBadge": "No reviews",
-          "reviewsBadge": "{{product.reviews_count}} {{ product.reviews_count | pluralize: 'review', 'reviews' }}"
+          "reviewsBadge": "${count} reviews"
         }
       }
     ]

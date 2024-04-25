@@ -135,11 +135,7 @@ const addSettings = async(req, res) => {
       res.status(200).send(JSON.stringify({message:"Data inserted in settings table "}));
     });
   }
-    // const jsonData = req.body.data
-  // console.log(jsonData)
-  // return
 
-  // const SettingsTable = req.shopname + '_settings';
 }
 
 

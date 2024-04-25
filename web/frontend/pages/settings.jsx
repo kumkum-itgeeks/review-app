@@ -5,7 +5,7 @@ import {
   , ColorPicker, TextField, Button, Tooltip, Popover, Select, DataTable
 } from '@shopify/polaris'
 import { useAuthenticatedFetch } from '../hooks';
-import {Modal , useToast} from '@shopify/app-bridge-react';
+import { Modal, useToast } from '@shopify/app-bridge-react';
 
 export default function Settings() {
 
@@ -20,7 +20,7 @@ export default function Settings() {
   const [borderRgb, setBorderRgb] = useState('#D3D3D3');
   const [divierRgb, setDividerRgb] = useState('#D3D3D3');
   const [formData, setFormData] = useState([]);
-  const [isModalOpen , setIsModalOpen]=useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
 
   const [color, setColor] = useState({  //star icon color state
@@ -104,7 +104,7 @@ export default function Settings() {
 
   //******** variables********
 
-  const {show} = useToast();
+  const { show } = useToast();
   let type = ['autopublish', 'emailSettings', 'starIconColor', 'reviewListingLayout', 'reviewListingText', 'reviewFormText', 'badgeText']
   let data = [{ type: 'autopublish', setting: AutopublishSetting },
   { type: 'emailSettings', setting: emailSetting },
@@ -142,7 +142,7 @@ export default function Settings() {
   //********useEffects********
 
   useEffect(() => {
-    getSettings()
+    checkTableExists()
   }, [])
 
   useEffect(() => {
@@ -157,14 +157,14 @@ export default function Settings() {
     setBorderRgb(convertToHex(borderColor))
     handleReviewListing('bordercolor', borderRgb)
 
-   
-  }, [ borderColor])
+
+  }, [borderColor])
 
   useEffect(() => {
 
     setDividerRgb(convertToHex(dividerColor))
     handleReviewListing('dividercolor', divierRgb)
-  }, [ dividerColor])
+  }, [dividerColor])
 
 
 
@@ -211,21 +211,55 @@ export default function Settings() {
       body: JSON.stringify({ data }),
     })
       .then(res => res.json())
-      .then(data => {show('settings saved!', {duration: 2000})});
+      .then(data => { show('settings saved!', { duration: 2000 }) });
 
   }
 
+  const checkTableExists = () => {
+
+    fetch(`/api/table/checkTableExists`)
+      .then(res => res.json())
+      .then(tableExists => {
+        if(tableExists===true){
+          getSettings()
+        }
+        else{
+          createAllTables()
+        }
+      })
+  }
   const getSettings = () => {
 
     fetch(`/api/settings/getSettings`)
       .then(res => res.json())
       .then(data => setFormData(data))
   }
+
+  async function createAllTables() {
+    await fetch(`api/table/createReviewTable`)
+     .then((res) => res.json())
+     .then((data) => console.log(data))
+
+    await fetch(`api/table/createDetailTable`)
+     .then((res) => res.json())
+     .then((data) => console.log(data))
+
+    await fetch(`api/table/createDeletedReviewsTable`)
+     .then((res) => res.json())
+     .then((data) => { console.log(data) })
+
+    await fetch(`api/settings/addSettingsData`)
+     .then((res) => res.json())
+     .then((data) => { console.log(data), getSettings() })
+
+ }
+
+
   const resetSettings = () => {
 
     fetch(`/api/settings/resetSettings`)
       .then(res => res.json())
-      .then(data => {setFormData(data),show(' successfully reset setting!', {duration: 2000})})
+      .then(data => { setFormData(data), show(' successfully reset setting!', { duration: 2000 }) })
   }
 
   const test = () => {
@@ -438,40 +472,42 @@ export default function Settings() {
 
   const activator = (
     <>
-    <Button onClick={togglePopoverActive}  >
-      color
-    </Button>
-    <Box style={{backgroundColor:reviewListingLayout?.bordercolor , maxWidth:'50px' , marginTop:'10px' , paddingLeft:'7px' , borderRadius:'10%'}}>
-        color
-      </Box>
+      <InlineStack>
+        <Button onClick={togglePopoverActive}  >
+          Choose Color
+        </Button>
+        <Box style={{ backgroundColor: reviewListingLayout?.bordercolor, width: '30px', height: "30px", borderRadius: '5px', marginLeft: '10px' }}>
+        </Box>
+      </InlineStack>
     </>
 
   );
 
   const activatordivider = (
     <>
-    <Button onClick={togglePopoverActiveDivider}  >
-      color
-    </Button>
-    <Box style={{backgroundColor:reviewListingLayout?.dividercolor, maxWidth:'50px' , marginTop:'10px' , paddingLeft:'7px' , borderRadius:'10%'}}>
-        color
-      </Box>
+      <InlineStack>
+        <Button onClick={togglePopoverActiveDivider}>
+          Choose Color
+        </Button>
+        <Box style={{ backgroundColor: reviewListingLayout?.dividercolor, width: '30px', height: "30px", borderRadius: '5px', marginLeft: '10px' }}>
+        </Box>
+      </InlineStack>
     </>
   );
 
   const activatorStar = (
     <>
-    <Button onClick={togglePopoverActiveStar}   >
-      color
-      
-    </Button>
-      <Box style={{backgroundColor:starIconColor.customColor , maxWidth:'50px' , marginTop:'10px' , paddingLeft:'7px' , borderRadius:'10%'}}>
-        color
-      </Box>
+      <InlineStack >
+        <Button onClick={togglePopoverActiveStar}   >
+          Choose Color
+        </Button>
+        <Box style={{ backgroundColor: starIconColor.customColor, width: '30px', height: "30px", borderRadius: '5px', marginLeft: '10px' }} >
+        </Box>
+      </InlineStack>
     </>
   );
 
-// console.log(isModalOpen)
+  // console.log(isModalOpen)
 
   return (
     <>
@@ -483,8 +519,8 @@ export default function Settings() {
               <Grid.Cell columnSpan={{ xs: 4, sm: 2, md: 2, lg: 4, xl: 4 }} >
                 <Box padding={400} >
                   <BlockStack gap={400} align='center'>
-                    <Text variant='headingMd' as='h6'> Autopublish</Text>
-                    <Text variant='bodyLg' as='p'> Automatically check new reviews for spam and then publish them.</Text>
+                    <Text variant='headingMd' as='h6'> Auto-Publish</Text>
+                    <Text variant='bodyLg' as='p'>New reviews are automatically published without manual intervention.</Text>
                   </BlockStack>
                 </Box>
               </Grid.Cell>
@@ -492,16 +528,16 @@ export default function Settings() {
                 <Box background='bg-surface' padding={400}>
                   <BlockStack gap={300}>
                     <RadioButton
-                      label="Enabled"
-                      helpText="Customers will only be able to check out as guests."
+                      label={<Text variant="headingSm" as="h6">Enable</Text>}
+                      helpText="Reviews are checked for spam and then automatically published when enabled"
                       checked={AutopublishSetting.autopublish === 'enabled'}
                       id="enabled"
                       name="accounts"
                       onChange={handleAutopublish}
                     />
                     <RadioButton
-                      label="Disabled"
-                      helpText="You must manually publish new reviews."
+                      label={<Text variant="headingSm" as="h6">Disable</Text>}
+                      helpText="Reviews require manual approval before they can be published on your store."
                       id="disabled"
                       name="accounts"
                       checked={AutopublishSetting.autopublish === 'disabled'}
@@ -521,8 +557,8 @@ export default function Settings() {
               <Grid.Cell columnSpan={{ xs: 4, sm: 2, md: 2, lg: 4, xl: 4 }} >
                 <Box padding={400} >
                   <BlockStack gap={400} align='center'>
-                    <Text variant='headingMd' as='h6'> Email setting</Text>
-                    <Text variant='bodyLg' as='p'> Choose if you want to receive email notifications for each review</Text>
+                    <Text variant='headingMd' as='h6'>Email Notification</Text>
+                    <Text variant='bodyLg' as='p'>Receive email notifications for each review.</Text>
                   </BlockStack>
                 </Box>
               </Grid.Cell>
@@ -530,13 +566,15 @@ export default function Settings() {
                 <Box background='bg-surface' padding={400}>
                   <BlockStack gap={300}>
                     <Checkbox
-                      label="Send me an email when a review is submitted."
+                      disabled
+                      label={<Text variant="headingSm" as="h6">"Send me an email when a review is submitted."</Text>}
                       checked={emailSetting.sendEmail}
                       onChange={handleCheck}
                     />
                     {
                       checked ?
                         <TextField
+                          disabled
                           label="Email"
                           type="email"
                           value={emailSetting.email}
@@ -558,43 +596,45 @@ export default function Settings() {
               <Grid.Cell columnSpan={{ xs: 4, sm: 2, md: 2, lg: 4, xl: 4 }} >
                 <Box padding={400} >
                   <BlockStack gap={400} align='center'>
-                    <Text variant='headingMd' as='h6'> Star icon color</Text>
-                    <Text variant='bodyLg' as='p'> Customize the color of your star icons.</Text>
+                    <Text variant='headingMd' as='h6'>Star Icon Color</Text>
+                    <Text variant='bodyLg' as='p'>Choose the color of your star icons.</Text>
                   </BlockStack>
                 </Box>
               </Grid.Cell>
               <Grid.Cell columnSpan={{ xs: 8, sm: 4, md: 4, lg: 8, xl: 8 }}>
                 <Box background='bg-surface' padding={400}>
                   <BlockStack gap={300}>
-                    <RadioButton
+                    {/* <RadioButton
                       disabled
-                      label="Theme color"
-                      helpText="Icons get their color from your theme."
+                      label="Theme Color"
+                      helpText="Icons will reflect the color scheme of your theme."
                       checked={starIconColor.isThemeColor === 'themecolor'}
                       id="themecolor"
                       name="star"
                       onChange={handleStarSetting}
-                    />
+                    /> */}
 
                     <RadioButton
-                    
-                      label="Custom color"
-                      helpText="Icons are a custom color."
+
+                      label={<Text variant="headingSm" as="h6">Custom Color</Text>}
+                      helpText="Select a custom color for your icons."
                       id="customcolor"
                       name="star"
-                      checked={starIconColor.isThemeColor === 'customcolor'}
+                      // checked={starIconColor.isThemeColor == 'customcolor'}
+                      checked={'customcolor'}
                       onChange={handleStarSetting}
                     />
-                   
+
                     {
-                      starIconColor.isThemeColor== 'customcolor' ?
+                      // starIconColor.isThemeColor == 'customcolor' ?
+                      true ?
                         <Popover
                           active={popoverActiveStar}
                           activator={activatorStar}
                           autofocusTarget="first-node"
                           onClose={togglePopoverActiveStar}
                         >
-                          <ColorPicker  onChange={setStarColorfunction} color={color} />
+                          <ColorPicker onChange={setStarColorfunction} color={color} />
                         </Popover>
                         : ''
                     }
@@ -612,8 +652,8 @@ export default function Settings() {
               <Grid.Cell columnSpan={{ xs: 4, sm: 2, md: 2, lg: 4, xl: 4 }} >
                 <Box padding={400} >
                   <BlockStack gap={400} align='center'>
-                    <Text variant='headingMd' as='h6'> Review listing layout</Text>
-                    <Text variant='bodyLg' as='p'> Customize how your review listing looks and feels.</Text>
+                    <Text variant='headingMd' as='h6'>Review Listing Layout</Text>
+                    <Text variant='bodyLg' as='p'> Tailor the appearance of your review listing for a personalized experience.</Text>
                   </BlockStack>
                 </Box>
               </Grid.Cell>
@@ -621,50 +661,60 @@ export default function Settings() {
                 <Box background='bg-surface' padding={400}>
                   <BlockStack gap={300}>
                     <Checkbox
-                      label="Show reviews on load"
+                      label={<Text variant="headingSm" as="h6">Show Reviews on Load</Text>}
                       checked={reviewListingLayout.reviewOnload}
                       onChange={showReviewCheck}
                     />
-                    <Text>The reviews for products will be visible for all users by default.</Text>
+                    <Text as='p' tone='subdued'>Enable this option to make product reviews visible to all users upon page load.</Text>
                     <Divider />
-
+                    <Text variant="headingSm" as="h6">Border Color</Text>
+                    <Box>
                     <Popover
                       active={popoverActive}
                       activator={activator}
                       autofocusTarget="first-node"
                       onClose={togglePopoverActive}
                     >
-                      <ColorPicker  onChange={setBorderColorfunction} color={borderColor} />
+                      <ColorPicker onChange={setBorderColorfunction} color={borderColor} />
                     </Popover>
+                    <Text as='p' tone='subdued'>Choose the color of the border surrounding each review.</Text>
+                    </Box>
 
-                    <Text>Border color</Text>
-
+                    <Text variant="headingSm" as="h6">Divider Color</Text>
+                    <Box>
                     <Popover
                       active={popoverActiveDivider}
                       activator={activatordivider}
                       autofocusTarget="first-node"
                       onClose={togglePopoverActiveDivider}
                     >
-                      <ColorPicker  onChange={setDividerColorfunction} color={dividerColor} />
-
+                      <ColorPicker onChange={setDividerColorfunction} color={dividerColor} />
                     </Popover>
-                    <Text>Divider color</Text>
+                    <Text as='p' tone='subdued'>Select the color for the divider line between individual reviews.</Text>
+                    </Box>
 
-                    <TextField
-                      label="Padding"
-                      type="number"
-                      value={reviewListingLayout.reviewListingPadding}
-                      onChange={(value) => handleReviewListing('reviewListingPadding', value)}
-                      autoComplete="off"
-                    />
+                    <Box>
+                      <TextField
+                        label={<Text variant="headingSm" as="h6">Padding</Text>}
+                        type="number"
+                        value={reviewListingLayout.reviewListingPadding}
+                        onChange={(value) =>{ value >=0 ? handleReviewListing('reviewListingPadding', value) :''}}
+                        autoComplete="off"
+                      />
+                      <Text as='p' tone='subdued'>Adjust the padding around the review section for optimal spacing and layout.</Text>
+                    </Box>
 
+                    <Box>
                     <TextField
-                      label="Reviews per page (Value between 2 and 100)"
+                      label={<Text variant="headingSm" as="h6">Reviews Per Page</Text>}
                       type="number"
                       value={reviewListingLayout.reviewPerpage}
-                      onChange={(value) => handleReviewListing('reviewPerpage', value)}
+                      onChange={(value) =>{ value >=2 && value<=100 ? handleReviewListing('reviewPerpage', value) :''}}
                       autoComplete="off"
                     />
+                    <Text as='p' tone='subdued'>Specify the number of reviews to display per page, ranging from 2 to 100.</Text>
+                    </Box>
+
                   </BlockStack>
                 </Box>
               </Grid.Cell>
@@ -679,88 +729,121 @@ export default function Settings() {
               <Grid.Cell columnSpan={{ xs: 4, sm: 2, md: 2, lg: 4, xl: 4 }} >
                 <Box padding={400} >
                   <BlockStack gap={400} align='center'>
-                    <Text variant='headingMd' as='h6'>Review listing text</Text>
-                    <Text variant='bodyLg' as='p'>Customize the text for the area that reviews are displayed on your website.</Text>
+                    <Text variant='headingMd' as='h6'>Review Listing Text</Text>
+                    <Text variant='bodyLg' as='p'>Customize the text displayed in the area where reviews appear on your website.</Text>
                   </BlockStack>
                 </Box>
               </Grid.Cell>
               <Grid.Cell columnSpan={{ xs: 8, sm: 4, md: 4, lg: 8, xl: 8 }}>
                 <Box background='bg-surface' padding={400}>
-                  <BlockStack gap={400}>
+                  <BlockStack gap={600}>
+                    <Box>
+                      <TextField
+                        label={<Text variant="headingSm" as="h6">Review Headline</Text>}
+                        type="text"
+                        value={reviewListingText.reviewHeadline}
+                        onChange={(value) => handlereviewListingText('reviewHeadline', value)}
+                        autoComplete="off"
+                      />
+                      <Text as='p' tone="subdued">Set the headline for your customer reviews section.</Text>
+                    </Box>
+
+                    <Box>
+                      <TextField
+                        label={<Text variant="headingSm" as="h6">Review Link</Text>}
+                        type="text"
+                        value={reviewListingText.reviewLink}
+                        onChange={(value) => handlereviewListingText('reviewLink', value)}
+                        autoComplete="off"
+                      />
+                      <Text as='p' tone="subdued">Customize the text for the link that prompts users to write a review..</Text>
+                    </Box>
+
+                    <Box>
                     <TextField
-                      label="Review headline"
-                      type="text"
-                      value={reviewListingText.reviewHeadline}
-                      onChange={(value) => handlereviewListingText('reviewHeadline', value)}
-                      autoComplete="off"
-                    />
-                    <TextField
-                      label="Write a review link"
-                      type="text"
-                      value={reviewListingText.reviewLink}
-                      onChange={(value) => handlereviewListingText('reviewLink', value)}
-                      autoComplete="off"
-                    />
-                    <TextField
-                      label="Review summary with no reviews"
+                      label={<Text variant="headingSm" as="h6">Review Summary with No Reviews</Text>}
                       type="text"
 
                       value={reviewListingText.noReviewSummary}
                       onChange={(value) => handlereviewListingText('noReviewSummary', value)}
                       autoComplete="off"
                     />
+                    <Text as='p' tone='subdued'>Specify the text to display when there are no reviews for a product.</Text>
+                    </Box>
+
+                    <Box>
                     <TextField
-                      label="Review summary with 1 or more reviews"
+                      label={<Text variant="headingSm" as="h6">Review Summary with 1 or More Reviews</Text>}
                       type="text"
 
                       value={reviewListingText.reviewSummary}
                       onChange={(value) => handlereviewListingText('reviewSummary', value)}
                       autoComplete="off"
                     />
+                    <Text as='p' tone='subdued'>Define the text format for summarizing reviews based on the total number.</Text>
+                    </Box>
+
+                    <Box>
                     <TextField
-                      label="Pagination 'next' label"
+                      label={<Text variant="headingSm" as="h6">Pagination 'Next' Label </Text>}
                       type="text"
 
                       value={reviewListingText.paginationNextLabel}
                       onChange={(value) => handlereviewListingText('paginationNextLabel', value)}
                       autoComplete="off"
                     />
+                    <Text as='p' tone='subdued'>Modify the text for the 'Next' button in pagination.</Text>
+                    </Box>
+
+                    <Box>
                     <TextField
-                      label="Pagination 'previous' label"
+                      label={<Text variant="headingSm" as="h6">Pagination 'Previous' Label </Text>}
                       type="text"
 
                       value={reviewListingText.paginationPrevLabel}
                       onChange={(value) => handlereviewListingText('paginationPrevLabel', value)}
                       autoComplete="off"
                     />
-                    <TextField
-                      label="Report as inappropriate"
-                      type="text"
+                    <Text>Modify the text for the 'Previous' button in pagination.</Text>
+                    </Box>
 
+                    <Box>
+                    <TextField
+                      label={<Text variant="headingSm" as="h6">Report as Inappropriate </Text>}
+                      type="text"
                       value={reviewListingText.reportAsinappropriate}
                       onChange={(value) => handlereviewListingText('reportAsinappropriate', value)}
                       autoComplete="off"
                     />
+                    <Text as='p' tone='subdued'>Set the text for reporting a review as inappropriate.</Text>
+                    </Box>
+
+                    <Box>
                     <TextField
-                      label="Reported as inappropriate message"
+                      label={<Text variant="headingSm" as="h6">"Reported as Inappropriate Message</Text>}
                       type="text"
 
                       value={reviewListingText.reportAsinappropriateMessage}
                       onChange={(value) => handlereviewListingText('reportAsinappropriateMessage', value)}
                       autoComplete="off"
                     />
-                    <TextField
-                      label="Author information"
-                      type="text"
+                    <Text as='p' tone='subdued'>Define the message to display when a review has been reported.</Text>
+                    </Box>
 
+                    <Box>
+                    <TextField
+                      label={<Text variant="headingSm" as="h6">Author Information Template</Text>}
+                      type="text"
                       multiline={4}
                       value={reviewListingText.authorInformation}
                       onChange={(value) => handlereviewListingText('authorInformation', value)}
                       autoComplete="off"
                     />
+                    <Text as='p' tone='subdued'>Customize the template for displaying author information in reviews.</Text>
+                    </Box>
 
-                    <Text as='div' tone="subdued">
-                      {'This field supports very basic javascript syntax .'} <Divider borderColor='transparent'/>{' here ( username = ${itm.userName} ) , ( review date = ${itm.datePosted} ) ' }
+                    <Text as='p' tone="subdued">
+                      {'Note: This field supports basic JavaScript syntax. You can use variables like ${itm.userName} for the username and ${itm.datePosted} for the review date'}
                     </Text>
 
                   </BlockStack>
@@ -771,30 +854,30 @@ export default function Settings() {
           </BlockStack>
 
           {/* 6 review form text  setting  */}
-          <BlockStack gap={400}>
+          <BlockStack gap={600}>
             <Grid>
               <Grid.Cell columnSpan={{ xs: 4, sm: 2, md: 2, lg: 4, xl: 4 }} >
                 <Box padding={400} >
                   <BlockStack gap={400} align='center'>
-                    <Text variant='headingMd' as='h6'>Review form text</Text>
-                    <Text variant='bodyLg' as='p'>Customize the text, and which fields are shown for the new review form.</Text>
+                    <Text variant='headingMd' as='h6'>Review Form Text </Text>
+                    <Text variant='bodyLg' as='p'>Customize the content and fields displayed in the new review form</Text>
                   </BlockStack>
                 </Box>
               </Grid.Cell>
               <Grid.Cell columnSpan={{ xs: 8, sm: 4, md: 4, lg: 8, xl: 8 }}>
                 <Box background='bg-surface' padding={400}>
-                  <BlockStack gap={300}>
+                  <BlockStack gap={400}>
                     <TextField
-                      disabled={reviewFormText.emailType==='hidden'?true:false}
-                      label="Author's email"
+                      disabled={reviewFormText.emailType === 'hidden' ? true : false}
+                      label={<Text variant="headingSm" as="h6">Author's Email Address</Text>}
                       type="text"
                       value={reviewFormText.authorEmail}
                       onChange={(value) => handlereviewFormText('authorEmail', value)}
                       autoComplete="off"
                     />
                     <TextField
-                      disabled={reviewFormText.emailType==='hidden'?true:false}
-                      label="Help message"
+                      disabled={reviewFormText.emailType === 'hidden' ? true : false}
+                      label={<Text variant="headingSm" as="h6">Help Message</Text>}
                       type="text"
                       value={reviewFormText.emailHelpMessage}
                       onChange={(value) => handlereviewFormText('emailHelpMessage', value)}
@@ -802,7 +885,7 @@ export default function Settings() {
                     />
 
                     <Select
-                      label="Type"
+                      label={<Text variant="headingSm" as="h6">Type</Text>}
                       options={emailTypeoptions}
                       onChange={(value) => handlereviewFormText('emailType', value)}
                       value={reviewFormText.emailType}
@@ -811,16 +894,16 @@ export default function Settings() {
                     <Divider />
 
                     <TextField
-                      disabled={reviewFormText.nameType==='hidden'?true:false}
-                      label="Author's name"
+                      disabled={reviewFormText.nameType === 'hidden' ? true : false}
+                      label={<Text variant="headingSm" as="h6">Author's Name</Text>}
                       type="text"
                       value={reviewFormText.authorName}
                       onChange={(value) => handlereviewFormText('authorName', value)}
                       autoComplete="off"
                     />
                     <TextField
-                      disabled={reviewFormText.nameType==='hidden'?true:false}
-                      label="Help message"
+                      disabled={reviewFormText.nameType === 'hidden' ? true : false}
+                      label={<Text variant="headingSm" as="h6">Help Message</Text>}
                       type="text"
                       value={reviewFormText.nameHelpMessage}
                       onChange={(value) => handlereviewFormText('nameHelpMessage', value)}
@@ -828,7 +911,7 @@ export default function Settings() {
                     />
 
                     <Select
-                      label="Type"
+                      label={<Text variant="headingSm" as="h6">Type</Text>}
                       options={nameTypeoptions}
                       onChange={(value) => handlereviewFormText('nameType', value)}
                       value={reviewFormText.nameType}
@@ -837,8 +920,8 @@ export default function Settings() {
                     <Divider />
 
                     <TextField
-                      disabled={reviewFormText.locationType==='hidden'?true:false}
-                      label="Author's location"
+                      disabled={reviewFormText.locationType === 'hidden' ? true : false}
+                      label={<Text variant="headingSm" as="h6">Author's Location</Text>}
                       type="text"
                       value={reviewFormText.authorLocation}
                       onChange={(value) => handlereviewFormText('authorLocation', value)}
@@ -846,8 +929,8 @@ export default function Settings() {
                     />
 
                     <TextField
-                      disabled={reviewFormText.locationType==='hidden'?true:false}
-                      label="Help message"
+                      disabled={reviewFormText.locationType === 'hidden' ? true : false}
+                      label={<Text variant="headingSm" as="h6">Help Message</Text>}
                       type="text"
                       value={reviewFormText.locationHelpMessage}
                       onChange={(value) => handlereviewFormText('locationHelpMessage', value)}
@@ -855,7 +938,7 @@ export default function Settings() {
                     />
 
                     <Select
-                      label="Type"
+                      label={<Text variant="headingSm" as="h6">Type</Text>}
                       options={locationTypeoptions}
                       onChange={(value) => handlereviewFormText('locationType', value)}
                       value={reviewFormText.locationType}
@@ -864,7 +947,7 @@ export default function Settings() {
                     <Divider />
 
                     <TextField
-                      label="Review form title"
+                      label={<Text variant="headingSm" as="h6">Review Form Title</Text>}
                       type="text"
                       value={reviewFormText.reviewFormTitle}
                       onChange={(value) => handlereviewFormText('reviewFormTitle', value)}
@@ -872,7 +955,7 @@ export default function Settings() {
                     />
 
                     <TextField
-                      label="Review rating"
+                      label={<Text variant="headingSm" as="h6">Rating Field</Text>}
                       type="text"
                       value={reviewFormText.reviewRating}
                       onChange={(value) => handlereviewFormText('reviewRating', value)}
@@ -882,14 +965,14 @@ export default function Settings() {
                     <Divider />
 
                     <TextField
-                      label="Review title"
+                      label={<Text variant="headingSm" as="h6">Review Heading</Text>}
                       type="text"
                       value={reviewFormText.reviewTitle}
                       onChange={(value) => handlereviewFormText('reviewTitle', value)}
                       autoComplete="off"
                     />
                     <TextField
-                      label="Help message"
+                      label={<Text variant="headingSm" as="h6">Help Message</Text>}
                       type="text"
                       value={reviewFormText.reviewTitleHelpMessage}
                       onChange={(value) => handlereviewFormText('reviewTitleHelpMessage', value)}
@@ -899,14 +982,14 @@ export default function Settings() {
                     <Divider />
 
                     <TextField
-                      label="Review body"
+                      label={<Text variant="headingSm" as="h6">Description of Review</Text>}
                       type="text"
                       value={reviewFormText.reviewBody}
                       onChange={(value) => handlereviewFormText('reviewBody', value)}
                       autoComplete="off"
                     />
                     <TextField
-                      label="Help message"
+                      label={<Text variant="headingSm" as="h6">Help Message</Text>}
                       type="text"
                       value={reviewFormText.reviewBodyHelpMessage}
                       onChange={(value) => handlereviewFormText('reviewBodyHelpMessage', value)}
@@ -916,21 +999,21 @@ export default function Settings() {
                     <Divider />
 
                     <TextField
-                      label="Submit button"
+                      label={<Text variant="headingSm" as="h6">Submit Button</Text>}
                       type="text"
                       value={reviewFormText.submitButtton}
                       onChange={(value) => handlereviewFormText('submitButtton', value)}
                       autoComplete="off"
                     />
                     <TextField
-                      label="Success message"
+                      label={<Text variant="headingSm" as="h6">Success Message</Text>}
                       type="text"
                       value={reviewFormText.successMessage}
                       onChange={(value) => handlereviewFormText('successMessage', value)}
                       autoComplete="off"
                     />
                     <TextField
-                      label="Error message"
+                      label={<Text variant="headingSm" as="h6">Error Message</Text>}
                       type="text"
                       value={reviewFormText.errorMessage}
                       onChange={(value) => handlereviewFormText('errorMessage', value)}
@@ -950,8 +1033,8 @@ export default function Settings() {
               <Grid.Cell columnSpan={{ xs: 4, sm: 2, md: 2, lg: 4, xl: 4 }} >
                 <Box padding={400} >
                   <BlockStack gap={400} align='center'>
-                    <Text variant='headingMd' as='h6'> Badge text</Text>
-                    <Text variant='bodyLg' as='p'>Customize the text of the star rating badges by modifying the text fields.</Text>
+                    <Text variant='headingMd' as='h6'>Badge Text </Text>
+                    <Text variant='bodyLg' as='p'>Personalize the text for star rating badges by adjusting the text fields.</Text>
                   </BlockStack>
                 </Box>
               </Grid.Cell>
@@ -959,14 +1042,14 @@ export default function Settings() {
                 <Box background='bg-surface' padding={400}>
                   <BlockStack gap={300}>
                     <TextField
-                      label="Badge with no reviews"
+                      label={<Text variant="headingSm" as="h6">Badge with No Reviews</Text>}
                       type="text"
                       value={BadgeText.noReviewsBadge}
                       onChange={(value) => handleBadgeText('noReviewsBadge', value)}
                       autoComplete="off"
                     />
                     <TextField
-                      label="Badge with 1 or more reviews"
+                      label={<Text variant="headingSm" as="h6">Badge with 1 or More Reviews</Text>}
                       type="text"
                       value={BadgeText.reviewsBadge}
                       onChange={(value) => handleBadgeText('reviewsBadge', value)}
@@ -981,23 +1064,24 @@ export default function Settings() {
 
 
           <InlineStack gap={300} align='end'>
-          <Modal 
-          title="Reset all settings to default?" message="Are you sure ? you want to reset all settings to default? This action cannot be reversed." 
-          open={isModalOpen}
-          onClose={()=>setIsModalOpen(false)}
-          size='Small' 
-          primaryAction={{
-            content:'Reset all settings' ,
-            onAction:()=>{resetSettings(),setIsModalOpen(false)}
-            }}
-          secondaryActions={[
-            {content:'cancel',
-            onAction:()=>setIsModalOpen(false)
-           }
-          ]}
-             />
-             {/* <Toast content="Success!" duration={2000}/> */}
-            <Button size='large' onClick={()=>setIsModalOpen(true)} tone='critical' variant='primary'> Reset all settings to default</Button>
+            <Modal
+              title="Reset all settings to default?" message="Are you sure ? you want to reset all settings to default? This action cannot be reversed."
+              open={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              size='Small'
+              primaryAction={{
+                content: 'Reset all settings',
+                onAction: () => { resetSettings(), setIsModalOpen(false) }
+              }}
+              secondaryActions={[
+                {
+                  content: 'cancel',
+                  onAction: () => setIsModalOpen(false)
+                }
+              ]}
+            />
+            {/* <Toast content="Success!" duration={2000}/> */}
+            <Button size='large' onClick={() => setIsModalOpen(true)} tone='critical' variant='primary'> Reset all settings to default</Button>
             {/* <Button size='large'> Export deleted reviews</Button> */}
             <Button size='large' onClick={() => saveSettings()} tone='success' variant='primary'> Save </Button>
           </InlineStack>

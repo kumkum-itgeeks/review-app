@@ -6,8 +6,8 @@ import { con } from "../index.js";
 
 const checkTableExists = (req, res) => {
 
-  const reviewTable = req.shopName + 'review'
-
+  const reviewTable = req.shopname + '_review'
+  console.log('table length ', reviewTable)
   const query = `SELECT * FROM information_schema.tables WHERE table_schema = 'reviews' AND table_name = '${reviewTable}'`;
 
   con.query(query, function (err, tables) {
@@ -458,4 +458,6 @@ const createDeletedReviewsTable = async (req, res) => {
     }
   })
 }
+
+
 export default { createReviewsTable, createDetailTable, createMetafield, updateMetafields, createSettingsTable, createDeletedReviewsTable , checkTableExists }

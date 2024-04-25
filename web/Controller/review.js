@@ -7,6 +7,7 @@ import shopify from '../shopify.js';
 // const {detailTable,reviewTable}=api
 import { con } from '../index.js';
 import logger from '../frontend/assets/logger.js';
+import { error } from 'winston';
 
 
 const totalReviews = (req, res) => {
@@ -498,6 +499,7 @@ const addImportedReview = async (req, res) => {
     DataValue = Data.map(cat => `'${cat}'`).join(', ');
 
     const query = `INSERT INTO ${reviewTable} (${Columns} , productid) VALUES (${DataValue} , '${Id[ind]}');INSERT INTO ${detailsTable} (${Columns} , productid) VALUES (${DataValue} , '${Id[ind]}')`
+    
     con.query(query, async (err, results) => {
       if (err) {
         console.error('Error inserting reviews', err);

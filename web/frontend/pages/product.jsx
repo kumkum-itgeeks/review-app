@@ -63,7 +63,10 @@ export default function Product() {
 
   useEffect(() => {
     setLoading(true)
-    getAllReviews();
+    if(!Id || Id===''){}
+    else{
+      getAllReviews();
+    }
 
   }, [queryValue, pageNumber, sortSelected, reviewStatus])
 
@@ -390,17 +393,17 @@ export default function Product() {
         </IndexTable.Cell>
         <IndexTable.Cell>
           <Text >
-            <Button variant='plain' >
+            <Text tone="magic-subdued" >
               {reviewTitle}
-            </Button>
+            </Text>
           </Text>
           <Box maxWidth="200px">
             <Text truncate>
               {reviewDescription}
             </Text>
           </Box>
-          <Text>
-            -{userName} on <Button variant='plain'>{productHandle}</Button>
+          <Text as='span'>
+            -{userName} on <Text tone="magic-subdued">{productHandle}</Text>
           </Text>
         </IndexTable.Cell>
         <IndexTable.Cell>{formatDate(datePosted)}</IndexTable.Cell>

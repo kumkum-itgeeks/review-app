@@ -2,10 +2,89 @@
 //global variables*********
 let currentPage = 1;
 var isthisLastPage;
-var starsettingColor;
+// initially setting default value for star color
+var starsettingColor = "#FFFF00";
 var shopName;
 let PageNumber = document.getElementById('page-number-display').value;
-const URL = `https://inputs-thee-post-intelligence.trycloudflare.com`
+const URL = `https://survival-relationships-recognize-assured.trycloudflare.com`
+
+const defaultData = {
+  averageRating: 0,
+  isLastPage: true,
+  length: 0,
+  reviews: [],
+  settingData: [
+    {
+      autopublish: {
+        autopublish: "enabled"
+      }
+    },
+    {
+      emailSettings: {
+        sendEmail: true,
+        email: "yourEmail@gmail.com"
+      }
+    },
+    {
+      starIconColor: {
+        isThemeColor: "customcolor",
+        customColor: "#FFFF00"
+      }
+    },
+    {
+      reviewListingLayout: {
+        reviewOnload: false,
+        bordercolor: "#5A5A5A",
+        dividercolor: "#e3e3e3",
+        reviewListingPadding: "45",
+        reviewPerpage: "4"
+      }
+    },
+    {
+      reviewListingText: {
+        reviewHeadline: "Customer Reviews",
+        reviewLink: "Write a review",
+        noReviewSummary: "No reviews yet !",
+        reviewSummary: "Based on ${length} reviews",
+        paginationNextLabel: "Next",
+        paginationPrevLabel: "Previous",
+        reportAsinappropriate: "Report as Inappropriate",
+        reportAsinappropriateMessage: "This review has been reported !",
+        authorInformation: "<p><i><b>${itm.userName} </b> on <b>${itm.datePosted}</b></i></p>"
+      }
+    },
+    {
+      reviewFormText: {
+        authorEmail: "Email",
+        emailHelpMessage: "john.smith@example.com...",
+        emailType: "required",
+        authorName: "Name",
+        nameHelpMessage: "Enter your name...",
+        nameType: "required",
+        authorLocation: "Location",
+        locationHelpMessage: "Enter your location",
+        locationType: "hidden",
+        reviewFormTitle: "Write a review",
+        reviewRating: "Rating",
+        reviewTitle: "Review Title",
+        reviewTitleHelpMessage: "Give your review a title ...",
+        reviewBody: "Body of Review",
+        reviewBodyHelpMessage: "Write your comments heree...",
+        submitButtton: "Submit Review",
+        successMessage: "Thank you for submitting a review!",
+        errorMessage: "Not all the fields have been filled out correctly!"
+      }
+    },
+    {
+      badgeText: {
+        noReviewsBadge: "No reviews",
+        reviewsBadge: "${count} reviews"
+      }
+    }
+  ]
+}
+
+
 
 // dom content loaded********
 
@@ -77,20 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-// sending formdata****
-
-
-function addReviews(obj, shop, handle, id) {
-
-  fetch(`${URL}/api/addReviews/${JSON.stringify(obj)}/${JSON.stringify(shop)}/${JSON.stringify(handle)}/${id}`)
-    .then(res => res.json())
-    .then(data => console.log(data))
-
-}
-
-// checking if to show reviews on load**** (according to app setting)
-
-
+// checking if table exists for setting layout , if not exists , set default data
 function getOnloadReviewsSetting(shop, handle) {
 
   fetch(`${URL}/api/checkTableExists/${JSON.stringify(shop)}`)
@@ -101,15 +167,15 @@ function getOnloadReviewsSetting(shop, handle) {
         getOnloadsetting()
       }
       else {
-        console.log('creating tables ....')
-        fetch(`${URL}/api/createAllTables/${JSON.stringify(shop)}`)
-        .then(res => res.json())
-        .then(data =>{console.log(data), getOnloadsetting()})
+        setReviewInfo(defaultData, shop)
       }
     })
 
-    async function getOnloadsetting(){
-      fetch(`${URL}/api/checkReviewsOnload/${JSON.stringify(shop)}`)
+
+  // checking if to show reviews on load**** (according to app setting)
+
+  async function getOnloadsetting() {
+    fetch(`${URL}/api/checkReviewsOnload/${JSON.stringify(shop)}`)
       .then(res => res.json())
       .then(data => {
         if (data === true) {
@@ -125,9 +191,45 @@ function getOnloadReviewsSetting(shop, handle) {
         getReviews(shop, handle, PageNumber);
       }
       )
-    }
+  }
 
 }
+
+//checkTable for data submission
+
+function checkTable(obj, shop, handle, id) {
+  fetch(`${URL}/api/checkTableExists/${JSON.stringify(shop)}`)
+    .then(res => res.json())
+    .then(tableexists => {
+      console.log('table exists ..')
+      if (tableexists === true) {
+        addReviews(obj, shop, handle, id)
+      }
+      else {
+        createAllTables(obj, shop, handle, id)
+      }
+    })
+}
+// create all tables 
+
+function createAllTables(obj, shop, handle, id) {
+  console.log('creating tables ....')
+  fetch(`${URL}/api/createAllTables/${JSON.stringify(shop)}`)
+    .then(res => res.json())
+    .then(data => { addReviews(obj, shop, handle, id), console.log(data) })
+}
+// sending formdata****
+
+
+function addReviews(obj, shop, handle, id) {
+
+  fetch(`${URL}/api/addReviews/${JSON.stringify(obj)}/${JSON.stringify(shop)}/${JSON.stringify(handle)}/${id}`)
+    .then(res => res.json())
+    .then(data => console.log(data))
+
+}
+
+
 
 // changing functionality  based on onload function results *****
 
@@ -155,6 +257,9 @@ function getReviews(shop, handle, page) {
     .then(res => res.json())
     .then(data => {
       setReviewInfo(data, shop)
+      console.log('data from api ===>>>', data)
+      // console.log('default data ===>>>', defaultData)
+
     }
     )
 }
@@ -219,7 +324,7 @@ function getSettingsData(shop) {
 }
 
 
-const setReviewInfo = (data, shop) => {
+function setReviewInfo(data, shop) {
 
   let stars = [1, 2, 3, 4, 5];
 
@@ -245,11 +350,11 @@ function setSettings(data) {
   const isInappropriateReview = reviews.map((itm) => itm.isInappropriate)
   isthisLastPage = isLastPage;
 
-  starColorData = settingData.filter((itm) => (itm.starIconColor))
+  starColorData = settingData?.filter((itm) => (itm.starIconColor))
   let star = document.getElementsByClassName('review-list-star');
   let ratingStar = document.querySelectorAll('.star');
   let halfStars = document.getElementById('half-stars')
-  halfStars?.style.setProperty('--star-color', (starColorData.map((itm) => itm.starIconColor.customColor)));
+  halfStars?.style.setProperty('--star-color', (starColorData?.map((itm) => itm.starIconColor.customColor)));
 
   starsettingColor = (starColorData[0].starIconColor.customColor)
 
@@ -260,7 +365,7 @@ function setSettings(data) {
 
   //review listing layout**
 
-  let reviewListingData = settingData.filter((itm) => (itm.reviewListingLayout))
+  let reviewListingData = settingData?.filter((itm) => (itm.reviewListingLayout))
   let reviewSection = document.getElementById('review-section');
   let divider = document.getElementsByTagName('hr');
 
@@ -273,7 +378,7 @@ function setSettings(data) {
   }
 
   //review listing text**
-  let reviewListingTextData = settingData.filter((itm) => (itm.reviewListingText));
+  let reviewListingTextData = settingData?.filter((itm) => (itm.reviewListingText));
   let reviewHeadline = document.getElementById('review-headline');
   let reviewLink = document.getElementById('review-link-title');
   let noReviewTitle = document.getElementById('no-review-title');
@@ -306,7 +411,7 @@ function setSettings(data) {
 
   // review form text** 
 
-  let reviewFormTextData = settingData.filter((itm) => (itm.reviewFormText));
+  let reviewFormTextData = settingData?.filter((itm) => (itm.reviewFormText));
   let EmailPlaceholderValue = (reviewFormTextData.map((itm) => `${itm.reviewFormText.emailHelpMessage}`));
   let NamePlaceholderValue = (reviewFormTextData.map((itm) => `${itm.reviewFormText.nameHelpMessage}`));
   let reviewTitlePlaceholderValue = (reviewFormTextData.map((itm) => `${itm.reviewFormText.reviewTitleHelpMessage}`));
@@ -662,7 +767,7 @@ function handleSubmit(e, id, shop, product, handle) {
     }
 
     //api function for adding formdata **
-    addReviews(dataObj, shop, handle, id);
+    checkTable(dataObj, shop, handle, id);
 
 
     //thanks you message after submitting form **

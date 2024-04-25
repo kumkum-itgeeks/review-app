@@ -180,3 +180,9 @@ loading spinner and loading skeleton
 * app dashboard changes
 * table creation in extension 
 * reduced loading time 
+
+25/04/24
+
+* setting page changes
+* setting page content change
+* fixed frontend bugs
