@@ -1,12 +1,12 @@
-
 //global variables*********
+
 let currentPage = 1;
 var isthisLastPage;
 // initially setting default value for star color
 var starsettingColor = "#FFFF00";
 var shopName;
 let PageNumber = document.getElementById('page-number-display').value;
-const URL = `https://survival-relationships-recognize-assured.trycloudflare.com`
+const URL = `https://dig-coalition-wy-configure.trycloudflare.com`
 
 const defaultData = {
   averageRating: 0,
@@ -43,36 +43,36 @@ const defaultData = {
     {
       reviewListingText: {
         reviewHeadline: "Customer Reviews",
-        reviewLink: "Write a review",
-        noReviewSummary: "No reviews yet !",
+        reviewLink: "Write a Review Here",
+        noReviewSummary: "No reviews yet",
         reviewSummary: "Based on ${length} reviews",
         paginationNextLabel: "Next",
         paginationPrevLabel: "Previous",
         reportAsinappropriate: "Report as Inappropriate",
-        reportAsinappropriateMessage: "This review has been reported !",
+        reportAsinappropriateMessage: "This review has been reported.",
         authorInformation: "<p><i><b>${itm.userName} </b> on <b>${itm.datePosted}</b></i></p>"
       }
     },
     {
       reviewFormText: {
         authorEmail: "Email",
-        emailHelpMessage: "john.smith@example.com...",
+        emailHelpMessage: "xyz@example.com...",
         emailType: "required",
         authorName: "Name",
-        nameHelpMessage: "Enter your name...",
+        nameHelpMessage: "Enter your name here",
         nameType: "required",
         authorLocation: "Location",
-        locationHelpMessage: "Enter your location",
+        locationHelpMessage: "Enter your location here",
         locationType: "hidden",
-        reviewFormTitle: "Write a review",
+        reviewFormTitle: "Write a Review",
         reviewRating: "Rating",
         reviewTitle: "Review Title",
-        reviewTitleHelpMessage: "Give your review a title ...",
-        reviewBody: "Body of Review",
-        reviewBodyHelpMessage: "Write your comments heree...",
+        reviewTitleHelpMessage: "Give your review a heading",
+        reviewBody: "Description of Review",
+        reviewBodyHelpMessage: "Write your description heree",
         submitButtton: "Submit Review",
-        successMessage: "Thank you for submitting a review!",
-        errorMessage: "Not all the fields have been filled out correctly!"
+        successMessage: "Thank you for submitting a review !",
+        errorMessage: "Fields and rating can not be left empty."
       }
     },
     {

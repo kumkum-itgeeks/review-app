@@ -3,7 +3,7 @@ import {
   Text, Page, Button, TextField, IndexTable, IndexFilters, useSetIndexFiltersMode,
   useIndexResourceState, ChoiceList, RangeSlider, Badge, useBreakpoints,
   Divider, Box, Link, Icon, InlineStack, Grid, BlockStack, Thumbnail, Image,
-  SkeletonThumbnail
+  SkeletonThumbnail , Pagination
 } from "@shopify/polaris";
 import { ImportIcon, ExportIcon } from '@shopify/polaris-icons';
 import { useTranslation, Trans } from "react-i18next";
@@ -54,7 +54,7 @@ export default function Product() {
   useEffect(() => {
     if(!Id || Id===''){
       Navigate("/")
-      show("click on product from details page !  ", { duration: 2000 })
+      show("To access the Product section, navigate to Reviews > Details > Products.", { duration: 2000 })
     }
     else{
       getProduct();
@@ -121,6 +121,19 @@ export default function Product() {
 
   //*******functions**********
 
+  
+  const showToast = (message) => {
+    show(message, { duration: 2000 })
+  }
+
+  const setUpdateCount = (count, updateMessage, noUpdateMessage) => {
+    if (count === 0) {
+      showToast(`${noUpdateMessage}`)
+    }
+    else {
+      showToast(`${count} ${updateMessage}`)
+    }
+  }
   function formatDate(dateString) {
     const options = { month: 'short', day: 'numeric', year: 'numeric' };
     const date = new Date(dateString);
@@ -139,38 +152,48 @@ export default function Product() {
       .then(data => console.log(data));
   }
 
-    const updateMetafield=()=>{
-    fetch(`/api/table/updateMetafields/${updateid}`)
+    const updateMetafield=(data)=>{
+      const productHandle = data?.productHandle;
+    const productid = data?.productid;
+    fetch(`/api/table/updateMetafields/${selectedResources}/${productid}/${productHandle}`)
       .then(res => res.json())
-      .then(data => { console.log(data)});
+      .then(data => { console.log(data) })
   }
   const deleteReview = () => {
 
     fetch(`/api/review/deleteReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => {getAllReviews() , updateMetafield()});
+      .then(data => {getAllReviews() ,
+         showToast(selectedResources?.length > 1 ? ` ${selectedResources?.length} Reviews deleted.` : ` ${selectedResources?.length} Review deleted.`),
+       updateMetafield(data),
+      clearSelection() });
   }
 
+
   const unSpamReview = () => {
- 
     fetch(`/api/review/unSpam/${selectedResources}`)
       .then(res => res.json())
-      .then(data => getAllReviews());
+      .then(data => { getAllReviews(), 
+        setUpdateCount(Number(data.count), Number(data.count) > 1 ? 'Reviews unspammed.' : 'Review unspammed.', 'Reviews already unspammed.'), 
+      clearSelection() });
   }
 
   const publishReview = () => {
-    
     fetch(`/api/review/publishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => {getAllReviews() , updateMetafield()});
-
+      .then(data => { getAllReviews(),
+         setUpdateCount(Number(data.count), Number(data.count) > 1 ? 'Reviews published.' : 'Review published.', 'Reviews already published.'),
+          updateMetafield(data), 
+          clearSelection() });
   }
 
   const unpublishReview = () => {
-   
     fetch(`/api/review/unpublishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => {getAllReviews() , updateMetafield()});
+      .then(data => { getAllReviews(), 
+        setUpdateCount(Number(data.count), Number(data.count) > 1 ? 'Reviews unpublished.' : 'Review unpublished.', 'Reviews already unpublished.'),
+         updateMetafield(data), 
+         clearSelection() });
   }
 
   const createTable = () => {
@@ -359,7 +382,7 @@ export default function Product() {
     },
   ];
 
-  const { selectedResources, allResourcesSelected, handleSelectionChange } =
+  const { selectedResources, allResourcesSelected, handleSelectionChange , clearSelection } =
     useIndexResourceState(tableData);
 
 
@@ -499,17 +522,17 @@ export default function Product() {
     <>
       <Page
         title="Reviews"
-        pagination={{
-          hasPrevious: prevPage,
-          hasNext: nextPage,
-          onPrevious: (() => {
-            pageNumber != 1 ? (setPageNumber(pageNumber - 1)) : '';
+        // pagination={{
+        //   hasPrevious: prevPage,
+        //   hasNext: nextPage,
+        //   onPrevious: (() => {
+        //     pageNumber != 1 ? (setPageNumber(pageNumber - 1)) : '';
             
-          }),
-          onNext: (() => {
-            !isLastPage ? (setPageNumber(pageNumber + 1)) : '';
-          })
-        }}
+        //   }),
+        //   onNext: (() => {
+        //     !isLastPage ? (setPageNumber(pageNumber + 1)) : '';
+        //   })
+        // }}
       >
 
         <BlockStack gap={600}>
@@ -618,8 +641,21 @@ export default function Product() {
             >
               {rowMarkup}
             </IndexTable>
+            
             <Divider />
           </Box>
+            <InlineStack align="center">
+            <Pagination
+              hasPrevious={prevPage}
+              onPrevious={() => {
+                pageNumber != 1 ? (setPageNumber(pageNumber - 1)) : '';
+              }}
+              hasNext={nextPage}
+              onNext={() => {
+                !isLastPage ? (setPageNumber(pageNumber + 1)) : '';
+              }}
+            />
+          </InlineStack>
         </BlockStack>
       </Page>
     </>

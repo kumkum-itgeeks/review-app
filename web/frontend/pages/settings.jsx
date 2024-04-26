@@ -21,6 +21,8 @@ export default function Settings() {
   const [divierRgb, setDividerRgb] = useState('#D3D3D3');
   const [formData, setFormData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [resetLoading , setResetLoading] = useState(true)
+  const [saveLoading , setSaveLoading] = useState(true)
 
 
   const [color, setColor] = useState({  //star icon color state
@@ -65,7 +67,7 @@ export default function Settings() {
 
   const [reviewListingText, setreviewListingText] = useState({  // for review listing text setting
     reviewHeadline: 'Customer Reviews',
-    reviewLink: 'Write a review',
+    reviewLink: 'Write a Review Here',
     noReviewSummary: 'No reviews yet',
     reviewSummary: "Based on {{product.reviews_count}} {{ product.reviews_count | pluralize: 'review', 'reviews' }}",
     paginationNextLabel: 'Next &raquo;',
@@ -80,20 +82,20 @@ export default function Settings() {
     emailHelpMessage: 'john.smith@example.com',
     emailType: 'required',
     authorName: 'Name',
-    nameHelpMessage: 'Enter your name',
+    nameHelpMessage: 'Enter your name here',
     nameType: 'required',
     authorLocation: 'Location',
-    locationHelpMessage: 'Enter your location',
+    locationHelpMessage: 'Enter your location here',
     locationType: 'required',
-    reviewFormTitle: 'Write a review',
+    reviewFormTitle: 'Write a Review',
     reviewRating: 'Rating',
     reviewTitle: 'Review Title',
-    reviewTitleHelpMessage: 'Give your review a title',
+    reviewTitleHelpMessage: 'Give your review a heading',
     reviewBody: 'Body of Review',
-    reviewBodyHelpMessage: 'Write your comments here',
+    reviewBodyHelpMessage: 'Write your description here',
     submitButtton: 'Submit Review',
     successMessage: 'Thank you for submitting a review!',
-    errorMessage: 'Not all the fields have been filled out correctly!',
+    errorMessage: 'Fields and rating can not be left empty.',
   })
 
   const [BadgeText, setBadgeText] = useState({ // for badge text setting 
@@ -211,7 +213,8 @@ export default function Settings() {
       body: JSON.stringify({ data }),
     })
       .then(res => res.json())
-      .then(data => { show('settings saved!', { duration: 2000 }) });
+      .then(data => { show('Settings saved.', { duration: 2000 }) , setSaveLoading(false)})
+      .catch(error => console.error(error));
 
   }
 
@@ -227,30 +230,36 @@ export default function Settings() {
           createAllTables()
         }
       })
+      .catch(error => console.error(error));
   }
   const getSettings = () => {
 
     fetch(`/api/settings/getSettings`)
       .then(res => res.json())
-      .then(data => setFormData(data))
+      .then(data => {setFormData(data), setResetLoading(false) , setSaveLoading(false)})
+      .catch(error => console.error(error));
   }
 
   async function createAllTables() {
     await fetch(`api/table/createReviewTable`)
      .then((res) => res.json())
      .then((data) => console.log(data))
+     .catch(error => console.error(error));
 
     await fetch(`api/table/createDetailTable`)
      .then((res) => res.json())
      .then((data) => console.log(data))
+     .catch(error => console.error(error));
 
     await fetch(`api/table/createDeletedReviewsTable`)
      .then((res) => res.json())
      .then((data) => { console.log(data) })
+     .catch(error => console.error(error));
 
     await fetch(`api/settings/addSettingsData`)
      .then((res) => res.json())
      .then((data) => { console.log(data), getSettings() })
+     .catch(error => console.error(error));
 
  }
 
@@ -259,7 +268,8 @@ export default function Settings() {
 
     fetch(`/api/settings/resetSettings`)
       .then(res => res.json())
-      .then(data => { setFormData(data), show(' successfully reset setting!', { duration: 2000 }) })
+      .then(data => { setFormData(data), show('Default settings successfully applied.', { duration: 2000 }) , setResetLoading(false)})
+      .catch(error => console.error(error));
   }
 
   const test = () => {
@@ -267,6 +277,7 @@ export default function Settings() {
     fetch(`/api/table/createSettingsTable`)
       .then(res => res.json())
       .then(data => console.log(data))
+      .catch(error => console.error(error));
   }
 
   const test2 = () => {
@@ -279,7 +290,8 @@ export default function Settings() {
       body: JSON.stringify({ data }),
     })
       .then(res => res.json())
-      .then(data => console.log((data)));
+      .then(data => console.log((data)))
+      .catch(error => console.error(error));
   }
 
   const convertToHex = ({ hue, saturation, brightness }) => {
@@ -1065,13 +1077,13 @@ export default function Settings() {
 
           <InlineStack gap={300} align='end'>
             <Modal
-              title="Reset all settings to default?" message="Are you sure ? you want to reset all settings to default? This action cannot be reversed."
+              title="Reset all settings to default?" message="Are you sure you want to reset all settings to their default values? This action cannot be undone."
               open={isModalOpen}
               onClose={() => setIsModalOpen(false)}
               size='Small'
               primaryAction={{
-                content: 'Reset all settings',
-                onAction: () => { resetSettings(), setIsModalOpen(false) }
+                content: 'Reset',
+                onAction: () => { resetSettings(), setIsModalOpen(false) , setResetLoading(true) }
               }}
               secondaryActions={[
                 {
@@ -1080,10 +1092,8 @@ export default function Settings() {
                 }
               ]}
             />
-            {/* <Toast content="Success!" duration={2000}/> */}
-            <Button size='large' onClick={() => setIsModalOpen(true)} tone='critical' variant='primary'> Reset all settings to default</Button>
-            {/* <Button size='large'> Export deleted reviews</Button> */}
-            <Button size='large' onClick={() => saveSettings()} tone='success' variant='primary'> Save </Button>
+            <Button size='large' onClick={() => setIsModalOpen(true)} tone='critical' variant='primary' loading={resetLoading}> Reset all settings to default</Button>
+            <Button size='large' onClick={() =>{ saveSettings() , setSaveLoading(true)}} tone='success' variant='primary' loading={saveLoading}> Save </Button>
           </InlineStack>
         </BlockStack>
       </Page>

@@ -34,13 +34,13 @@ const addSettings = async(req, res) => {
       "type": "reviewListingText",
       "setting": {
         "reviewHeadline": "Customer Reviews",
-        "reviewLink": "Write a review",
-        "noReviewSummary": "No reviews yet !",
+        "reviewLink": "Write a Review Here",
+        "noReviewSummary": "No reviews yet",
         "reviewSummary": "Based on ${length} reviews",
         "paginationNextLabel": "Next",
         "paginationPrevLabel": "Previous",
         "reportAsinappropriate": "Report review as Inappropriate",
-        "reportAsinappropriateMessage": "This review has been reported !",
+        "reportAsinappropriateMessage": "This review has been reported",
         "authorInformation": "<p><i><b>${itm.userName} </b> on <b>${itm.datePosted}</b></i></p>"
       }
     },
@@ -48,30 +48,30 @@ const addSettings = async(req, res) => {
       "type": "reviewFormText",
       "setting": {
         "authorEmail": "Email",
-        "emailHelpMessage": "john.smith@example.com...",
+        "emailHelpMessage": "xyz@example.com...",
         "emailType": "required",
         "authorName": "Name",
-        "nameHelpMessage": "Enter your name...",
+        "nameHelpMessage": "Enter your name here",
         "nameType": "required",
         "authorLocation": "Location",
-        "locationHelpMessage": "Enter your location",
+        "locationHelpMessage": "Enter your location here",
         "locationType": "hidden",
-        "reviewFormTitle": "Write a review",
+        "reviewFormTitle": "Write a Review",
         "reviewRating": "Rating",
         "reviewTitle": "Review Title",
-        "reviewTitleHelpMessage": "Give your review a title ...",
-        "reviewBody": "Body of Review",
-        "reviewBodyHelpMessage": "Write your comments heree...",
+        "reviewTitleHelpMessage": "Give your review a heading",
+        "reviewBody": "Description of Review",
+        "reviewBodyHelpMessage": "Write your description here",
         "submitButtton": "Submit Review",
         "successMessage": "Thank you for submitting a review!",
-        "errorMessage": "Not all the fields have been filled out correctly!"
+        "errorMessage": "Fields and rating can not be left empty."
       }
     },
     {
       "type": "badgeText",
       "setting": {
         "noReviewsBadge": "No reviews",
-        "reviewsBadge": "{{product.reviews_count}} {{ product.reviews_count | pluralize: 'review', 'reviews' }}"
+        "reviewsBadge": "${count} reviews"
       }
     }
   ]
@@ -91,12 +91,10 @@ const addSettings = async(req, res) => {
 
   con.query(sql,  async (err, result) =>{
     if (err) {
-      console.error('error creating settings table ==>>', err)
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     else{
       
-      console.log(JSON.stringify("setting table created"));
-      // res.send(JSON.stringify({message:"setting table created"}));
        await checkData()
     }
   });
@@ -106,9 +104,8 @@ const addSettings = async(req, res) => {
     let checkQuery = ` SELECT * from ${SettingsTable}`
     con.query(checkQuery, async(err, results) => {
       if (err) {
-        console.error('Error inserting data:', err);
-        return res.status(500).send('Error inserting data');
-      }
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
       else{
         if(results.length){
          res.status(200).send(JSON.stringify({message:"setting table and correct data exists ."}));
@@ -129,9 +126,8 @@ const addSettings = async(req, res) => {
     
     con.query(query, [values], (err, results) => {
       if (err) {
-        console.error('Error inserting data:', err);
-        return res.status(500).send('Error inserting data');
-      }
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
       res.status(200).send(JSON.stringify({message:"Data inserted in settings table "}));
     });
   }
@@ -145,9 +141,8 @@ const getSettings = (req, res) => {
   const query = `SELECT type , settings FROM ${settingsTable} `
   con.query(query, (err, results) => {
     if (err) {
-      console.error('Error fetching data:', err);
-      return res.status(500).send('Error fetching data');
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
 
     const transformedData = results.map(item => {
       const settingsObj = JSON.parse(item.settings);
@@ -174,11 +169,8 @@ const ModifySettings = (req, res) => {
   
     con.query(updateQuery, [JSON.stringify(setting), type], (err, results) => {
       if (err) {
-        console.error('Error updating settings:', err);
-        return;
-      }
-      console.log(`Settings updated for type: ${type}`);
-      
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
     });
   });
 
@@ -194,9 +186,8 @@ const resetSettings=(req,res)=>{
   const query = `SELECT type , defaultSettings FROM ${settingsTable} `
   con.query(query, (err, results) => {
     if (err) {
-      console.error('Error fetching data:', err);
-      return res.status(500).send('Error fetching data');
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
 
     const transformedData = results.map(item => {
       const settingsObj = JSON.parse(item.defaultSettings);
@@ -210,10 +201,8 @@ const resetSettings=(req,res)=>{
     
       con.query(updateQuery, [(defaultSettings), type], (err, results) => {
         if (err) {
-          console.error('Error updating settings:', err);
-          return;
-        }
-        console.log(`Settings updated for type: ${type}`);
+          return  res.status(400).send(JSON.stringify({'error' : err.message}))
+         }
         
       });
     });

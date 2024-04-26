@@ -1,14 +1,8 @@
-const myUrl = `https://survival-relationships-recognize-assured.trycloudflare.com`
+const myUrl = `https://dig-coalition-wy-configure.trycloudflare.com`
 
 function test(shop, handle, avgRating, count) {
 
-
-  // fetch(`${myUrl}/api/getReviewCount/${JSON.stringify(shop)}/${JSON.stringify(handle)}`)
-  //   .then(res => res.json())
-  //   .then(data => { setData(data, shop , avgRating , count), console.log('star rating data ==>', data)})
-
   setData(shop, avgRating, count , handle)
-
 
 }
 
@@ -85,10 +79,12 @@ function setData(shop, avgRating, count , handle) {
           )
       }
       else {
-        if (count <= 0) {
+        if (count < 1) {
           document.getElementById('review-count-block').innerHTML = `(No reviews)`;
         }
-        document.getElementById('review-count-block').innerHTML = `(${count} reviews)`;
+        else{
+          document.getElementById('review-count-block').innerHTML = `(${count} reviews)`;
+        }
 
       }
     })

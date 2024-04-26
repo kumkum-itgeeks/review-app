@@ -57,7 +57,7 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
   const shop = JSON.parse(_req.params.shop).toLowerCase();
   const handle = _req.params.handle;
   const Id = _req.params.id;
-  const shopName = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim();
+  const shopName = (shop).trim().replaceAll(" ", "_").replaceAll("-", "_");
   const reviewTable = shopName + '_review'
   const detailsTable = shopName + '_details'
   const settingsTable = shopName + '_settings'
@@ -73,19 +73,16 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
   con.query(checkStatus, (err, results) => {
     if (err) {
-      console.error('Error inserting reviews', err);
-      return;
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     let settingObj = (JSON.parse(results[0].settings));
     var reviewStatus = (settingObj.autopublish)
 
     if (reviewStatus === 'enabled') {
       con.query(enabledQuery, async (err, results) => {
         if (err) {
-          console.error('Error inserting reviews', err);
-          return;
-        }
-        // res.send(JSON.stringify('Data inserted successfully'));
+          return  res.status(400).send(JSON.stringify({'error' : err.message}))
+         }
         await avgRating()
 
       });
@@ -93,10 +90,8 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
     else {
       con.query(query, async (err, results) => {
         if (err) {
-          console.error('Error inserting reviews', err);
-          return;
-        }
-        // res.send(JSON.stringify('Data inserted successfully'));
+          return  res.status(400).send(JSON.stringify({'error' : err.message}))
+         }
         await avgRating()
 
       });
@@ -109,9 +104,8 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
     const getAveragequery = ` SELECT starRating , reviewTitle FROM ${reviewTable} WHERE productHandle=${handle} AND reviewStatus='Published'`;
     con.query(getAveragequery, async (err, results) => {
       if (err) {
-        console.error('Error fetching reviews', err);
-        return;
-      }
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
       else {
         let sum = 0;
         let rating = results.map((itm) => itm.starRating)
@@ -131,7 +125,7 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
     console.log('inside metafield functionality******')
 
     //****************** getting session data *******************/
-    let completeShop = shop.replaceAll(" ","-") + '.myshopify.com';
+    let completeShop = shop.trim().replaceAll(" ","-") + '.myshopify.com';
     var session;
     var RatingMetaId;
     var ReviewCountId;
@@ -139,22 +133,16 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
     let getSessionQuery = `Select * from shopify_sessions WHERE shop='${completeShop}'`
     con.query(getSessionQuery, async (err, results) => {
       if (err) {
-        console.error('err fetching session ', err)
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
 
-      }
-
-      
       session = results[0];
       console.log(session, 'session')
-
-      // let version = shopify.api.config.apiVersion
-      // let endpoint = `https://${shop}.myshopify.com/admin/api/${version}/graphql.json`;
 
       var client = new shopify.api.clients.Graphql({ session });
 
 
       //****************************** retrieving metafield id ************************
-      console.log('here ====> 1')
 
       const getRatingMetaIdQuery = `query {
       product(id: "gid://shopify/Product/${Id}") {
@@ -186,7 +174,9 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
         RatingMetaId = (Object(myData).data.product.metafield.id);
 
       } catch (error) {
-        console.error('erorrrrrr=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
+        
+          return  res.status(400).send(JSON.stringify({'error' : error.message}))
+         
       }
 
       // Execute the count  mutation
@@ -202,7 +192,9 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
         ReviewCountId = (Object(myData).data.product.metafield.id);
 
       } catch (error) {
-        console.error('erorrrrrr=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
+      
+          return  res.status(400).send(JSON.stringify({'error' : error.message}))
+         
       }
 
       //****************** creating metafield *************************/
@@ -304,7 +296,9 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
           console.log('create mutation response ********', Object(createResponse).body.data.productUpdate.userErrors)
 
         } catch (error) {
-          console.error('erorrrrrr with create metafield =>>>>', error.message);
+          
+            return  res.status(400).send(JSON.stringify({'error' : error.message}))
+           
         }
       }
 
@@ -323,15 +317,14 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
 
         } catch (error) {
-          console.error('erorrrrrr with update metafield =>>>', error.message);
+         
+            return  res.status(400).send(JSON.stringify({'error' : error.message}))
+           
         }
 
       }
 
     })
-
-
-
 
 
   }
@@ -353,7 +346,7 @@ app.get(`/api/getReviews/:shop/:handle/:page`, (req, res) => {
   const shop = JSON.parse(req.params.shop).toLowerCase();
   const productHandle = (req.params.handle);
   const pageNumber = Number(req.params.page);
-  const shopName = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim();
+  const shopName = (shop).trim().replaceAll(" ", "_").replaceAll("-", "_");
   const detailsTable = shopName + '_details'
   const settingsTable = shopName + '_settings'
   const type = ['starIconColor', 'reviewListingLayout', 'reviewListingText', 'reviewFormText', 'badgeText'];
@@ -365,9 +358,8 @@ app.get(`/api/getReviews/:shop/:handle/:page`, (req, res) => {
 
   con.query(settingsQuery, (err, results) => {
     if (err) {
-      console.error('Error fetching data', err);
-      return;
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     const transformedData = results.map(item => {
       const settingsObj = JSON.parse(item.settings);
       return { [item.type]: settingsObj };
@@ -384,9 +376,8 @@ app.get(`/api/getReviews/:shop/:handle/:page`, (req, res) => {
 
     con.query(totoalDataquery, (err, results) => {
       if (err) {
-        console.error('Error retrieving data', err);
-        return;
-      }
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
       let sum = 0;
       let rating = results.map((itm) => itm.starRating)
       length = results.length
@@ -407,9 +398,8 @@ app.get(`/api/getReviews/:shop/:handle/:page`, (req, res) => {
 
     con.query(query, (err, results) => {
       if (err) {
-        console.error('Error retrieving data', err);
-        return;
-      }
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
       res.send(JSON.stringify({ reviews: results, length: length, averageRating: averageRating, settingData: settingData, isLastPage: isLastPage }));
 
     });
@@ -422,15 +412,14 @@ app.get(`/api/getReviews/:shop/:handle/:page`, (req, res) => {
 
 app.get("/api/checkReviewsOnload/:shop", async (_req, res) => {
   const shop = JSON.parse(_req.params.shop).toLowerCase();
-  const settingsTable = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim() + '_settings';
+  const settingsTable = (shop).trim().replaceAll(" ", "_").replaceAll("-", "_") + '_settings';
 
   const query = `SELECT settings from ${settingsTable} Where type ='reviewListingLayout' `;
 
   con.query(query, (err, results) => {
     if (err) {
-      console.error('Error fetching onload details', err);
-      return;
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     else {
       let data = (results.map((itm) => itm.settings))
       let onLoad = (JSON.parse(data).reviewOnload)
@@ -445,7 +434,7 @@ app.get("/api/checkReviewsOnload/:shop", async (_req, res) => {
 app.get("/api/reportInappropriate/:shop/:id", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
-  const shopName = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim();
+  const shopName = (shop).trim().replaceAll(" ", "_").replaceAll("-", "_");
   const reviewTable =  shopName+ '_review';
   const detailsTable = shopName + '_details';
   const Id = req.params.id;
@@ -455,9 +444,8 @@ app.get("/api/reportInappropriate/:shop/:id", (req, res) => {
   const query = `UPDATE ${reviewTable} SET isInappropriate = 1 WHERE id = ${Id}; UPDATE ${detailsTable} SET isInappropriate = 1 WHERE id = ${Id}`
   con.query(query, (err, results) => {
     if (err) {
-      console.error('Error fetching onload details', err);
-      return;
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     else {
       res.status(200).send(JSON.stringify(results))
     }
@@ -475,7 +463,7 @@ app.get("/api/getBadgeDetails/:shop/:handle", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
   const handle = req.params.handle;
-  const settingsTable = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim() + '_settings';
+  const settingsTable = (shop).trim().replaceAll(" ", "_").replaceAll("-", "_") + '_settings';
   var averageRating;
   var length;
 
@@ -485,18 +473,9 @@ app.get("/api/getBadgeDetails/:shop/:handle", (req, res) => {
 
   con.query(query, (err, results) => {
     if (err) {
-      console.error('Error fetching reviews', err);
-      return;
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     else {
-      //  res.status(200).send(JSON.stringify(results))
-      // let sum = 0;
-      // let rating = results.map((itm) => itm.starRating)
-      // length = results.length
-      // let totalRating = rating.forEach((itm) => {
-      //   sum += itm;
-      // })
-      // averageRating = sum / length;
       let myData=(results[0].settings)
       // let ReviewsBadge=(results[0].settings.ReviewsBadge)
       
@@ -510,15 +489,14 @@ app.get("/api/getBadgeDetails/:shop/:handle", (req, res) => {
 app.get("/api/starColor/:shop", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
-  const settingTable = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim() + '_settings';
+  const settingTable = (shop).trim().replaceAll(" ", "_").replaceAll("-", "_") + '_settings';
 
   const query = ` SELECT settings FROM ${settingTable} WHERE type='starIconColor'`;
 
   con.query(query, (err, results) => {
     if (err) {
-      console.error('Error fetching onload details', err);
-      return;
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     else {
 
       let data = (JSON.parse(results[0].settings))
@@ -534,14 +512,14 @@ app.get("/api/starColor/:shop", (req, res) => {
 app.get("/api/checkTableExists/:shop", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
-  const reviewTable = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim() + '_review';
+  const reviewTable = (shop).trim().replaceAll(" ", "_").replaceAll("-", "_") + '_review';
 
   const query = `SELECT * FROM information_schema.tables WHERE table_schema = 'reviews' AND table_name = '${reviewTable}'`;
 
   con.query(query, function (err, tables) {
     if (err) {
-      console.error('error checking tables', err);
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     if (tables.length > 0) {
       res.send(JSON.stringify(true))
     }
@@ -555,7 +533,8 @@ app.get("/api/checkTableExists/:shop", (req, res) => {
 app.get("/api/createAllTables/:shop", (req, res) => {
 
   const shop = JSON.parse(req.params.shop).toLowerCase();
-  const shopName = (shop).replaceAll(" ", "_").replaceAll("-", "_").trim();
+  console.log('shop***8', shop)
+  const shopName = (shop).trim().replaceAll(" ", "_").replaceAll("-", "_");
   const reviewTable = shopName+ '_review';
   const detailsTable = shopName + '_details'
   const SettingsTable = shopName + '_settings'
@@ -586,8 +565,8 @@ app.get("/api/createAllTables/:shop", (req, res) => {
 
   con.query(createReviewTable, function (err, tables) {
     if (err) {
-      console.error('error creating review table', err);
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     else {
       console.log('review table created')
     }
@@ -617,8 +596,8 @@ app.get("/api/createAllTables/:shop", (req, res) => {
       )`;
   con.query(createDetailsTable, function (err, result) {
     if (err) {
-      console.error('error creating details table', err)
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     else {
       console.log( " details table created" );
     }
@@ -657,13 +636,13 @@ app.get("/api/createAllTables/:shop", (req, res) => {
         "type": "reviewListingText",
         "setting": {
           "reviewHeadline": "Customer Reviews",
-          "reviewLink": "Write a review",
-          "noReviewSummary": "No reviews yet !",
+          "reviewLink": "Write a Review Here",
+          "noReviewSummary": "No reviews yet",
           "reviewSummary": "Based on ${length} reviews",
           "paginationNextLabel": "Next",
           "paginationPrevLabel": "Previous",
           "reportAsinappropriate": "Report as Inappropriate",
-          "reportAsinappropriateMessage": "This review has been reported !",
+          "reportAsinappropriateMessage": "This review has been reported",
           "authorInformation": "<p><i><b>${itm.userName} </b> on <b>${itm.datePosted}</b></i></p>"
         }
       },
@@ -671,23 +650,23 @@ app.get("/api/createAllTables/:shop", (req, res) => {
         "type": "reviewFormText",
         "setting": {
           "authorEmail": "Email",
-          "emailHelpMessage": "john.smith@example.com...",
+          "emailHelpMessage": "xyz@example.com...",
           "emailType": "required",
           "authorName": "Name",
-          "nameHelpMessage": "Enter your name...",
+          "nameHelpMessage": "Enter your name here",
           "nameType": "required",
           "authorLocation": "Location",
-          "locationHelpMessage": "Enter your location",
+          "locationHelpMessage": "Enter your location here",
           "locationType": "hidden",
-          "reviewFormTitle": "Write a review",
+          "reviewFormTitle": "Write a Review",
           "reviewRating": "Rating",
           "reviewTitle": "Review Title",
-          "reviewTitleHelpMessage": "Give your review a title ...",
-          "reviewBody": "Body of Review",
-          "reviewBodyHelpMessage": "Write your comments heree...",
+          "reviewTitleHelpMessage": "Give your review a heading",
+          "reviewBody": "Description of Review",
+          "reviewBodyHelpMessage": "Write your description here",
           "submitButtton": "Submit Review",
           "successMessage": "Thank you for submitting a review!",
-          "errorMessage": "Not all the fields have been filled out correctly!"
+          "errorMessage": "Fields and rating can not be left empty."
         }
       },
       {
@@ -714,8 +693,8 @@ app.get("/api/createAllTables/:shop", (req, res) => {
   
     con.query(sql,  async (err, result) =>{
       if (err) {
-        console.error('error creating settings table ==>>', err)
-      }
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
       else{
         
         console.log(JSON.stringify("setting table created"));
@@ -729,9 +708,8 @@ app.get("/api/createAllTables/:shop", (req, res) => {
       let checkQuery = ` SELECT * from ${SettingsTable}`
       con.query(checkQuery, async(err, results) => {
         if (err) {
-          console.error('Error inserting data:', err);
-          return res.status(500).send('Error inserting data');
-        }
+          return  res.status(400).send(JSON.stringify({'error' : err.message}))
+         }
         else{
           if(results.length){
            console.log(JSON.stringify({message:"setting table and correct data exists ."}));
@@ -752,9 +730,8 @@ app.get("/api/createAllTables/:shop", (req, res) => {
       
       con.query(query, [values], (err, results) => {
         if (err) {
-          console.error('Error inserting data:', err);
-          return res.status(500).send('Error inserting data');
-        }
+          return  res.status(400).send(JSON.stringify({'error' : err.message}))
+         }
         console.log(JSON.stringify({message:"Data inserted in settings table "}));
       });
     }
@@ -784,8 +761,8 @@ app.get("/api/createAllTables/:shop", (req, res) => {
     )`;
   con.query(createDeletedReviewTable, function (err, result) {
     if (err) {
-      console.error('error creating delted review table ', err)
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     else {
       res.send(JSON.stringify({ message: 'export deleted review table created' }));
     }

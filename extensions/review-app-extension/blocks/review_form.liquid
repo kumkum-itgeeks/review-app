@@ -6,9 +6,6 @@
 {% assign producthandle= product.handle %}
 {% assign metaRating = product.metafields.itgeeks_reviews.average_rating.value %}
 
-
-
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -43,7 +40,6 @@
         <h3 id='review-form-title'>
             WRITE A REVIEW
         </h3>
-        <div id='common-err'></div>
         <label id='name-label'>Name</label>
         <Input type='text' placeholder='Enter your name'  value ='' id='nameInput' autocomplete='off' class='input-box' isRequired=true/>
         <span id='nameErr' class='err'></span>
@@ -71,6 +67,7 @@
         <label id='review-desc-label'>Body of Review (1500)</label>
         <textarea  rows='10'  id='reviewBodyInput' placeholder='Write your comments here' class='input-box' ></textarea>
         <span id='bodyErr' class='err'></span>
+        <div id='common-err'></div>
         <div id='submit-btn'>
             <button type='submit' onclick="handleSubmit(event,{{productId}},'{{shopName}}','{{productName}}' ,'{{producthandle}}')" class='btn button' ><b id='submit-btn-title'>Submit Review</b></button>
         </div>
@@ -103,16 +100,9 @@
 </body>
 </html>
 
-
-
-
-
-
-
-
 {% schema %}
 {
-  "name": "form",
+  "name": "Review Form",
   "target": "section",
   "settings": [
     { "type": "product", "id": "product", "label": "product", "autofill": true },

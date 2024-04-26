@@ -2,7 +2,7 @@
 
 client_id = "c8b76d8cdccd39ae45b847901d4b4fb3"
 name = "reviews"
-application_url = "https://survival-relationships-recognize-assured.trycloudflare.com"
+application_url = "https://dig-coalition-wy-configure.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://survival-relationships-recognize-assured.trycloudflare.com/auth/callback",
-  "https://survival-relationships-recognize-assured.trycloudflare.com/auth/shopify/callback",
-  "https://survival-relationships-recognize-assured.trycloudflare.com/api/auth/callback"
+  "https://dig-coalition-wy-configure.trycloudflare.com/auth/callback",
+  "https://dig-coalition-wy-configure.trycloudflare.com/auth/shopify/callback",
+  "https://dig-coalition-wy-configure.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

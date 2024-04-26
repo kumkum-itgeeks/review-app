@@ -15,8 +15,8 @@ import solidStar from '../assets/star-solid.svg'
 
 export default function Details() {
 
-  const [textFieldValue, setTextFieldValue] = useState('');
   const [review, setReview] = useState();
+  const [textFieldValue, setTextFieldValue] = useState('');
   const [product, setProduct] = useState()
   const [status, setStatus] = useState();
   const [cardLoading, setCardLoading] = useState(true);
@@ -29,6 +29,7 @@ export default function Details() {
   const [averageRating, setAverageRating] = useState(0);
   const [totalRating, setTotalRating] = useState(0);
   const [showWarning, setShowWarning] = useState(0);
+  const [replyLoading ,setReplyLoading]=useState(false)
 
 
   //*******variables********
@@ -55,13 +56,15 @@ export default function Details() {
   const deleteReview = () => {
     fetch(`/api/review/deleteReview/${Id}`)
       .then(res => res.json())
-      .then(data => { getReviewDetails(), show(' review deleted ', { duration: 2000 }) , updateMetafield() , Navigate("/") });
+      .then(data => { getReviewDetails(), show(' review deleted ', { duration: 2000 }) , updateMetafield(data) , Navigate("/") })
+      .catch(error => console.error(error));
   }
 
   const publishReview = () => {
     fetch(`/api/review/publishReview/${Id}`)
       .then(res => res.json())
-      .then(data => getReviewDetails());
+      .then(data => getReviewDetails())
+      .catch(error => console.error(error));
   }
 
 
@@ -76,6 +79,7 @@ export default function Details() {
     fetch(`api/details/getAllDetails/${Id}`)
       .then(res => res.json())
       .then(data => checkForInappropriate(data))
+      .catch(error => console.error(error));
   }
 
   function checkForInappropriate(data) {
@@ -86,21 +90,36 @@ export default function Details() {
       setShowWarning(0);
 
     setReview(data[0])
+    setTextFieldValue(data[0]?.reply ? data[0].reply : '')
   }
 const dissmissInappropriate=()=>{
   fetch(`api/details/dissmissInappropriate/${Id}`)
   .then(res => res.json())
   .then(data => {setShowWarning(0),show('cleared Inappropriate review ', { duration: 2000 })})
+  .catch(error => console.error(error));
 }
 
   const changeStatus = () => {
-    fetch(`api/details/changeStatus/${Id}/${review.reviewStatus}`)
-      .then(res => res.json())
-      .then(data => { 
-        setStatus(data),
-         show(` review ${review.reviewStatus == 'Published' ? 'unpublished' : 'published'} `, { duration: 2000 }), 
-         updateMetafield() })
+    if (review?.reviewStatus =='Published'){
+      unpublishReview()
+    }
+    else{
+      publishReviews()
+    }
 
+  }
+  const publishReviews = () => {
+    fetch(`/api/review/publishReview/${Id}`)
+      .then(res => res.json())
+      .then(data => { getReviewDetails(),show('review published  ', { duration: 2000 }), updateMetafield(data)  })
+      .catch(error => console.error(error));
+  }
+
+  const unpublishReview = () => {
+    fetch(`/api/review/unpublishReview/${Id}`)
+      .then(res => res.json())
+      .then(data => { getReviewDetails(), show('review unpublished ', { duration: 2000 }), updateMetafield(data) })
+      .catch(error => console.error(error));
   }
 
   const postReply = () => {
@@ -113,7 +132,8 @@ const dissmissInappropriate=()=>{
       body: JSON.stringify({ textFieldValue, Id }),
     })
       .then(res => res.json())
-      .then(data => { setTextFieldValue(''), show(' reply posted ', { duration: 2000 }) });
+      .then(data => { getReviewDetails() ,  setTextFieldValue(review?.reply), show(' Reply posted. ', { duration: 2000 }) , setReplyLoading(false)})
+      .catch(error => console.error(error));
   }
 
   const getProductDetails = () => {
@@ -122,6 +142,7 @@ const dissmissInappropriate=()=>{
     fetch(`api/details/getProductDetails/${review?.productid}`)
       .then(res => res.json())
       .then(data => setProduct(data))
+      .catch(error => console.error(error));
 
   }
 
@@ -129,21 +150,29 @@ const dissmissInappropriate=()=>{
     fetch(`api/details/getProductReviewDetails/${review?.productid}`)
       .then(res => res.json())
       .then(data => setProductDescription(data))
+      .catch(error => console.error(error));
 
   }
 
   
-  const updateMetafield=()=>{
-    fetch(`/api/table/updateMetafields/${Id}`)
+  const updateMetafield=(data)=>{
+    // fetch(`/api/table/updateMetafields/${Id}`)
+    //   .then(res => res.json())
+    //   .then(data => { console.log(data)})
+    //   .catch(error => console.error(error));
+    const productHandle = data?.productHandle;
+    const productid = data?.productid;
+    fetch(`/api/table/updateMetafields/${Id}/${productid}/${productHandle}`)
       .then(res => res.json())
-      .then(data => { console.log(data)});
+      .then(data => { console.log(data) })
+      .catch(error => console.error(error));
   }
   //*******useEffects********
 
   useEffect(()=>{
     if(!Id || Id===''){
       Navigate("/")
-      show("click 'Details' for further details !  ", { duration: 2000 })
+      show("To see the details, navigate to Reviews > Details.", { duration: 2000 })
     }
   },[])
 
@@ -206,7 +235,7 @@ const dissmissInappropriate=()=>{
 
       <BlockStack gap='300'>
         <Box maxWidth="100px">
-        <Button variant="primary" onClick={() => changeStatus()} textAlign="start" size="medium" fullWidth='false' tone={review?.reviewStatus == 'Published' ? "critical" : "success"}>
+        <Button variant="secondary" onClick={() => changeStatus()} textAlign="start" size="medium" fullWidth='false' >
           {
            
               review?.reviewStatus == 'Published' ?
@@ -301,7 +330,7 @@ const dissmissInappropriate=()=>{
                             (review?.location) ? <Text>,  from {review?.location} </Text> : ''
                           }
 
-                          <><Text tone="magic-subdued">{review?.Email}</Text></>
+                          <><Text tone="magic-subdued">({review?.Email})</Text></>
                         </InlineStack>
                       </BlockStack>
                     </>
@@ -374,7 +403,8 @@ const dissmissInappropriate=()=>{
                         <Text variant="headingLg" as="h5" fontWeight='medium'>Reply to Review</Text>
                         <Box paddingBlock={400}>
                           <TextField
-                            value={textFieldValue}
+                            monospaced
+                            value={ textFieldValue}
                             onChange={handleTextFieldChange}
                             multiline={4}
                             placeholder="Add a reply to this review..."
@@ -386,7 +416,7 @@ const dissmissInappropriate=()=>{
                         </Box>
                         <Box paddingBlock={200}>
                           <InlineStack align="end" >
-                            <Button size="large" onClick={() => postReply()}>Post reply</Button>
+                            <Button size="large" onClick={() => {postReply(), setReplyLoading(true)}}loading={replyLoading} variant="primary" tone="success">Post reply</Button>
                           </InlineStack>
                         </Box>
                       </Box>
@@ -402,7 +432,9 @@ const dissmissInappropriate=()=>{
 
         <Divider borderColor="border" />
       </Box>
-      <Button size="large" onClick={() => deleteReview()}>Delete</Button>
+      <Box>
+      <Button size="large" onClick={() => deleteReview()} variant="primary" tone="critical" >Delete Review</Button>
+      </Box>
     </Page>
   );
 }

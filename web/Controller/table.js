@@ -7,7 +7,6 @@ import { con } from "../index.js";
 const checkTableExists = (req, res) => {
 
   const reviewTable = req.shopname + '_review'
-  console.log('table length ', reviewTable)
   const query = `SELECT * FROM information_schema.tables WHERE table_schema = 'reviews' AND table_name = '${reviewTable}'`;
 
   con.query(query, function (err, tables) {
@@ -26,6 +25,68 @@ const checkTableExists = (req, res) => {
 
 
 }
+
+
+const checkPlanTableExists = (req, res) => {
+
+  const PlanTable = req.shopname + '_pricing_plan'
+  const query = `SELECT * FROM information_schema.tables WHERE table_schema = 'reviews' AND table_name = '${PlanTable}'`;
+
+  con.query(query,async function (err, tables) {
+    if (err) {
+      return res.status(400).send(JSON.stringify({'Error searching table' : err}))
+    }
+
+    if (tables.length > 0) { 
+      await checkChargeId()
+    }
+    else{
+      await createPlanTable()
+    }
+
+  })
+
+  async function checkChargeId(){
+    const query = `SELECT chargeId FROM ${PlanTable}`
+
+    con.query(query, async function (err, result) {
+      if (err) {
+        return  res.status(400).send(JSON.stringify({'error fetching chargeId' : err.message}))
+       }
+       else{
+        if(result===null || result===undefined || result===''){
+          res.status(200).send(JSON.stringify(false));
+        }
+        else{
+          res.status(200).send(JSON.stringify(true));
+        }
+      }
+    });
+
+  }
+
+  async function createPlanTable(){
+    var sql = `CREATE TABLE IF NOT EXISTS ${PlanTable}  (
+      id INT NOT NULL AUTO_INCREMENT,
+      chargeId INT DEFAULT NULL,
+      planName VARCHAR(255) DEFAULT NULL,
+      created_at TIMESTAMP NOT NULL,
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+      PRIMARY KEY (id)
+      )`;
+  
+    con.query(sql, function (err, result) {
+      if (err) {
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
+       else{
+        res.status(200).send(JSON.stringify(false));
+       }
+    });
+  
+  }
+
+}
 const createSettingsTable = (req, res) => {
   const SettingsTable = req.shopname + '_settings';
 
@@ -40,8 +101,9 @@ const createSettingsTable = (req, res) => {
     )`;
 
   con.query(sql, function (err, result) {
-    if (err) throw err;
-    console.log(JSON.stringify("setting table created"));
+    if (err) {
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     res.send(result);
   });
 
@@ -74,10 +136,9 @@ const createReviewsTable = async (_req, res) => {
       )`;
   con.query(sql, function (err, result) {
     if (err) {
-      console.error('error creating review table =>>', err)
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     else {
-      console.log(JSON.stringify("Review Table created"))
       res.send(JSON.stringify({ message: " review table created" }));
     }
   });
@@ -111,8 +172,8 @@ const createDetailTable = async (_req, res) => {
       )`;
   con.query(sql, function (err, result) {
     if (err) {
-      console.error('error creating details table', err)
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     else {
       res.send(JSON.stringify({ message: " details table created" }));
     }
@@ -198,8 +259,6 @@ const updateMetafields = async (req, res) => {
   const reviewIdArr = (req.params.id);
   const pidArr = (req.params.pid).split(',');
   const handleArray = (req.params.handle).split(',');
-  console.log(pidArr)
-  console.log(handleArray)
   const shop = req.shopname;
   var handle = [];
   var Id = [];
@@ -210,16 +269,13 @@ const updateMetafields = async (req, res) => {
   const session = res.locals.shopify.session;
   var client = new shopify.api.clients.Graphql({ session });
 
-
-  console.log('review id array ===>> ', reviewIdArr)
   if (pidArr == "null" || pidArr === '' || pidArr == "undefined") {
-    console.log('in normal query')
 
     const query = `SELECT productHandle , productid  FROM ${reviewTable} WHERE id IN (${reviewIdArr})`
     con.query(query, async (err, result) => {
       if (err) {
-        console.error('error fetching product handle , product id', err)
-      }
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
       else {
         result.map(async (objs) => {
           let { productHandle, productid } = objs;
@@ -232,17 +288,6 @@ const updateMetafields = async (req, res) => {
 
   }
   else {
-
-    console.log('in delete query')
-
-    // handle.map(async(Handle , ind)=>{
-    //   handle.push(Handle)
-    //   Id.push(pidArr[ind])
-
-    //   // if (ind === (handle.length) - 1) {
-    //   //   removeDuplicateHandles()
-    //   // }
-    // })
     handle = handleArray;
     Id = pidArr;
     await removeDuplicateHandles()
@@ -251,8 +296,6 @@ const updateMetafields = async (req, res) => {
 
 
   async function removeDuplicateHandles() {
-    console.log("productHandles ==>", handle)
-    console.log("Ids ==>", Id)
     let filteredHandles = handle.filter((item,
       index) => handle.indexOf(item) === index);
     await avgRating(filteredHandles)
@@ -268,9 +311,8 @@ const updateMetafields = async (req, res) => {
       const getAveragequery = ` SELECT starRating , reviewTitle FROM ${reviewTable} WHERE productHandle='${itm}' AND reviewStatus='Published'`;
       con.query(getAveragequery, async (err, results) => {
         if (err) {
-          console.error('Error fetching reviews', err);
-          return;
-        }
+          return  res.status(400).send(JSON.stringify({'error' : err.message}))
+         }
         else {
           let sum = 0;
           if (!results || results.length <= 0 || results === '') {
@@ -331,7 +373,9 @@ const updateMetafields = async (req, res) => {
       RatingMetaId = (RatingMetaIds)
 
     } catch (error) {
-      console.error('erorrrrrr=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
+      
+        return  res.status(400).send(JSON.stringify({'error' : error.message}))
+       
     }
 
     //********* retrieveing count meta id  *****************//
@@ -357,7 +401,9 @@ const updateMetafields = async (req, res) => {
       ReviewCountId = (countMetaIds)
 
     } catch (error) {
-      console.error('erorrrrrr=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
+  
+        return  res.status(400).send(JSON.stringify({'error' : error.message}))
+       
     }
 
 
@@ -389,7 +435,6 @@ const updateMetafields = async (req, res) => {
 
       try {
         const mutationResponses = await Promise.all(RatingMetaId.map(async (id, ind) => {
-          console.log(filteredIds[ind], 'piddd.......')
           const response = await client.query({
             data: {
               query: UpdateMetafieldMutation,
@@ -417,7 +462,9 @@ const updateMetafields = async (req, res) => {
         console.log('Update Mutation UserErros ==>>:', mutationResponses.map((Res) => Object(Res).body.data.productUpdate.userErrors));
         await res.status(200).send(JSON.stringify({ message: 'Metafields updated succesfully' }))
       } catch (error) {
-        console.error('Error updating metafields ==>>:', error.message);
+       
+          return  res.status(400).send(JSON.stringify({'error' : error.message}))
+         
       }
 
     }
@@ -451,8 +498,8 @@ const createDeletedReviewsTable = async (req, res) => {
     )`;
   con.query(sql, function (err, result) {
     if (err) {
-      console.error('error creating delted review table ', err)
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     else {
       res.send(JSON.stringify({ message: 'export deletd review table created' }));
     }
@@ -460,4 +507,4 @@ const createDeletedReviewsTable = async (req, res) => {
 }
 
 
-export default { createReviewsTable, createDetailTable, createMetafield, updateMetafields, createSettingsTable, createDeletedReviewsTable , checkTableExists }
+export default { createReviewsTable, createDetailTable, checkPlanTableExists ,createMetafield, updateMetafields, createSettingsTable, createDeletedReviewsTable , checkTableExists }

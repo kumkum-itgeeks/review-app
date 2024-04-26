@@ -12,6 +12,7 @@ import { useNavigate, useToast } from "@shopify/app-bridge-react";
 import emptyStar from '../assets/star-regular.svg'
 import solidStar from '../assets/star-solid.svg'
 import '../css/index.css';
+import { hide } from "@shopify/app-bridge/actions/ContextualSaveBar";
 
 
 export default function HomePage() {
@@ -62,15 +63,8 @@ export default function HomePage() {
 
   //********useEffects********
 
-  // useEffect(() => {
-  //   createAllTables()
-
-  // }, [])
-
   useEffect(() => {
-    // tableCreated ?
-      getTotalRows()
-      // : ''
+    getTotalRows()
     setPageNumber(1);
   }, [reviewStatus])
 
@@ -89,9 +83,9 @@ export default function HomePage() {
 
   useEffect(() => {
     setLoading(true)
-    // tableCreated ?
-      getAllReviews()
-      // : ''
+
+    getAllReviews()
+
 
   }, [queryValue, pageNumber, sortSelected, reviewStatus,])
 
@@ -99,19 +93,9 @@ export default function HomePage() {
     setPageNumber(1);
   }, [queryValue, sortSelected, reviewStatus])
 
-  // useEffect(() => {
-  //   setLoading(false)
-  // }, [tableData])
-
-  // useEffect(() => {
-  //  removeSelectedResources(selectedResources);
-  // }, [pageNumber])
 
 
   useEffect(() => {
-    // !isLastPage ? setNextPage(true) : setNextPage(true)
-    // pageNumber != 1 ? setPrevPage(true) : setPrevPage(false)
-    // isLastPage ? setNextPage(false) :''
 
     if (pageNumber === 1 && !isLastPage) {
       setNextPage(true)
@@ -168,36 +152,41 @@ export default function HomePage() {
     }
   }
 
-  async function checkTableExistance(){
+  async function checkTableExistance() {
     fetch(`/api/table/checkTableExists`)
-    .then(res => res.json())
-    .then(tableExists => {
-      console.log(tableExists)
-      if(tableExists===true){
-        console.log('table exists')
-      }
-      else{
-        createAllTables()
-      }
-    })
+      .then(res => res.json())
+      .then(tableExists => {
+        console.log(tableExists)
+        if (tableExists === true) {
+          console.log('table exists')
+        }
+        else {
+          createAllTables()
+        }
+      })
+      .catch(error => console.error(error));
   }
-   async function createAllTables() {
-     await fetch(`api/table/createReviewTable`)
+  async function createAllTables() {
+    await fetch(`api/table/createReviewTable`)
       .then((res) => res.json())
       .then((data) => console.log(data))
+      .catch(error => console.error(error));
 
 
-     await fetch(`api/table/createDetailTable`)
+    await fetch(`api/table/createDetailTable`)
       .then((res) => res.json())
       .then((data) => console.log(data))
+      .catch(error => console.error(error));
 
-     await fetch(`api/table/createDeletedReviewsTable`)
+    await fetch(`api/table/createDeletedReviewsTable`)
       .then((res) => res.json())
       .then((data) => { console.log(data) })
+      .catch(error => console.error(error));
 
-     await fetch(`api/settings/addSettingsData`)
+    await fetch(`api/settings/addSettingsData`)
       .then((res) => res.json())
       .then((data) => { console.log(data), getAllReviews() })
+      .catch(error => console.error(error));
 
   }
   const ExportDeletedReviews = () => {
@@ -228,8 +217,9 @@ export default function HomePage() {
   const createMetafield = () => {
     fetch('/api/table/createReviewTable')
       .then(res => res.json())
-      .then(data => console.log(data));
-    console.log('err')
+      .then(data => (data))
+      .catch(error => console.error(error));
+   
   }
 
   // Function to convert CSV text to JSON
@@ -291,12 +281,12 @@ export default function HomePage() {
             setImportErrors(...[importErrorsArray])
             setFileStatus('')
             console.log('product not exists')
-            // logger.error(`Error importing review at Line : ${ind}`);
           }
         })
         addReview(review, productHandle, IdArr);
 
-      });
+      })
+      .catch(error => console.error(error));
 
   }
 
@@ -316,15 +306,15 @@ export default function HomePage() {
           console.log(data),
             setImportLoading(false),
             setFileStatus(''),
-            show(' review Imported !', { duration: 2000 }),
+            show(' Reviews imported.', { duration: 2000 }),
             getAllReviews()
         })
         .catch((err) => {
           console.log('error :', err)
-          show(' error importing reviews !', { duration: 2000 })
+          show(' Error importing reviews.', { duration: 2000 })
         })
       :
-      show(' error importing reviews !', { duration: 2000 })
+      show(' Error importing reviews.', { duration: 2000 })
 
   }
 
@@ -401,25 +391,29 @@ export default function HomePage() {
 
     fetch(`/api/review/deleteReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), showToast(selectedResources?.length > 1 ? ` ${selectedResources?.length} Reviews deleted.` : ` ${selectedResources?.length} Review deleted.`), updateMetafield(data), clearSelection() });
+      .then(data => { getAllReviews(), showToast(selectedResources?.length > 1 ? ` ${selectedResources?.length} Reviews deleted.` : ` ${selectedResources?.length} Review deleted.`), updateMetafield(data), clearSelection() })
+      .catch(error => console.error(error))
   }
 
   const unSpamReview = () => {
     fetch(`/api/review/unSpam/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), setUpdateCount(Number(data.count), Number(data.count) > 1 ? 'Reviews unspammed.' : 'Review unspammed.', 'Reviews already unspammed.'), clearSelection() });
+      .then(data => { getAllReviews(), setUpdateCount(Number(data.count), Number(data.count) > 1 ? 'Reviews unspammed.' : 'Review unspammed.', 'Reviews already unspammed.'), clearSelection() })
+      .catch(error => console.error(error));
   }
 
   const publishReview = () => {
     fetch(`/api/review/publishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), setUpdateCount(Number(data.count), Number(data.count) > 1 ? 'Reviews published.' : 'Review published.', 'Reviews already published.'), updateMetafield(), clearSelection() });
+      .then(data => { getAllReviews(), setUpdateCount(Number(data.count), Number(data.count) > 1 ? 'Reviews published.' : 'Review published.', 'Reviews already published.'), updateMetafield(), clearSelection() })
+      .catch(error => console.error(error));
   }
 
   const unpublishReview = () => {
     fetch(`/api/review/unpublishReview/${selectedResources}`)
       .then(res => res.json())
-      .then(data => { getAllReviews(), setUpdateCount(Number(data.count), Number(data.count) > 1 ? 'Reviews unpublished.' : 'Review unpublished.', 'Reviews already unpublished.'), updateMetafield(), clearSelection() });
+      .then(data => { getAllReviews(), setUpdateCount(Number(data.count), Number(data.count) > 1 ? 'Reviews unpublished.' : 'Review unpublished.', 'Reviews already unpublished.'), updateMetafield(), clearSelection() })
+      .catch(error => console.error(error));
   }
 
   const updateMetafield = (data) => {
@@ -429,11 +423,13 @@ export default function HomePage() {
     fetch(`/api/table/updateMetafields/${selectedResources}/${productid}/${productHandle}`)
       .then(res => res.json())
       .then(data => { console.log(data) })
+      .catch(error => console.error(error));
   }
   const createTable = () => {
     fetch('/api/table/createDetailTable')
       .then(res => res.json())
-      .then(data => console.log(data));
+      .then(data => console.log(data))
+      .catch(error => console.error(error));
   }
 
   const getAllReviews = () => {
@@ -447,7 +443,8 @@ export default function HomePage() {
       body: JSON.stringify({ queryValue, pageNumber, reviewStatus, sortSelected }),
     })
       .then(res => res.json())
-      .then(data => { setTableData(data), setLoading(false) });
+      .then(data => { setTableData(data), setLoading(false) })
+      .catch(error => console.error(error));
   };
 
   const getTotalRows = () => {
@@ -455,11 +452,13 @@ export default function HomePage() {
       fetch(`/api/review/totalReviews/All`)
         .then(res => res.json())
         .then(data => setTotalRows(data))
+        .catch(error => console.error(error));
     }
     else {
       fetch(`/api/review/totalReviews/${reviewStatus}`)
         .then(res => res.json())
-        .then(data => setTotalRows(data));
+        .then(data => setTotalRows(data))
+        .catch(error => console.error(error));
     }
   }
 
@@ -521,13 +520,12 @@ export default function HomePage() {
   }));
 
   const emptyStateMarkup = (
-    // <Box background="bg-fill"  minHeight="300px" paddingBlock={0} >
-      <EmptySearchResult
-        title={'No Reviews Found !'}
-        withIllustration
-        
-      />
-    // </Box>
+
+    <EmptySearchResult
+      title={'No Reviews Found !'}
+      withIllustration
+
+    />
   );
 
   const sortOptions = [
@@ -572,7 +570,7 @@ export default function HomePage() {
           </Box>
         </IndexTable.Cell>
         <IndexTable.Cell>
-          <Text >
+          <Text as="span" >
             <Text tone="magic-subdued">
               {reviewTitle}
             </Text>
@@ -652,7 +650,6 @@ export default function HomePage() {
 
   //************* conditonal statements *******************
 
-  // console.log('selected', selected)
   return (
     <>
       <Page
@@ -660,17 +657,17 @@ export default function HomePage() {
         secondaryActions={[
           {
             content: 'Import reviews',
-            onAction: () => {setIsModalOpen(true), checkTableExistance()},
+            onAction: () => { setIsModalOpen(true), checkTableExistance() },
             icon: ImportIcon
           },
           {
             content: 'Export',
-            onAction: () => ExportReview(),
+            onAction: () => { checkTableExistance(), ExportReview() },
             icon: ExportIcon
           },
           {
             content: 'Export deleted reviews',
-            onAction: () => ExportDeletedReviews(),
+            onAction: () => { checkTableExistance(), ExportDeletedReviews() },
             icon: ExportIcon
           },
         ]}
@@ -702,8 +699,10 @@ export default function HomePage() {
               setMode={setMode}
               loading={Loading}
               filteringAccessibilityTooltip="Search"
-              hideFilters 
+              hideFilters
               
+              
+
             />
             <IndexTable
               hasZebraStriping={false}
@@ -723,9 +722,10 @@ export default function HomePage() {
                 { title: 'Status' },
                 { title: '' },
               ]}
+          
             >
               {rowMarkup}
-           
+              
             </IndexTable>
 
 
@@ -776,14 +776,12 @@ export default function HomePage() {
               {
                 importLoading === true ?
                   <>
-
                     <Spinner size="small" />
                     <Text as="p">
                       Importing Reviews ...
                     </Text>
 
                   </>
-
                   :
                   <>
                     <DropZone

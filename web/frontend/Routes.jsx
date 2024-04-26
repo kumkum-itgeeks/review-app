@@ -1,5 +1,8 @@
 import { Routes as ReactRouterRoutes, Route } from "react-router-dom";
 import Product from "./pages/product";
+import MyPlanProvider, { MyContext } from "./components/providers/PlanProvider";
+import { useContext, useState } from "react";
+import PricingPlan from "./pages/plan";
 
 /**
  * File-based routing.
@@ -15,10 +18,15 @@ import Product from "./pages/product";
  *
  * @return {Routes} `<Routes/>` from React Router, with a `<Route/>` for each file in `pages`
  */
+
+
 export default function Routes({ pages }) {
+
+  const {hasPlan} = useContext(MyContext)  
+  console.log(hasPlan)
   const routes = useRoutes(pages);
   const routeComponents = routes.map(({ path, component: Component }) => (
-    <Route key={path} path={path} element={<Component />} />
+    <Route key={path} path={path} element={hasPlan?<Component />:<PricingPlan/>} />
   ));
 
   const NotFound = routes.find(({ path }) => path === "/notFound").component;
@@ -29,6 +37,7 @@ export default function Routes({ pages }) {
       {routeComponents}
       <Route path="*" element={<NotFound />} />
       <Route path="details/:id" element={<Details/>} />
+
     </ReactRouterRoutes>
   );
 }

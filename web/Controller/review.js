@@ -1,13 +1,9 @@
 // review controller
 
 import shopify from '../shopify.js';
-// import sql from 'mysql';
-
-// import api from '../shop.js';
-// const {detailTable,reviewTable}=api
 import { con } from '../index.js';
-import logger from '../frontend/assets/logger.js';
-import { error } from 'winston';
+
+
 
 
 const totalReviews = (req, res) => {
@@ -20,27 +16,33 @@ const totalReviews = (req, res) => {
 
 con.query(query, function (err, tables) {
   if (err) {
-    throw err;
+   return  res.status(400).send(JSON.stringify({'error' : err.message}))
   }
 
   if (tables.length > 0) {
   if (status == 'All') {
     con.query(`SELECT * FROM ${reviewTable}`, function (err, result) {
-      if (err) throw err;
+      if (err) {
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
 
       res.status(200).send(JSON.stringify(result.length))
     })
   }
   else if (status == 'Spam') {
     con.query(`SELECT * FROM ${reviewTable} WHERE isSpam = 1`, function (err, result) {
-      if (err) throw err;
+      if (err) {
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
 
       res.status(200).send(JSON.stringify(result.length))
     })
   }
   else {
     con.query(`SELECT * FROM ${reviewTable} WHERE reviewStatus='${status}'`, function (err, result) {
-      if (err) throw err;
+      if (err) {
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
 
       res.status(200).send(JSON.stringify(result.length))
     })
@@ -72,8 +74,8 @@ const getAllReviews = (req, res) => {
 
 con.query(query, function (err, tables) {
   if (err) {
-    throw err;
-  }
+    return  res.status(400).send(JSON.stringify({'error' : err.message}))
+   }
 
   if (tables.length > 0) {
       //check if search
@@ -81,14 +83,18 @@ con.query(query, function (err, tables) {
     //check if selected all reviews as filter
     if (status == 'All Reviews') {
       con.query(`SELECT * FROM ${reviewTable} ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-        if (err) throw err;
+        if (err) {
+          return  res.status(400).send(JSON.stringify({'error' : err.message}))
+         }
         res.send(JSON.stringify(result));
       })
     }
     else if (status == 'Spam') {
 
       con.query(`SELECT * FROM ${reviewTable}  WHERE isSPAM = 1 ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-        if (err) throw err;
+        if (err) {
+          return  res.status(400).send(JSON.stringify({'error' : err.message}))
+         }
         res.send(JSON.stringify(result));
       })
 
@@ -96,7 +102,9 @@ con.query(query, function (err, tables) {
     else {
 
       con.query(`SELECT * FROM ${reviewTable}  WHERE reviewStatus='${status}' ORDER BY ${sortStr} LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-        if (err) throw err;
+        if (err) {
+          return  res.status(400).send(JSON.stringify({'error' : err.message}))
+         }
         res.send(JSON.stringify(result));
       })
     }
@@ -105,7 +113,9 @@ con.query(query, function (err, tables) {
     if (status == 'All Reviews') {
 
       con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' ORDER BY ${sortStr}  LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-        if (err) throw err;
+        if (err) {
+          return  res.status(400).send(JSON.stringify({'error' : err.message}))
+         }
         res.send(JSON.stringify(result));
       })
 
@@ -113,7 +123,9 @@ con.query(query, function (err, tables) {
     else {
 
       con.query(`SELECT * FROM ${reviewTable} Where LOWER(reviewTitle) LIKE '%${SearchValue}%' AND reviewStatus='${status}' ORDER BY ${sortStr}   LIMIT ${limit} OFFSET ${offset}`, function (err, result) {
-        if (err) throw err;
+        if (err) {
+          return  res.status(400).send(JSON.stringify({'error' : err.message}))
+         }
         res.send(JSON.stringify(result));
       })
     }
@@ -128,17 +140,14 @@ con.query(query, function (err, tables) {
 
 const getReviews = (req, res) => {
   const status = req.params.status;
-  // const shop = res.locals.shopify.session.shop;
-  // let shopLowercase = shop.toLowerCase();
-  // let removeSuffix = shopLowercase.replace(".myshopify.com", "");
-  // let shopName = removeSuffix.replace("-", "_");
   const shopName = req.shopname
   let reviewTable = shopName + '_review'
   let detailTable = shopName + '_details'
 
   con.query(`SELECT * FROM ${reviewTable} WHERE reviewStatus='${status}'`, function (err, result) {
-    if (err) throw err;
-    console.log(result);
+    if (err) {
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     res.status(200).send(JSON.stringify(result))
   })
 }
@@ -159,7 +168,9 @@ const deleteReview = (req, res) => {
 
 
   con.query(getHandleQuery, function async(err, result) {
-    if (err) throw err;
+    if (err) {
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     // res.send(JSON.stringify(result));
     else {
       totalData = result;
@@ -183,9 +194,8 @@ const deleteReview = (req, res) => {
       const query = `INSERT INTO ${deletdReviewTable} (${Columns}) VALUES (${DataValue});`
       con.query(query, async (err, results) => {
         if (err) {
-          console.error('Error inserting reviews', err);
-          return;
-        }
+          return  res.status(400).send(JSON.stringify({'error' : err.message}))
+         }
 
         else {
           if (ind === (totalData.length) - 1) {
@@ -203,7 +213,9 @@ const deleteReview = (req, res) => {
 
   async function deleteReview() {
     con.query(query, function (err, result) {
-      if (err) throw err;
+      if (err) {
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
       res.send(JSON.stringify({ productid: productId, productHandle: producthandle }));
     })
   }
@@ -220,7 +232,9 @@ const UnSpamReview = async(req, res) => {
   const query = `UPDATE ${reviewTable} SET isSpam = 0 WHERE id IN (${id}) ;UPDATE ${detailTable} SET isSpam = 0 WHERE id IN (${id}) `
   const checkspam = `SELECT isSpam FROM ${reviewTable} WHERE id IN (${id}) AND isSpam = 1`
   con.query(checkspam, async function (err, result) {
-    if (err) throw err; 
+    if (err) {
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     } 
     else{
       spamReviews = result.length;
       await updateUnspam()
@@ -231,7 +245,9 @@ const UnSpamReview = async(req, res) => {
   async function updateUnspam(){
 
     con.query(query, function (err, result) {
-      if (err) throw err;
+      if (err) {
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
       res.send(JSON.stringify({count : spamReviews}));
     })
   }
@@ -246,7 +262,9 @@ const publishReview = async(req, res) => {
 
   const checkPublish = `SELECT id FROM ${reviewTable} WHERE id IN (${id}) AND reviewStatus = 'Unpublished'`;
   con.query(checkPublish, async function (err, result) {
-    if (err) throw err; 
+    if (err) {
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     else{
       unPublished = result.length;
       await publish()
@@ -257,7 +275,9 @@ const publishReview = async(req, res) => {
   const query = `UPDATE ${reviewTable} SET reviewStatus = 'Published' WHERE id IN (${id});UPDATE ${detailTable} SET reviewStatus = 'Published' WHERE id IN (${id}) `
   async function publish(){
     con.query(query, function (err, result) {
-      if (err) throw err;
+      if (err) {
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
       res.send(JSON.stringify({count : unPublished}));
     })
   }
@@ -272,7 +292,9 @@ const unpublishReview = (req, res) => {
 
   const checkUnpublish = `SELECT id FROM ${reviewTable} WHERE id IN (${id}) AND reviewStatus = 'Published'`;
   con.query(checkUnpublish, async function (err, result) {
-    if (err) throw err; 
+    if (err) {
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     else{
       published = result.length;
       await unPublish()
@@ -283,7 +305,9 @@ const unpublishReview = (req, res) => {
   const query = `UPDATE ${reviewTable} SET reviewStatus = 'Unpublished' WHERE id IN (${id});UPDATE ${detailTable} SET reviewStatus = 'Unpublished' WHERE id IN (${id}) `
   async function unPublish(){
     con.query(query, function (err, result) {
-      if (err) throw err;
+      if (err) {
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
       res.send(JSON.stringify({count : published}));
     })
   }
@@ -297,7 +321,9 @@ const getProductReviews = (req, res) => {
 
   const query = `SELECT * FROM ${detailTable} WHERE productid=${id}`
   con.query(query, function (err, result) {
-    if (err) throw err;
+    if (err) {
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     res.send(JSON.stringify(result));
   })
 
@@ -362,14 +388,17 @@ const getAllProductReviews = (req, res) => {
 
   con.query(publishedQuery, function (err, result) {
 
-    if (err) throw err;
+    if (err) {
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     publishedReviews = result.length;
-    console.log('published reviews', publishedReviews)
   })
 
   con.query(totalData, function (err, result) {
 
-    if (err) throw err;
+    if (err) {
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     let sum = 0;
     length = result.length;
     unpublishedReviews = length - publishedReviews
@@ -385,12 +414,13 @@ const getAllProductReviews = (req, res) => {
     else {
       isLastPage = false
     }
-    console.log('avg rating ', isLastPage)
   })
 
   con.query(query, function (err, result) {
 
-    if (err) throw err;
+    if (err) {
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
 
     res.send(JSON.stringify({
       reviews: result,
@@ -410,8 +440,8 @@ const getReviewsForExport = (req, res) => {
   const query = `SELECT productHandle , reviewStatus , starRating , reviewTitle , userName , Email , location , reviewDescription , reply , datePosted  FROM ${reviewTable}`;
   con.query(query, function (err, result) {
     if (err) {
-      console.error('error fetching reviews', err)
-    }
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
     res.send(JSON.stringify(result));
   })
 
@@ -423,9 +453,11 @@ const getDeletedReviewsForExport = (req, res) => {
   const query = `SELECT productHandle , reviewStatus , starRating , reviewTitle , userName , Email , location , reviewDescription , reply , datePosted  FROM ${deletedReviewTable}`;
   con.query(query, function (err, result) {
     if (err) {
-      console.error('error fetching reviews', err)
+      return  res.status(400).send(JSON.stringify({'error' : err.message}))
+     }
+    else{
+      res.send(JSON.stringify(result));
     }
-    res.send(JSON.stringify(result));
   })
 
 }
@@ -460,7 +492,7 @@ const checkProduct = async (req, res) => {
   IdArr?.map((Id, ind) => {
 
     if (Id === undefined || Id === null || Id === '' || !Id) {
-      logger.error(`Error importing review at Line : ${ind}`);
+      // logger.error(`Error importing review at Line : ${ind}`);
 
       ResponseArr.push({ idExists: false, pid: null })
     }
@@ -502,9 +534,8 @@ const addImportedReview = async (req, res) => {
     
     con.query(query, async (err, results) => {
       if (err) {
-        console.error('Error inserting reviews', err);
-        return;
-      }
+        return  res.status(400).send(JSON.stringify({'error' : err.message}))
+       }
 
       else {
         if (ind === (ObjArray.length) - 1) {
@@ -531,9 +562,8 @@ const addImportedReview = async (req, res) => {
       const getAveragequery = ` SELECT starRating , reviewTitle FROM ${reviewTable} WHERE productHandle='${itm}' AND reviewStatus='Published'`;
       con.query(getAveragequery, async (err, results) => {
         if (err) {
-          console.error('Error fetching reviews', err);
-          return;
-        }
+          return  res.status(400).send(JSON.stringify({'error' : err.message}))
+         }
         else {
           let sum = 0;
           let rating = results.map((itm) => itm.starRating)
@@ -588,7 +618,8 @@ const addImportedReview = async (req, res) => {
       RatingMetaId = (RatingMetaIds)
 
     } catch (error) {
-      console.error('erorrrrrr=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
+        return  res.status(400).send(JSON.stringify({'error' : error.message}))
+       
     }
 
     //********* retrieveing count meta id  *****************/
@@ -614,7 +645,9 @@ const addImportedReview = async (req, res) => {
       ReviewCountId = (countMetaIds)
 
     } catch (error) {
-      console.error('erorrrrrr=>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', error.message);
+      
+        return  res.status(400).send(JSON.stringify({'error' : error.message}))
+       
     }
 
 
@@ -690,7 +723,6 @@ mutation {
         // ************ checking if metafield exists or not //
         if (id === null || id === '' || id === undefined) {
 
-          console.log(' creating metafield **********************************************')
           try {
             const createResponse = await client.query({
               data: {
@@ -737,7 +769,9 @@ mutation {
             console.log('create mutation user Errors ===>', Object(createResponse).body.data.productUpdate.userErrors)
 
           } catch (error) {
-            console.error('erorrrrrr with create metafield ===>>>', error.message);
+          
+              return  res.status(400).send(JSON.stringify({'error' : error.message}))
+             
           }
         }
 
@@ -745,7 +779,6 @@ mutation {
           // Execute the update  mutation
           try {
             const mutationResponses = await Promise.all(filteredIds.map(async (data) => {
-              console.log(filteredIds[ind], 'piddd.......')
               const response = await client.query({
                 data: {
                   query: UpdateMetafieldMutation,
@@ -773,19 +806,12 @@ mutation {
             await res.status(200).send(JSON.stringify({ message: 'Review imported succesfully' }))
 
           } catch (error) {
-            console.error('Error updating metafields ==>>:', error.message);
-            // await res.send(JSON.stringify({message:'error while updating metafields'}))
-
+              return  res.status(400).send(JSON.stringify({'error' : error.message}))
           }
-
         }
       })
-
-
     }
-
   }
-
 }
 
 

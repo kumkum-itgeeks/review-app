@@ -17,5 +17,7 @@ router.get('/createDeletedReviewsTable', TableController.createDeletedReviewsTab
 
 router.get('/checkTableExists', TableController.checkTableExists);
 
+router.get('/checkPlanTableExists', TableController.checkPlanTableExists);
+
 export default router;
 
