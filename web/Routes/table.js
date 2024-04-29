@@ -19,5 +19,11 @@ router.get('/checkTableExists', TableController.checkTableExists);
 
 router.get('/checkPlanTableExists', TableController.checkPlanTableExists);
 
+router.get('/addBasicPlan', TableController.addBasicPlan);
+
+router.get('/createSubscription', TableController.createSubscription);
+
+router.get('/addProPlan/:chargeId', TableController.addProPlan);
+
 export default router;
 

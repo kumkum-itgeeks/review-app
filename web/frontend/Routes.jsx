@@ -19,14 +19,13 @@ import PricingPlan from "./pages/plan";
  * @return {Routes} `<Routes/>` from React Router, with a `<Route/>` for each file in `pages`
  */
 
-
 export default function Routes({ pages }) {
 
-  const {hasPlan} = useContext(MyContext)  
-  console.log(hasPlan)
+  const {hasPlan} = useContext(MyContext) 
+  const {planExists , activePlan} = hasPlan; 
   const routes = useRoutes(pages);
   const routeComponents = routes.map(({ path, component: Component }) => (
-    <Route key={path} path={path} element={hasPlan?<Component />:<PricingPlan/>} />
+    <Route key={path} path={path} element={planExists?<Component/>:<PricingPlan/>} />
   ));
 
   const NotFound = routes.find(({ path }) => path === "/notFound").component;

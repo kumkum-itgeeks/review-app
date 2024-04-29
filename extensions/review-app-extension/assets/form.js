@@ -6,7 +6,7 @@ var isthisLastPage;
 var starsettingColor = "#FFFF00";
 var shopName;
 let PageNumber = document.getElementById('page-number-display').value;
-const URL = `https://dig-coalition-wy-configure.trycloudflare.com`
+const URL = `https://bucks-butter-totals-encyclopedia.trycloudflare.com`
 
 const defaultData = {
   averageRating: 0,

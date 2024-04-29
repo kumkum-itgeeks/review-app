@@ -144,12 +144,14 @@ export default function Product() {
     fetch(`/api/details/getProductDetails/${Id}`)
       .then(res => res.json())
       .then(data => setProduct(data))
+      .catch(error => console.error(error));
   }
 
   const createMetafield = () => {
     fetch('/api/table/getMetafields')
       .then(res => res.json())
-      .then(data => console.log(data));
+      .then(data => console.log(data))
+      .catch(error => console.error(error));
   }
 
     const updateMetafield=(data)=>{
@@ -158,6 +160,7 @@ export default function Product() {
     fetch(`/api/table/updateMetafields/${selectedResources}/${productid}/${productHandle}`)
       .then(res => res.json())
       .then(data => { console.log(data) })
+      .catch(error => console.error(error));
   }
   const deleteReview = () => {
 
@@ -166,7 +169,8 @@ export default function Product() {
       .then(data => {getAllReviews() ,
          showToast(selectedResources?.length > 1 ? ` ${selectedResources?.length} Reviews deleted.` : ` ${selectedResources?.length} Review deleted.`),
        updateMetafield(data),
-      clearSelection() });
+      clearSelection() })
+      .catch(error => console.error(error));
   }
 
 
@@ -175,7 +179,8 @@ export default function Product() {
       .then(res => res.json())
       .then(data => { getAllReviews(), 
         setUpdateCount(Number(data.count), Number(data.count) > 1 ? 'Reviews unspammed.' : 'Review unspammed.', 'Reviews already unspammed.'), 
-      clearSelection() });
+      clearSelection() })
+      .catch(error => console.error(error));
   }
 
   const publishReview = () => {
@@ -184,7 +189,8 @@ export default function Product() {
       .then(data => { getAllReviews(),
          setUpdateCount(Number(data.count), Number(data.count) > 1 ? 'Reviews published.' : 'Review published.', 'Reviews already published.'),
           updateMetafield(data), 
-          clearSelection() });
+          clearSelection() })
+          .catch(error => console.error(error));
   }
 
   const unpublishReview = () => {
@@ -193,13 +199,15 @@ export default function Product() {
       .then(data => { getAllReviews(), 
         setUpdateCount(Number(data.count), Number(data.count) > 1 ? 'Reviews unpublished.' : 'Review unpublished.', 'Reviews already unpublished.'),
          updateMetafield(data), 
-         clearSelection() });
+         clearSelection() })
+         .catch(error => console.error(error));
   }
 
   const createTable = () => {
     fetch('/api/table/createDetailTable')
       .then(res => res.json())
-      .then(data => console.log(data));
+      .then(data => console.log(data))
+      .catch(error => console.error(error));
   }
 
   const getAllReviews = () => {
@@ -213,7 +221,8 @@ export default function Product() {
       body: JSON.stringify({ queryValue, pageNumber, reviewStatus, sortSelected, Id }),
     })
       .then(res => res.json())
-      .then(data => setAlldata(data));
+      .then(data => setAlldata(data))
+      .catch(error => console.error(error));
 
 
   };
@@ -415,7 +424,7 @@ export default function Product() {
           </Box>
         </IndexTable.Cell>
         <IndexTable.Cell>
-          <Text >
+          <Text as='span'>
             <Text tone="magic-subdued" >
               {reviewTitle}
             </Text>

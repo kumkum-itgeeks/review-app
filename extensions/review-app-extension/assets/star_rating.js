@@ -1,4 +1,4 @@
-const myUrl = `https://dig-coalition-wy-configure.trycloudflare.com`
+const myUrl = `https://bucks-butter-totals-encyclopedia.trycloudflare.com`
 
 function test(shop, handle, avgRating, count) {
 
