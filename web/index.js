@@ -612,7 +612,7 @@ app.get("/api/createAllTables/:shop", (req, res) => {
     const jsonData =[
       {
         "type": "autopublish",
-        "setting": { "autopublish": "enabled" }
+        "setting": { "autopublish": "disabled" }
       },
       {
         "type": "emailSettings",

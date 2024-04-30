@@ -1,16 +1,16 @@
 import shopify from "../shopify.js";
 import { con } from "../index.js";
 
-const addSettings = async(req, res) => {
+const addSettings = async (req, res) => {
 
   const SettingsTable = req.shopname + '_settings';
 
   // if changing the json data after data is inserted once in default table  . It wont affect the data . and new data will
   // not be inserted .
-  const jsonData =[
+  const jsonData = [
     {
       "type": "autopublish",
-      "setting": { "autopublish": "enabled" }
+      "setting": { "autopublish": "disabled" }
     },
     {
       "type": "emailSettings",
@@ -89,28 +89,28 @@ const addSettings = async(req, res) => {
     PRIMARY KEY (id)
     )`;
 
-  con.query(sql,  async (err, result) =>{
+  con.query(sql, async (err, result) => {
     if (err) {
-      return  res.status(400).send(JSON.stringify({'error' : err.message}))
-     }
-    else{
-      
-       await checkData()
+      return res.status(400).send(JSON.stringify({ 'error': err.message }))
+    }
+    else {
+
+      await checkData()
     }
   });
-  
 
-  async function checkData(){
+
+  async function checkData() {
     let checkQuery = ` SELECT * from ${SettingsTable}`
-    con.query(checkQuery, async(err, results) => {
+    con.query(checkQuery, async (err, results) => {
       if (err) {
-        return  res.status(400).send(JSON.stringify({'error' : err.message}))
-       }
-      else{
-        if(results.length){
-         res.status(200).send(JSON.stringify({message:"setting table and correct data exists ."}));
+        return res.status(400).send(JSON.stringify({ 'error': err.message }))
+      }
+      else {
+        if (results.length) {
+          res.status(200).send(JSON.stringify({ message: "setting table and correct data exists ." }));
         }
-        else{
+        else {
           await addSettingdata()
         }
       }
@@ -122,13 +122,13 @@ const addSettings = async(req, res) => {
   const values = types.map((type, index) => [type, JSON.stringify(settingsArray[index]), JSON.stringify(settingsArray[index])]);
 
 
-  async function addSettingdata(){
-    
+  async function addSettingdata() {
+
     con.query(query, [values], (err, results) => {
       if (err) {
-        return  res.status(400).send(JSON.stringify({'error' : err.message}))
-       }
-      res.status(200).send(JSON.stringify({message:"Data inserted in settings table "}));
+        return res.status(400).send(JSON.stringify({ 'error': err.message }))
+      }
+      res.status(200).send(JSON.stringify({ message: "Data inserted in settings table " }));
     });
   }
 
@@ -141,8 +141,8 @@ const getSettings = (req, res) => {
   const query = `SELECT type , settings FROM ${settingsTable} `
   con.query(query, (err, results) => {
     if (err) {
-      return  res.status(400).send(JSON.stringify({'error' : err.message}))
-     }
+      return res.status(400).send(JSON.stringify({ 'error': err.message }))
+    }
 
     const transformedData = results.map(item => {
       const settingsObj = JSON.parse(item.settings);
@@ -153,32 +153,105 @@ const getSettings = (req, res) => {
   );
 }
 
-const ModifySettings = (req, res) => {
-  const jsonData = req.body.data;
-  const type = jsonData.map((itm) => itm.type)
-  const setting =jsonData.map((itm=>itm.setting))
-  const settingsTable = req.shopname + '_settings';
 
-  const typesString = type.map((type) => `'${type}'`).join(',');
-
-
-
-  jsonData.forEach((item) => {
-    const { type, setting } = item;
-    const updateQuery = `UPDATE ${req.shopname}_settings SET settings = ? WHERE type = ?`;
+const setAutoPublish = async (req, res) => {
   
-    con.query(updateQuery, [JSON.stringify(setting), type], (err, results) => {
+    const shopName = req.shopname;
+    const settingsTable = shopName + '_settings';
+    const PlanTable = shopName + '_pricing_plan';
+    const query = `SELECT * FROM information_schema.tables WHERE table_schema = 'reviews' AND table_name = '${settingsTable}'`;
+  
+    con.query(query, function (err, tables) {
       if (err) {
-        return  res.status(400).send(JSON.stringify({'error' : err.message}))
-       }
+        throw err;
+      }
+  
+      if (tables.length > 0) {
+        const AutopublishDisable = { "autopublish": "disabled" };
+        const updateQuery = `UPDATE ${settingsTable} SET settings = ? WHERE type = 'autopublish'`;
+        
+        con.query(updateQuery, [JSON.stringify(AutopublishDisable)], (err, results) => {
+          if(err){
+            return res.status(400).send(JSON.stringify({'err': err}))
+          }
+          else{
+            res.send(JSON.stringify({message : 'succesfully updated to  basic plan '}))
+          }
+        });
+      }
+      else {
+        res.send(JSON.stringify({message : 'succesfully updated to  basic plan '}))
+      }
+  
+    })
+
+};
+
+
+const ModifySettings = async (req, res) => {
+  try {
+    const jsonData = req.body.data;
+    const type = jsonData.map((itm) => itm.type);
+    const shopName = req.shopname;
+    const settingsTable = shopName + '_settings';
+    const PlanTable = shopName + '_pricing_plan';
+
+    // Function to save settings
+    async function saveSettings() {
+      for (const item of jsonData) {
+        const { type, setting } = item;
+        const updateQuery = `UPDATE ${shopName}_settings SET settings = ? WHERE type = ?`;
+        await new Promise((resolve, reject) => {
+          con.query(updateQuery, [JSON.stringify(setting), type], (err, results) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(results);
+            }
+          });
+        });
+      }
+    }
+
+    // Check the plan
+    const checkPlanQuery = `SELECT planName FROM ${PlanTable} WHERE shop = '${shopName}'`;
+    con.query(checkPlanQuery, async (err, results) => {
+      if (err) {
+        return res.status(400).send(JSON.stringify({ error: err.message }));
+      }
+
+      const PlanName = results[0]?.planName;
+      if (PlanName === 'Basic Plan') {
+        await saveSettings();
+        await saveBasicPlanSettings();
+        res.send(JSON.stringify('Updated successfully'));
+      } else {
+        await saveSettings();
+        res.send(JSON.stringify('Updated successfully'));
+      }
     });
-  });
 
-  res.send(JSON.stringify('Updated successfully'))
+    // Function to save basic plan settings
+    async function saveBasicPlanSettings() {
+      const AutopublishDisable = { "autopublish": "disabled" };
+      const updateQuery = `UPDATE ${settingsTable} SET settings = ? WHERE type = 'autopublish'`;
 
-}
+      await new Promise((resolve, reject) => {
+        con.query(updateQuery, [JSON.stringify(AutopublishDisable)], (err, results) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(results);
+          }
+        });
+      });
+    }
+  } catch (error) {
+    res.status(500).send(JSON.stringify({ error: error.message }));
+  }
+};
 
-const resetSettings=(req,res)=>{
+const resetSettings = (req, res) => {
   //reset all settings
 
   const settingsTable = req.shopname + '_settings';
@@ -186,28 +259,28 @@ const resetSettings=(req,res)=>{
   const query = `SELECT type , defaultSettings FROM ${settingsTable} `
   con.query(query, (err, results) => {
     if (err) {
-      return  res.status(400).send(JSON.stringify({'error' : err.message}))
-     }
+      return res.status(400).send(JSON.stringify({ 'error': err.message }))
+    }
 
     const transformedData = results.map(item => {
       const settingsObj = JSON.parse(item.defaultSettings);
       return { [item.type]: settingsObj };
     });
-    
+
     results.forEach((item) => {
-    
+
       const { type, defaultSettings } = item;
       const updateQuery = `UPDATE ${settingsTable} SET settings = ? WHERE type = ?`;
-    
+
       con.query(updateQuery, [(defaultSettings), type], (err, results) => {
         if (err) {
-          return  res.status(400).send(JSON.stringify({'error' : err.message}))
-         }
-        
+          return res.status(400).send(JSON.stringify({ 'error': err.message }))
+        }
+
       });
     });
     res.send(JSON.stringify(transformedData))
   }
   );
 }
-export default { addSettings, getSettings , ModifySettings ,resetSettings}
+export default { addSettings, getSettings, ModifySettings, resetSettings, setAutoPublish }

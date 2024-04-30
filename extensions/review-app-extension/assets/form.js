@@ -6,7 +6,7 @@ var isthisLastPage;
 var starsettingColor = "#FFFF00";
 var shopName;
 let PageNumber = document.getElementById('page-number-display').value;
-const URL = `https://bucks-butter-totals-encyclopedia.trycloudflare.com`
+const URL = `https://iv-glasgow-cheers-ko.trycloudflare.com`
 
 const defaultData = {
   averageRating: 0,
@@ -16,7 +16,7 @@ const defaultData = {
   settingData: [
     {
       autopublish: {
-        autopublish: "enabled"
+        autopublish: "disabled"
       }
     },
     {

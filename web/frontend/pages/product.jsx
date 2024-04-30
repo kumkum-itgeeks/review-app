@@ -5,13 +5,13 @@ import {
   Divider, Box, Link, Icon, InlineStack, Grid, BlockStack, Thumbnail, Image,
   SkeletonThumbnail , Pagination
 } from "@shopify/polaris";
-import { ImportIcon, ExportIcon } from '@shopify/polaris-icons';
 import { useTranslation, Trans } from "react-i18next";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { useAuthenticatedFetch } from "../hooks";
-import { useState, useCallback, useEffect } from 'react';
+import { MyContext } from '../components/providers/PlanProvider';
+import { useState, useCallback, useEffect , useContext} from 'react';
 import { useNavigate , useToast} from "@shopify/app-bridge-react";
-import { StarFilledIcon, StarIcon } from '@shopify/polaris-icons';
+import {  LockIcon } from '@shopify/polaris-icons';
 import '../css/index.css'
 import emptyStar from '../assets/star-regular.svg'
 import HalfStar from '../assets/star-half.svg'
@@ -39,6 +39,8 @@ export default function Product() {
   const [moneySpent, setMoneySpent] = useState(undefined,);
   const [accountStatus, setAccountStatus] = useState(undefined,);
   const [reviewStatus, setReviewStatus] = useState('All Reviews');
+  const [disableBulkActions  , setDisableBulkActions]=useState(false);
+  const { activePlan, planExists } = useContext(MyContext).hasPlan;
   const [sortSelected, setSortSelected] = useState(['starRating desc']);
   const [itemStrings, setItemStrings] = useState([
     'All Reviews',
@@ -50,6 +52,13 @@ export default function Product() {
 
   //********useEffects********
 
+  
+  const { selectedResources, allResourcesSelected, handleSelectionChange , clearSelection } =
+    useIndexResourceState(tableData);
+
+  useEffect(()=>{
+    handleBulkActions()
+  },[selectedResources])
 
   useEffect(() => {
     if(!Id || Id===''){
@@ -121,7 +130,16 @@ export default function Product() {
 
   //*******functions**********
 
-  
+    const handleBulkActions=()=>{
+    let selected = selectedResources.length
+    if(selected >1){
+      setDisableBulkActions(true)
+    }
+    else{
+      setDisableBulkActions(false)
+    }
+  }
+
   const showToast = (message) => {
     show(message, { duration: 2000 })
   }
@@ -391,8 +409,6 @@ export default function Product() {
     },
   ];
 
-  const { selectedResources, allResourcesSelected, handleSelectionChange , clearSelection } =
-    useIndexResourceState(tableData);
 
 
   const rowMarkup = tableData.map(
@@ -401,6 +417,7 @@ export default function Product() {
       index,
     ) => (
       <IndexTable.Row
+      
         id={id}
         key={id}
         selected={selectedResources.includes(id)}
@@ -485,19 +502,28 @@ export default function Product() {
     {
       content: 'Unspam selected reviews',
       onAction: () => unSpamReview(),
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
     },
     {
       content: 'Publish selected reviews',
       onAction: () => publishReview(),
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
     },
     {
       content: 'Unpublish selected reviews',
       onAction: () => unpublishReview(),
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
     },
     {
       content: 'delete selected reviews',
       onAction: () => deleteReview(),
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
+    },
+    activePlan==='Basic Plan' && disableBulkActions ?
+    {
+      content : <Badge tone="attention" size="small" icon={LockIcon} >PRO</Badge>,
     }
+    :{}
   ];
 
   //conditional statements
@@ -531,17 +557,6 @@ export default function Product() {
     <>
       <Page
         title="Reviews"
-        // pagination={{
-        //   hasPrevious: prevPage,
-        //   hasNext: nextPage,
-        //   onPrevious: (() => {
-        //     pageNumber != 1 ? (setPageNumber(pageNumber - 1)) : '';
-            
-        //   }),
-        //   onNext: (() => {
-        //     !isLastPage ? (setPageNumber(pageNumber + 1)) : '';
-        //   })
-        // }}
       >
 
         <BlockStack gap={600}>
@@ -629,6 +644,7 @@ export default function Product() {
               mode={mode}
               setMode={setMode}
               loading={Loading}
+              filteringAccessibilityTooltip='Search'
 
             />
             <IndexTable

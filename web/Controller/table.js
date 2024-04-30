@@ -23,7 +23,6 @@ const checkTableExists = (req, res) => {
 
   })
 
-
 }
 
 // API , checking if Plan table exists or not ******
@@ -146,6 +145,7 @@ async function UpdatePlan(){
 //API , createSubscription 
 const createSubscription = async(req , res) =>{
   const shopName = req.shopname;
+  const myShop = (res.locals.shopify.session.shop).replace('.myshopify.com', ' ').trim() //for return url 
   const session = res.locals.shopify.session;
   const client = new shopify.api.clients.Graphql({session});
  
@@ -165,7 +165,7 @@ const createSubscription = async(req , res) =>{
   ]
   
   const name ="newuser";
-  const returnUrl = `https://admin.shopify.com/store/${shopName}/apps/reviews-82/plan`;
+  const returnUrl = `https://admin.shopify.com/store/${myShop}/apps/reviews-82/plan`;
   const test = true;
 
  const SubscriptionCreateQuery = `

@@ -1,4 +1,4 @@
-const myUrl = `https://bucks-butter-totals-encyclopedia.trycloudflare.com`
+const myUrl = `https://iv-glasgow-cheers-ko.trycloudflare.com`
 
 function test(shop, handle, avgRating, count) {
 

@@ -1,11 +1,16 @@
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect, useContext } from 'react'
 import { TitleBar } from '@shopify/app-bridge-react'
 import {
   BlockStack, Box, Divider, InlineStack, Page, Text, Grid, RadioButton, Checkbox
-  , ColorPicker, TextField, Button, Tooltip, Popover, Select, DataTable
+  , ColorPicker, TextField, Button, Tooltip, Popover, Select, DataTable, Badge ,
+  Spinner,
+  SkeletonDisplayText,
+  SkeletonBodyText
 } from '@shopify/polaris'
 import { useAuthenticatedFetch } from '../hooks';
+import { LockIcon } from '@shopify/polaris-icons';
 import { Modal, useToast } from '@shopify/app-bridge-react';
+import { MyContext } from '../components/providers/PlanProvider';
 
 export default function Settings() {
 
@@ -23,7 +28,7 @@ export default function Settings() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [resetLoading , setResetLoading] = useState(true)
   const [saveLoading , setSaveLoading] = useState(true)
-
+  const {activePlan , planExists} = useContext(MyContext).hasPlan;
 
   const [color, setColor] = useState({  //star icon color state
     hue: 120,
@@ -44,7 +49,7 @@ export default function Settings() {
   });
 
   const [AutopublishSetting, setAutopublishSetting] = useState(
-    { autopublish: 'enabled' }); //for autopublish setting
+    { autopublish: 'disabled' }); //for autopublish setting
 
 
   const [emailSetting, setEmailSetting] = useState({  // for email settings
@@ -145,7 +150,7 @@ export default function Settings() {
 
   useEffect(() => {
     checkTableExists()
-  }, [])
+  }, [activePlan])
 
   useEffect(() => {
     setStarRgb(convertToHex(color))
@@ -485,7 +490,7 @@ export default function Settings() {
   const activator = (
     <>
       <InlineStack>
-        <Button onClick={togglePopoverActive}  >
+        <Button onClick={togglePopoverActive}  loading={saveLoading ? true : false}>
           Choose Color
         </Button>
         <Box style={{ backgroundColor: reviewListingLayout?.bordercolor, width: '30px', height: "30px", borderRadius: '5px', marginLeft: '10px' }}>
@@ -498,7 +503,7 @@ export default function Settings() {
   const activatordivider = (
     <>
       <InlineStack>
-        <Button onClick={togglePopoverActiveDivider}>
+        <Button onClick={togglePopoverActiveDivider} loading={saveLoading ? true : false}>
           Choose Color
         </Button>
         <Box style={{ backgroundColor: reviewListingLayout?.dividercolor, width: '30px', height: "30px", borderRadius: '5px', marginLeft: '10px' }}>
@@ -510,7 +515,7 @@ export default function Settings() {
   const activatorStar = (
     <>
       <InlineStack >
-        <Button onClick={togglePopoverActiveStar}   >
+        <Button onClick={togglePopoverActiveStar} loading={saveLoading ? true : false}  >
           Choose Color
         </Button>
         <Box style={{ backgroundColor: starIconColor.customColor, width: '30px', height: "30px", borderRadius: '5px', marginLeft: '10px' }} >
@@ -538,23 +543,35 @@ export default function Settings() {
               </Grid.Cell>
               <Grid.Cell columnSpan={{ xs: 8, sm: 4, md: 4, lg: 8, xl: 8 }}>
                 <Box background='bg-surface' padding={400}>
+                    {
+                      activePlan === 'Pro Plan' ? '' :  <Box paddingBlockEnd={200}><Badge tone="attention" size="small" icon={LockIcon} >PRO</Badge></Box>
+  
+                    }
                   <BlockStack gap={300}>
+                    {
+                      saveLoading ? <SkeletonBodyText lines={2}  /> :
                     <RadioButton
                       label={<Text variant="headingSm" as="h6">Enable</Text>}
                       helpText="Reviews are checked for spam and then automatically published when enabled"
                       checked={AutopublishSetting.autopublish === 'enabled'}
                       id="enabled"
                       name="accounts"
+                      disabled={activePlan === 'Pro Plan' ? false : true}
                       onChange={handleAutopublish}
                     />
+                  
+                  }
+                    {
+                      saveLoading ? <SkeletonBodyText lines={2}  /> :
                     <RadioButton
-                      label={<Text variant="headingSm" as="h6">Disable</Text>}
+                      label={saveLoading ? <SkeletonBodyText lines={1} /> :<Text variant="headingSm" as="h6">Disable</Text>}
                       helpText="Reviews require manual approval before they can be published on your store."
                       id="disabled"
                       name="accounts"
                       checked={AutopublishSetting.autopublish === 'disabled'}
                       onChange={handleAutopublish}
                     />
+                    }
                   </BlockStack>
                 </Box>
               </Grid.Cell>

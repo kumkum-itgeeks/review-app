@@ -56,7 +56,7 @@ export default function Details() {
   const deleteReview = () => {
     fetch(`/api/review/deleteReview/${Id}`)
       .then(res => res.json())
-      .then(data => { getReviewDetails(), show(' review deleted ', { duration: 2000 }) , updateMetafield(data) , Navigate("/") })
+      .then(data => { getReviewDetails(), show(' Review deleted ', { duration: 2000 }) , updateMetafield(data) , Navigate("/") })
       .catch(error => console.error(error));
   }
 
@@ -95,7 +95,7 @@ export default function Details() {
 const dissmissInappropriate=()=>{
   fetch(`api/details/dissmissInappropriate/${Id}`)
   .then(res => res.json())
-  .then(data => {setShowWarning(0),show('cleared Inappropriate review ', { duration: 2000 })})
+  .then(data => {setShowWarning(0),show('Cleared Inappropriate review ', { duration: 2000 })})
   .catch(error => console.error(error));
 }
 
@@ -111,14 +111,14 @@ const dissmissInappropriate=()=>{
   const publishReviews = () => {
     fetch(`/api/review/publishReview/${Id}`)
       .then(res => res.json())
-      .then(data => { getReviewDetails(),show('review published  ', { duration: 2000 }), updateMetafield(data)  })
+      .then(data => { getReviewDetails(),show('Review published  ', { duration: 2000 }), updateMetafield(data)  })
       .catch(error => console.error(error));
   }
 
   const unpublishReview = () => {
     fetch(`/api/review/unpublishReview/${Id}`)
       .then(res => res.json())
-      .then(data => { getReviewDetails(), show('review unpublished ', { duration: 2000 }), updateMetafield(data) })
+      .then(data => { getReviewDetails(), show('Review unpublished ', { duration: 2000 }), updateMetafield(data) })
       .catch(error => console.error(error));
   }
 

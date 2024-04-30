@@ -38,10 +38,9 @@ export default function PricingPlan() {
                 .then((res) => res.json())
                 .then((data) => {
                     setProSelectLoading(false),
-                    setModalButtonLoading(false),
+                        setModalButtonLoading(false),
                         setDashBoardDisabled(false),
                         setIsModalOpen(false),
-                        setProSelectLoading(false),
                         setHasPlan({
                             activePlan: 'Pro Plan',
                             planExists: true
@@ -56,6 +55,16 @@ export default function PricingPlan() {
     }, [])
 
 
+    const setAutoPublish=()=>{
+        fetch(`/api/settings/setAutoPublish`)
+            .then((res) => res.json())
+            .then((data) => {
+                selectBasicPlan()
+            })
+            .catch((err) => {
+                console.error('error adding plan ', err)
+            })
+    }
 
     const selectBasicPlan = () => {
 
@@ -94,15 +103,12 @@ export default function PricingPlan() {
 
 
 
-    //***************conditonal statements************
-
-
     return (
-        <Page  >
+        <Page>
             <BlockStack gap={600}>
                 <Box>
                 </Box>
-                <Box maxWidth="">
+                <Box >
                     <InlineStack align="space-between">
                         <Text variant="headingXl" as="h4" >
                             Plans and Pricing
@@ -128,7 +134,7 @@ export default function PricingPlan() {
                                                     <Text as="p" variant="bodyLg" tone={activePlan === 'Basic Plan' ? 'text-inverse' : ""} fontWeight="bold">
                                                         $0/month
                                                     </Text>
-                                                    <Badge tone={activePlan === 'Basic Plan' ? "success" : "attention"} size="medium">
+                                                    <Badge tone={activePlan === 'Basic Plan' ? "success" : "attention"} size="medium" >
                                                         BASIC
                                                     </Badge>
                                                 </InlineStack>
@@ -156,14 +162,14 @@ export default function PricingPlan() {
                                                     id="basicButton"
                                                     onClick={() => {
                                                         setIsModalOpen(true),
-                                                            setPlanFunction(() => selectBasicPlan),
+                                                            setPlanFunction(() => setAutoPublish),
                                                             setModalTitleContent('Want To Contiue With Basic Plan ?'),
                                                             setModalButtonContent('Select Basic Plan')
                                                     }}
                                                     disabled={activePlan === 'Basic Plan' ? true : false}
                                                     loading={basicSelectLoading}
                                                 >
-                                                    Select
+                                                    Select plan
                                                 </Button>
                                             </Box>
                                         </InlineStack>
@@ -193,7 +199,7 @@ export default function PricingPlan() {
                                                             <List.Item>Everything in free plan</List.Item>
                                                             <List.Item>Automatically publish reviews with built-in spam protection.</List.Item>
                                                             <List.Item>Perform bulk actions for efficient review handling.</List.Item>
-                                                            <List.Item>Enjoy unlimited review import/export capabilities.</List.Item>
+                                                            <List.Item>Import endless reviews.</List.Item>
                                                             <List.Item>Export deleted reviews for comprehensive data management.</List.Item>
                                                             <List.Item>Benefit from priority support via both email and phone.</List.Item>
                                                         </BlockStack>
@@ -216,7 +222,7 @@ export default function PricingPlan() {
                                                     disabled={activePlan === 'Pro Plan' ? true : false}
                                                     loading={proSelectLoading}
                                                 >
-                                                    Select
+                                                    Select plan
                                                 </Button>
                                             </Box>
                                         </InlineStack>

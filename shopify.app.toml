@@ -2,7 +2,7 @@
 
 client_id = "c8b76d8cdccd39ae45b847901d4b4fb3"
 name = "reviews"
-application_url = "https://employee-drainage-ty-boom.trycloudflare.com"
+application_url = "https://iv-glasgow-cheers-ko.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://employee-drainage-ty-boom.trycloudflare.com/auth/callback",
-  "https://employee-drainage-ty-boom.trycloudflare.com/auth/shopify/callback",
-  "https://employee-drainage-ty-boom.trycloudflare.com/api/auth/callback"
+  "https://iv-glasgow-cheers-ko.trycloudflare.com/auth/callback",
+  "https://iv-glasgow-cheers-ko.trycloudflare.com/auth/shopify/callback",
+  "https://iv-glasgow-cheers-ko.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

@@ -4,15 +4,17 @@ import {
   Tag, Modal, Checkbox, Thumbnail, EmptySearchResult, Spinner
 } from "@shopify/polaris";
 
-import { ImportIcon, ExportIcon } from '@shopify/polaris-icons';
+import { ImportIcon, ExportIcon, LockIcon } from '@shopify/polaris-icons';
 import { useTranslation, Trans } from "react-i18next";
 import { useAuthenticatedFetch } from "../hooks";
-import React, { useState, useCallback, useEffect, Component } from 'react';
+import React, { useState, useCallback, useEffect, useContext } from 'react';
+import { MyContext } from "../components/providers/PlanProvider";
 import { useNavigate, useToast } from "@shopify/app-bridge-react";
 import emptyStar from '../assets/star-regular.svg'
 import solidStar from '../assets/star-solid.svg'
 import '../css/index.css';
 import { hide } from "@shopify/app-bridge/actions/ContextualSaveBar";
+import { disable } from "@shopify/app-bridge/actions/LeaveConfirmation";
 
 
 export default function HomePage() {
@@ -41,6 +43,8 @@ export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [sortSelected, setSortSelected] = useState(['starRating desc']);
   const [checked, setChecked] = useState(false);
+  const [disableBulkActions, setDisableBulkActions] = useState(false);
+  const { activePlan, planExists } = useContext(MyContext).hasPlan;
   const [itemStrings, setItemStrings] = useState([
     'All Reviews',
     'Published',
@@ -60,12 +64,18 @@ export default function HomePage() {
     userName: ""
   })
 
-
+  const { selectedResources, allResourcesSelected, handleSelectionChange, clearSelection, removeSelectedResources } =
+    useIndexResourceState(tableData);
   //********useEffects********
+
+  useEffect(() => {
+    handleBulkActions()
+  }, [selectedResources])
 
   useEffect(() => {
     getTotalRows()
     setPageNumber(1);
+
   }, [reviewStatus])
 
   useEffect(() => {
@@ -137,7 +147,18 @@ export default function HomePage() {
   const totalPages = totalRows / recordsPerPage;
   const isLastPage = totalData !== recordsPerPage || pageNumber == totalPages || totalPages == 1;
 
+
   //*******functions**********
+
+  const handleBulkActions = () => {
+    let selected = selectedResources.length
+    if (selected > 1) {
+      setDisableBulkActions(true)
+    }
+    else {
+      setDisableBulkActions(false)
+    }
+  }
 
   const showToast = (message) => {
     show(message, { duration: 2000 })
@@ -156,9 +177,8 @@ export default function HomePage() {
     fetch(`/api/table/checkTableExists`)
       .then(res => res.json())
       .then(tableExists => {
-        console.log(tableExists)
         if (tableExists === true) {
-          console.log('table exists')
+          ''
         }
         else {
           createAllTables()
@@ -194,15 +214,20 @@ export default function HomePage() {
       .then(res => res.json())
       .then(jsonData => {
         // Convert JSON data to CSV
-        let csvData = jsonToCsv(jsonData); //
-        // Create a CSV file and allow the user to download it
-        let blob = new Blob([csvData], { type: 'text/csv' });
-        let url = window.URL.createObjectURL(blob);
-        let a = document.createElement('a');
-        a.href = url;
-        a.download = 'itgeeks-deleted-reviews.csv';
-        document.body.appendChild(a);
-        a.click();
+        if (jsonData.length <= 0 || !jsonData) {
+          showToast('No deleted reviews');
+        }
+        else {
+          let csvData = jsonToCsv(jsonData); //
+          // Create a CSV file and allow the user to download it
+          let blob = new Blob([csvData], { type: 'text/csv' });
+          let url = window.URL.createObjectURL(blob);
+          let a = document.createElement('a');
+          a.href = url;
+          a.download = 'itgeeks-deleted-reviews.csv';
+          document.body.appendChild(a);
+          a.click();
+        }
       })
       .catch(error => console.error(error));
   }
@@ -219,7 +244,7 @@ export default function HomePage() {
       .then(res => res.json())
       .then(data => (data))
       .catch(error => console.error(error));
-   
+
   }
 
   // Function to convert CSV text to JSON
@@ -250,7 +275,6 @@ export default function HomePage() {
     reader.onload = async (e) => {
       const contents = e.target.result;
       ImportedReview = convertCSVtoJson(contents);
-      console.log('CSV file contents:', ImportedReview);
       await checkProduct(ImportedReview)
     };
     // Read the file as text
@@ -261,16 +285,15 @@ export default function HomePage() {
   async function checkProduct(review) {
     setFileStatus('')
     setImportErrors([])
-    let productHandle = review.map((itm) => itm.productHandle)
+    let productHandle = review?.map((itm) => itm?.productHandle)
     let IdArr = [];
     fetch(`/api/review/checkProduct/${productHandle}`)
       .then(res => res.json())
       .then(data => {
-        data.map(async (obj, ind) => {
+        data?.map(async (obj, ind) => {
           let { idExists, pid } = obj;
           if (idExists == true) {
             IdArr.push(pid.slice(22))
-            console.log(ind)
           }
           else {
 
@@ -280,7 +303,6 @@ export default function HomePage() {
             importErrorsArray.push(Number(ind) + 2)
             setImportErrors(...[importErrorsArray])
             setFileStatus('')
-            console.log('product not exists')
           }
         })
         addReview(review, productHandle, IdArr);
@@ -303,8 +325,7 @@ export default function HomePage() {
       })
         .then(res => res.json())
         .then(data => {
-          console.log(data),
-            setImportLoading(false),
+          setImportLoading(false),
             setFileStatus(''),
             show(' Reviews imported.', { duration: 2000 }),
             getAllReviews()
@@ -319,7 +340,6 @@ export default function HomePage() {
   }
 
   const downloadTemplate = () => {
-    console.log('csv downlaoad')
     // Fetch the CSV file from a URL
     fetch('../assets/example-template.csv')
       .then(response => {
@@ -353,15 +373,20 @@ export default function HomePage() {
       .then(res => res.json())
       .then(jsonData => {
         // Convert JSON data to CSV
-        let csvData = jsonToCsv(jsonData); //
-        // Create a CSV file and allow the user to download it
-        let blob = new Blob([csvData], { type: 'text/csv' });
-        let url = window.URL.createObjectURL(blob);
-        let a = document.createElement('a');
-        a.href = url;
-        a.download = 'itgeeks-reviews.csv';
-        document.body.appendChild(a);
-        a.click();
+        if (jsonData.length <= 0 || !jsonData) {
+          showToast('No reviews to export')
+        }
+        else {
+          let csvData = jsonToCsv(jsonData); //
+          // Create a CSV file and allow the user to download it
+          let blob = new Blob([csvData], { type: 'text/csv' });
+          let url = window.URL.createObjectURL(blob);
+          let a = document.createElement('a');
+          a.href = url;
+          a.download = 'itgeeks-reviews.csv';
+          document.body.appendChild(a);
+          a.click();
+        }
       })
       .catch(error => console.error(error));
 
@@ -538,10 +563,6 @@ export default function HomePage() {
   ];
 
 
-  const { selectedResources, allResourcesSelected, handleSelectionChange, clearSelection, removeSelectedResources } =
-    useIndexResourceState(tableData);
-
-
   const rowMarkup = tableData?.map(
     (
       { id, starRating, reviewTitle, reviewDescription, datePosted, reviewStatus, userName, productHandle, isSpam },
@@ -553,8 +574,7 @@ export default function HomePage() {
         selected={selectedResources.includes(id)}
         position={index}
       >
-        <IndexTable.Cell>
-
+        <IndexTable.Cell >
           <Box maxWidth="100px">
             <InlineStack>
               {
@@ -620,6 +640,7 @@ export default function HomePage() {
             event.stopPropagation();
             Navigate(`/details/?id=${id}`);
           }}
+
           >
             Details
           </Button>
@@ -628,24 +649,54 @@ export default function HomePage() {
     ),
   );
 
-  const promotedBulkActions = [
+  const promotedBulkActions =   activePlan === 'Basic Plan' && disableBulkActions ? [
     {
       content: 'Unspam selected reviews',
-      onAction: () => unSpamReview(),
+      onAction: () => { unSpamReview() },
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
     },
     {
       content: 'Publish selected reviews',
       onAction: () => publishReview(),
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
     },
     {
       content: 'Unpublish selected reviews',
       onAction: () => unpublishReview(),
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
     },
     {
       content: 'Delete selected reviews',
       onAction: () => deleteReview(),
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
+    },
+    {
+      content: <Badge tone="attention" size="small" icon={LockIcon} >PRO</Badge>,
     }
-  ];
+  ]
+  :
+  [
+    {
+      content: 'Unspam selected reviews',
+      onAction: () => { unSpamReview() },
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
+    },
+    {
+      content: 'Publish selected reviews',
+      onAction: () => publishReview(),
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
+    },
+    {
+      content: 'Unpublish selected reviews',
+      onAction: () => unpublishReview(),
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
+    },
+    {
+      content: 'Delete selected reviews',
+      onAction: () => deleteReview(),
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
+    }
+  ]
 
 
   //************* conditonal statements *******************
@@ -656,19 +707,24 @@ export default function HomePage() {
         title="Reviews"
         secondaryActions={[
           {
-            content: 'Import reviews',
+            key: 1,
+            content: activePlan === 'Pro Plan' ? 'Import reviews' : <Text >Import reviews<Badge tone="attention" size="small" icon={LockIcon}>PRO</Badge></Text>,
             onAction: () => { setIsModalOpen(true), checkTableExistance() },
-            icon: ImportIcon
+            icon: ImportIcon,
+            disabled: activePlan === 'Pro Plan' ? false : true
           },
           {
+            key: 2,
             content: 'Export',
             onAction: () => { checkTableExistance(), ExportReview() },
             icon: ExportIcon
           },
           {
-            content: 'Export deleted reviews',
+            key: 3,
+            content: activePlan === 'Pro Plan' ? 'Export deleted reviews' : <Text>Export deleted reviews<Badge tone="attention" size="small" icon={LockIcon}>PRO</Badge></Text>,
             onAction: () => { checkTableExistance(), ExportDeletedReviews() },
-            icon: ExportIcon
+            icon: ExportIcon,
+            disabled: activePlan === 'Pro Plan' ? false : true,
           },
         ]}
       >
@@ -700,12 +756,10 @@ export default function HomePage() {
               loading={Loading}
               filteringAccessibilityTooltip="Search"
               hideFilters
-              
-              
 
-            />
+            />    
             <IndexTable
-              hasZebraStriping={false}
+              hasZebraStriping={true}
               condensed={useBreakpoints().smDown}
               resourceName={resourceName}
               itemCount={tableData?.length}
@@ -714,7 +768,7 @@ export default function HomePage() {
               selectedItemsCount={
                 allResourcesSelected ? 'All' : selectedResources.length
               }
-              onSelectionChange={handleSelectionChange}
+              onSelectionChange={(a, b, c, d) => { handleSelectionChange(a, b, c, d) }}
               headings={[
                 { title: 'Rating' },
                 { title: 'Review' },
@@ -722,14 +776,9 @@ export default function HomePage() {
                 { title: 'Status' },
                 { title: '' },
               ]}
-          
             >
               {rowMarkup}
-              
             </IndexTable>
-
-
-
 
           </Box>
           <InlineStack align="center">

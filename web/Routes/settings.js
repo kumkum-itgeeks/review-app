@@ -11,4 +11,6 @@ router.get('/resetSettings',settingController.resetSettings);
 
 router.post('/saveSettings',settingController.ModifySettings);
 
+router.get('/setAutoPublish',settingController.setAutoPublish);
+
 export default router;
