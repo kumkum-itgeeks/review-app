@@ -6,7 +6,7 @@ var isthisLastPage;
 var starsettingColor = "#FFFF00";
 var shopName;
 let PageNumber = document.getElementById('page-number-display').value;
-const URL = `https://iv-glasgow-cheers-ko.trycloudflare.com`
+const URL = `https://coordinated-inherited-inc-thereof.trycloudflare.com`
 
 const defaultData = {
   averageRating: 0,
@@ -21,8 +21,8 @@ const defaultData = {
     },
     {
       emailSettings: {
-        sendEmail: true,
-        email: "yourEmail@gmail.com"
+        sendEmail: false,
+        email: ""
       }
     },
     {
@@ -56,7 +56,7 @@ const defaultData = {
     {
       reviewFormText: {
         authorEmail: "Email",
-        emailHelpMessage: "xyz@example.com...",
+        emailHelpMessage: "xyz@example.com",
         emailType: "required",
         authorName: "Name",
         nameHelpMessage: "Enter your name here",
@@ -162,7 +162,6 @@ function getOnloadReviewsSetting(shop, handle) {
   fetch(`${URL}/api/checkTableExists/${JSON.stringify(shop)}`)
     .then(res => res.json())
     .then(data => {
-      console.log('table exists ..')
       if (data === true) {
         getOnloadsetting()
       }
@@ -217,19 +216,22 @@ function createAllTables(obj, shop, handle, id) {
   fetch(`${URL}/api/createAllTables/${JSON.stringify(shop)}`)
     .then(res => res.json())
     .then(data => { addReviews(obj, shop, handle, id), console.log(data) })
+    .catch((err)=>{
+      console.error('error creating tables ', err)
+    })
 }
 // sending formdata****
-
 
 function addReviews(obj, shop, handle, id) {
 
   fetch(`${URL}/api/addReviews/${JSON.stringify(obj)}/${JSON.stringify(shop)}/${JSON.stringify(handle)}/${id}`)
     .then(res => res.json())
     .then(data => console.log(data))
+    .catch((err)=>{
+      console.error('error adding reviews ', err)
+    })
 
 }
-
-
 
 // changing functionality  based on onload function results *****
 
@@ -257,8 +259,6 @@ function getReviews(shop, handle, page) {
     .then(res => res.json())
     .then(data => {
       setReviewInfo(data, shop)
-      console.log('data from api ===>>>', data)
-      // console.log('default data ===>>>', defaultData)
 
     }
     )
@@ -635,7 +635,15 @@ function handleSubmit(e, id, shop, product, handle) {
     isEmailValid = true;
   }
   else if (emailRequired == 'false') {
-    isEmailValid = true;
+    if((email == '')){
+      isEmailValid = true;
+    }
+    else if(email.match(emailRegex)){
+      isEmailValid=true
+    }
+    else{
+      isEmailValid= false;
+    }
   }
   else {
     isEmailValid = false;
@@ -646,7 +654,16 @@ function handleSubmit(e, id, shop, product, handle) {
     isNameValid = true;
   }
   else if (nameRequired == 'false') {
-    isNameValid = true;
+  
+    if((name == '')){
+      isNameValid = true;
+    }
+    else if(name.match(nameRegex) && (name.length <= 25)){
+      isNameValid=true
+    }
+    else{
+      isNameValid = false;
+    }
   }
   else {
     isNameValid = false;
@@ -676,7 +693,15 @@ function handleSubmit(e, id, shop, product, handle) {
   }
   else if (locationRequired == 'false') {
     isLocationValid = true;
-
+    if((location == '')){
+      isLocationValid = true;
+    }
+    else if(location.length <= 1500){
+      isLocationValid=true
+    }
+    else{
+      isLocationValid = false;
+    }
 
   }
   else {

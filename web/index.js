@@ -13,8 +13,7 @@ import tableRoutes from './Routes/table.js'
 import detailsRoute from './Routes/details.js'
 import settingsRoute from './Routes/settings.js'
 import { GraphQLClient } from 'graphql-request'
-
-
+import nodemailer from 'nodemailer'
 import bodyParser from "body-parser";
 
 
@@ -68,6 +67,7 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
   const DataValue = Data.map(cat => `'${cat}'`).join(', ');
 
   const checkStatus = `Select settings FROM ${settingsTable} Where type='autopublish'`;
+  const checkMailSetting = `Select settings FROM ${settingsTable} Where type='emailSettings'`;
   const query = `INSERT INTO ${reviewTable} (${Columns}) VALUES (${DataValue});INSERT INTO ${detailsTable} (${Columns}) VALUES (${DataValue})`
   const enabledQuery = `INSERT INTO ${reviewTable} (${Columns} , reviewStatus) VALUES (${DataValue}, 'Published');INSERT INTO ${detailsTable} (${Columns} , reviewStatus) VALUES (${DataValue},'Published')`
 
@@ -114,22 +114,96 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
           sum += itm;
         })
         averageRating = sum / length;
-        await metafieldFunctionality()
+        await sendMail()
 
       }
     });
   }
 
+  async function sendMail(){
+    //reset all settings
+  
+    const checkMailSetting = `Select settings FROM ${settingsTable} Where type='emailSettings'`;
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, // Use `true` for port 465, `false` for all other ports
+      auth: {
+        user: process.env.AUTH_USER,
+        pass: process.env.AUTH_PASS,
+      },
+    });
+  
+    con.query(checkMailSetting, async (err, results) => {
+      if (err) {
+        
+        return res.status(400).send(JSON.stringify({ 'error': err.message }))
+      }
+      else {
+        let resultObj = results[0]?.settings;
+        let dataObj = JSON.parse(resultObj)
+        const sendMail = dataObj?.sendEmail;
+        const userEmail = dataObj.email;
+        if (sendMail === true) {
+          await sendingMail(userEmail)
+          await metafieldFunctionality()
+        }
+        else {
+          metafieldFunctionality()
+        }
+      }
+  
+    });
+  
+    async function sendingMail(userEmail) {
+      // send mail with defined transport object
+      // console.log(Obj,'your object')
+      const {reviewTitle , reviewDescription , StarRating , productTitle } = Obj;
+      try {
+        await transporter.sendMail({
+          from: '"IT GEEKS REVIEWS" <mailto:itg.donotreply@gmail.com>', // sender address
+          to: userEmail, // list of receivers
+          subject: `New Review Notification for ${productTitle} in Your Store`, // Subject line
+          text: "New Review", // plain text body
+          html: `Dear User,<br><br>
+
+          We hope this email finds you well. We wanted to inform you that a new review has been received for the following product(s) in your store:<br><br>
+      
+          <b>Product Name:</b> ${productTitle}<br>
+          <b>Review Rating:</b> ${StarRating}<br>
+          <b>Review Title:</b>  ${reviewTitle}<br>
+          <b>Review Description:</b>  ${reviewDescription}<br>
+      
+          We value your feedback and appreciate your efforts in maintaining a positive customer experience. Please log in to your account to view and respond to the review.<br><br>
+      
+          If you have any questions or need further assistance, please don't hesitate to reach out to our support team.<br><br>
+      
+          Best regards,<br>
+          <b>ITGeeks Review App Team</b>`, // html body
+        });
+  
+      }
+      catch (err) {
+        console.log(err, 'error sending mail')
+        return res.status(400).send(JSON.stringify({ 'error generating mail': err.message }))
+  
+      }
+  
+    }
+  
+  
+  }
+
   async function metafieldFunctionality() {
 
-    console.log('inside metafield functionality******')
+
 
     //****************** getting session data *******************/
     let completeShop = shop.trim().replaceAll(" ","-") + '.myshopify.com';
     var session;
     var RatingMetaId;
     var ReviewCountId;
-    console.log(completeShop, 'complete shop')
+   
     let getSessionQuery = `Select * from shopify_sessions WHERE shop='${completeShop}'`
     con.query(getSessionQuery, async (err, results) => {
       if (err) {
@@ -137,7 +211,7 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
        }
 
       session = results[0];
-      console.log(session, 'session')
+ 
 
       var client = new shopify.api.clients.Graphql({ session });
 
@@ -175,7 +249,7 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
       } catch (error) {
         
-          return  res.status(400).send(JSON.stringify({'error' : error.message}))
+          // return  res.status(400).send(JSON.stringify({'error' : error.message}))
          
       }
 
@@ -193,12 +267,12 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
       } catch (error) {
       
-          return  res.status(400).send(JSON.stringify({'error' : error.message}))
+          // return  res.status(400).send(JSON.stringify({'error' : error.message}))
          
       }
 
       //****************** creating metafield *************************/
-      console.log('here ====> 2')
+      
 
       const createMetafieldMutation = `
       mutation {
@@ -237,7 +311,21 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
       //****************** updating my metafield *************************/
 
-      const metafieldsWithId = [
+      console.log(averageRating?.toFixed(1),'my average rating ********')
+      console.log(length,'my length********')
+      const metafieldsWithId = averageRating==='' || !averageRating || averageRating===null || averageRating===undefined ?[
+        {
+          id: `${RatingMetaId}`,
+          value: `${0}`, // Default value for review count
+
+        },
+        {
+          id: `${ReviewCountId}`,
+          value: `${length}`, // Default value for review count
+
+        },
+      ]
+      :[
         {
           id: `${RatingMetaId}`,
           value: `${averageRating?.toFixed(1)}`, // Default value for review count
@@ -283,9 +371,9 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
       // ************ checking if metafield exists or not //
       if (RatingMetaId === null || RatingMetaId === '' || RatingMetaId === undefined || ReviewCountId === null || ReviewCountId === '' || ReviewCountId === undefined) {
-      console.log('here ====> 3')
+ 
 
-        console.log(' creating metafield ***')
+       
         try {
           const createResponse = await client.query({
             data: {
@@ -616,7 +704,7 @@ app.get("/api/createAllTables/:shop", (req, res) => {
       },
       {
         "type": "emailSettings",
-        "setting": { "sendEmail": true, "email": "yourEmail@gmail.com" }
+        "setting": { "sendEmail": false, "email": "" }
       },
       {
         "type": "starIconColor",
@@ -650,7 +738,7 @@ app.get("/api/createAllTables/:shop", (req, res) => {
         "type": "reviewFormText",
         "setting": {
           "authorEmail": "Email",
-          "emailHelpMessage": "xyz@example.com...",
+          "emailHelpMessage": "xyz@example.com",
           "emailType": "required",
           "authorName": "Name",
           "nameHelpMessage": "Enter your name here",

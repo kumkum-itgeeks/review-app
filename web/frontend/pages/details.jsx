@@ -30,6 +30,7 @@ export default function Details() {
   const [totalRating, setTotalRating] = useState(0);
   const [showWarning, setShowWarning] = useState(0);
   const [replyLoading ,setReplyLoading]=useState(false)
+  const [statusBtnLoading , setStatusBtnLoading] = useState(false)
 
 
   //*******variables********
@@ -49,9 +50,7 @@ export default function Details() {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', options);
   }
-  const test = () => {
-    console.log('id', review.productid)
-  }
+
 
   const deleteReview = () => {
     fetch(`/api/review/deleteReview/${Id}`)
@@ -111,14 +110,14 @@ const dissmissInappropriate=()=>{
   const publishReviews = () => {
     fetch(`/api/review/publishReview/${Id}`)
       .then(res => res.json())
-      .then(data => { getReviewDetails(),show('Review published  ', { duration: 2000 }), updateMetafield(data)  })
+      .then(data => { getReviewDetails(),show('Review published  ', { duration: 2000 }), updateMetafield(data) , setStatusBtnLoading(()=>false) })
       .catch(error => console.error(error));
   }
 
   const unpublishReview = () => {
     fetch(`/api/review/unpublishReview/${Id}`)
       .then(res => res.json())
-      .then(data => { getReviewDetails(), show('Review unpublished ', { duration: 2000 }), updateMetafield(data) })
+      .then(data => { getReviewDetails(), show('Review unpublished ', { duration: 2000 }), updateMetafield(data) , setStatusBtnLoading(()=>false) })
       .catch(error => console.error(error));
   }
 
@@ -156,15 +155,12 @@ const dissmissInappropriate=()=>{
 
   
   const updateMetafield=(data)=>{
-    // fetch(`/api/table/updateMetafields/${Id}`)
-    //   .then(res => res.json())
-    //   .then(data => { console.log(data)})
-    //   .catch(error => console.error(error));
+
     const productHandle = data?.productHandle;
     const productid = data?.productid;
     fetch(`/api/table/updateMetafields/${Id}/${productid}/${productHandle}`)
       .then(res => res.json())
-      .then(data => { console.log(data) })
+      .then(data => { (data) })
       .catch(error => console.error(error));
   }
   //*******useEffects********
@@ -235,7 +231,7 @@ const dissmissInappropriate=()=>{
 
       <BlockStack gap='300'>
         <Box maxWidth="100px">
-        <Button variant="secondary" onClick={() => changeStatus()} textAlign="start" size="medium" fullWidth='false' >
+        <Button variant="secondary" loading={statusBtnLoading} onClick={() => {changeStatus() , setStatusBtnLoading(true)}} textAlign="start" size="medium" fullWidth='false' >
           {
            
               review?.reviewStatus == 'Published' ?

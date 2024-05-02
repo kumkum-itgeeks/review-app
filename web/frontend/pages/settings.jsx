@@ -17,7 +17,7 @@ export default function Settings() {
   const [starValue, setStarValue] = useState('themecolor');
   const [checked, setChecked] = useState(false);
   const [showReviewChecked, setShowReviewChecked] = useState(true);
-  const [email, setEmail] = useState('your@gmail.com')
+  const [email, setEmail] = useState('')
   const [popoverActive, setPopoverActive] = useState(false);
   const [popoverActiveStar, setPopoverActiveStar] = useState(false);
   const [popoverActiveDivider, setPopoverActiveDivider] = useState(false);
@@ -28,6 +28,7 @@ export default function Settings() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [resetLoading , setResetLoading] = useState(true)
   const [saveLoading , setSaveLoading] = useState(true)
+  const [isEmailValid , setEmailValid] = useState(true)
   const {activePlan , planExists} = useContext(MyContext).hasPlan;
 
   const [color, setColor] = useState({  //star icon color state
@@ -79,19 +80,19 @@ export default function Settings() {
     paginationPrevLabel: '&laquo; Previous',
     reportAsinappropriate: 'Report as Inappropriate',
     reportAsinappropriateMessage: 'This review has been reported',
-    authorInformation: "<strong>{{ review.author }}</strong> on <strong>{{ review.created_at | date: '%b %d, %Y' }}</strong>"
+    authorInformation: "<p><i><b>${itm.userName} </b> on <b>${itm.datePosted}</b></i></p>"
   })
 
   const [reviewFormText, setReviewFormText] = useState({ // for review form text setting 
     authorEmail: 'Email',
-    emailHelpMessage: 'john.smith@example.com',
+    emailHelpMessage: 'xyz@example.com',
     emailType: 'required',
     authorName: 'Name',
     nameHelpMessage: 'Enter your name here',
     nameType: 'required',
     authorLocation: 'Location',
     locationHelpMessage: 'Enter your location here',
-    locationType: 'required',
+    locationType: 'hidden',
     reviewFormTitle: 'Write a Review',
     reviewRating: 'Rating',
     reviewTitle: 'Review Title',
@@ -105,11 +106,13 @@ export default function Settings() {
 
   const [BadgeText, setBadgeText] = useState({ // for badge text setting 
     noReviewsBadge: 'No reviews',
-    reviewsBadge: "{{product.reviews_count}} {{ product.reviews_count | pluralize: 'review', 'reviews' }}"
+    reviewsBadge: "${count} reviews"
   })
 
 
   //******** variables********
+
+
 
   const { show } = useToast();
   let type = ['autopublish', 'emailSettings', 'starIconColor', 'reviewListingLayout', 'reviewListingText', 'reviewFormText', 'badgeText']
@@ -207,19 +210,38 @@ export default function Settings() {
 
   //********functions********* 
 
-  const saveSettings = () => {
+  const saveSettings = async() => {
+    setSaveLoading(true)
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if(checked===true){
+      if ((email.match(emailRegex)) && (email != '')) {
+        setEmailValid(true)
+        await save()
+      }
+      else{
+        setEmailValid(false)
+        setSaveLoading(false)
+        show('Invalid Email!.', { duration: 2000 })
+      }
+    }
+    else{
+      await save();
+    }
 
-    fetch('/api/settings/saveSettings', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ data }),
-    })
-      .then(res => res.json())
-      .then(data => { show('Settings saved.', { duration: 2000 }) , setSaveLoading(false)})
-      .catch(error => console.error(error));
+    async function save(){
+
+      fetch('/api/settings/saveSettings', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ data }),
+      })
+        .then(res => res.json())
+        .then(data => { show('Settings saved.', { duration: 2000 }) , setSaveLoading(false)})
+        .catch(error => console.error(error));
+    }
 
   }
 
@@ -237,6 +259,15 @@ export default function Settings() {
       })
       .catch(error => console.error(error));
   }
+
+
+  const sendMail = () => {
+
+    fetch(`/api/settings/sendMail`)
+      .then(res => res.json())
+      .then(data => {(data)})
+      .catch(error => console.error(error));
+  }
   const getSettings = () => {
 
     fetch(`/api/settings/getSettings`)
@@ -248,22 +279,22 @@ export default function Settings() {
   async function createAllTables() {
     await fetch(`api/table/createReviewTable`)
      .then((res) => res.json())
-     .then((data) => console.log(data))
+     .then((data) => (data))
      .catch(error => console.error(error));
 
     await fetch(`api/table/createDetailTable`)
      .then((res) => res.json())
-     .then((data) => console.log(data))
+     .then((data) => (data))
      .catch(error => console.error(error));
 
     await fetch(`api/table/createDeletedReviewsTable`)
      .then((res) => res.json())
-     .then((data) => { console.log(data) })
+     .then((data) => { (data) })
      .catch(error => console.error(error));
 
     await fetch(`api/settings/addSettingsData`)
      .then((res) => res.json())
-     .then((data) => { console.log(data), getSettings() })
+     .then((data) => { getSettings() })
      .catch(error => console.error(error));
 
  }
@@ -281,7 +312,7 @@ export default function Settings() {
 
     fetch(`/api/table/createSettingsTable`)
       .then(res => res.json())
-      .then(data => console.log(data))
+      .then(data => (data))
       .catch(error => console.error(error));
   }
 
@@ -295,7 +326,7 @@ export default function Settings() {
       body: JSON.stringify({ data }),
     })
       .then(res => res.json())
-      .then(data => console.log((data)))
+      .then(data => ((data)))
       .catch(error => console.error(error));
   }
 
@@ -524,8 +555,6 @@ export default function Settings() {
     </>
   );
 
-  // console.log(isModalOpen)
-
   return (
     <>
       <Page >
@@ -595,7 +624,6 @@ export default function Settings() {
                 <Box background='bg-surface' padding={400}>
                   <BlockStack gap={300}>
                     <Checkbox
-                      disabled
                       label={<Text variant="headingSm" as="h6">"Send me an email when a review is submitted."</Text>}
                       checked={emailSetting.sendEmail}
                       onChange={handleCheck}
@@ -603,12 +631,13 @@ export default function Settings() {
                     {
                       checked ?
                         <TextField
-                          disabled
                           label="Email"
                           type="email"
+                          placeholder='xyz@example.com'
                           value={emailSetting.email}
                           onChange={handeEmailtoSend}
                           autoComplete="off"
+                          error={!isEmailValid ? 'enter valid email address' : ''}
                         />
                         : ''
                     }
@@ -1110,7 +1139,7 @@ export default function Settings() {
               ]}
             />
             <Button size='large' onClick={() => setIsModalOpen(true)} tone='critical' variant='primary' loading={resetLoading}> Reset all settings to default</Button>
-            <Button size='large' onClick={() =>{ saveSettings() , setSaveLoading(true)}} tone='success' variant='primary' loading={saveLoading}> Save </Button>
+            <Button size='large' onClick={() =>{ saveSettings() }} tone='success' variant='primary' loading={saveLoading}> Save </Button>
           </InlineStack>
         </BlockStack>
       </Page>

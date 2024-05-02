@@ -41,6 +41,10 @@ export default function App() {
                   label: ("Pricing Plans"),
                   destination: "/plan",
                 },
+                {
+                  label: ("Support"),
+                  destination: "/support",
+                },
               ]}
             />
             <Routes pages={pages} />

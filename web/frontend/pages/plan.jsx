@@ -35,9 +35,9 @@ export default function PricingPlan() {
         if (chargeId) {
             setProSelectLoading(true)
             fetch(`/api/table/addProPlan/${chargeId}`)
-                .then((res) => res.json())
-                .then((data) => {
-                    setProSelectLoading(false),
+                .then((res) => {
+                    if(res.status=== 200){
+                        setProSelectLoading(false),
                         setModalButtonLoading(false),
                         setDashBoardDisabled(false),
                         setIsModalOpen(false),
@@ -46,14 +46,22 @@ export default function PricingPlan() {
                             planExists: true
                         }),
                         show(' Plan Succesfully Added ', { duration: 2000 }), Navigate('/plan')
+                    }
+                    else{
+                        setProSelectLoading(false),
+                        setModalButtonLoading(false),
+                        show(' error adding plan ', { duration: 2000 }),
+                        Navigate('/plan')
+                    }
                 })
                 .catch((err) => {
+                    setProSelectLoading(false),
+                    setModalButtonLoading(false),
                     console.error('error adding plan ', err)
                 })
         }
 
     }, [])
-
 
     const setAutoPublish=()=>{
         fetch(`/api/settings/setAutoPublish`)
@@ -144,7 +152,7 @@ export default function PricingPlan() {
                                                     <List type="bullet" gap="loose">
                                                         <BlockStack gap={300}>
                                                             <List.Item>Manage a substantial number of reviews. </List.Item>
-                                                            <List.Item>Access review import/export features for data flexibility.</List.Item>
+                                                            <List.Item>Access review export feature for data flexibility.</List.Item>
                                                             <List.Item>Enjoy basic customization options.</List.Item>
                                                             <List.Item>Receive responsive email support.</List.Item>
                                                             <List.Item>Easily handle essential review tasks.</List.Item>
@@ -152,7 +160,6 @@ export default function PricingPlan() {
                                                     </List>
                                                 </Box>
                                             </Box>
-
                                         </Box>
                                         <Divider borderColor="border" />
                                         <InlineStack blockAlign="center" align="start">

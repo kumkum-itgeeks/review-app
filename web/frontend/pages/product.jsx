@@ -168,7 +168,7 @@ export default function Product() {
   const createMetafield = () => {
     fetch('/api/table/getMetafields')
       .then(res => res.json())
-      .then(data => console.log(data))
+      .then(data => (data))
       .catch(error => console.error(error));
   }
 
@@ -177,7 +177,7 @@ export default function Product() {
     const productid = data?.productid;
     fetch(`/api/table/updateMetafields/${selectedResources}/${productid}/${productHandle}`)
       .then(res => res.json())
-      .then(data => { console.log(data) })
+      .then(data => { (data) })
       .catch(error => console.error(error));
   }
   const deleteReview = () => {
@@ -224,7 +224,7 @@ export default function Product() {
   const createTable = () => {
     fetch('/api/table/createDetailTable')
       .then(res => res.json())
-      .then(data => console.log(data))
+      .then(data => (data))
       .catch(error => console.error(error));
   }
 
@@ -347,10 +347,10 @@ export default function Product() {
   }));
 
   const sortOptions = [
-    { label: 'Rating', value: 'starRating asc', directionLabel: 'Ascending' },
-    { label: 'Rating', value: 'starRating desc', directionLabel: 'Descending' },
-    { label: 'Date', value: 'datePosted asc', directionLabel: 'A-Z' },
-    { label: 'Date', value: 'datePosted desc', directionLabel: 'Z-A' },
+    { label: 'Rating', value: 'starRating asc', directionLabel: 'Low - High' },
+    { label: 'Rating', value: 'starRating desc', directionLabel: 'High - Low' },
+    { label: 'Date', value: 'datePosted asc', directionLabel: 'Oldest - Newest' },
+    { label: 'Date', value: 'datePosted desc', directionLabel: 'Newest - Oldest' },
     { label: 'Status', value: 'reviewStatus asc', directionLabel: 'A-Z' },
     { label: 'Status', value: 'reviewStatus desc', directionLabel: 'Z-A' },
   ];
@@ -498,10 +498,13 @@ export default function Product() {
     ),
   );
 
-  const promotedBulkActions = [
+
+  //conditional statements
+
+  const promotedBulkActions =   activePlan === 'Basic Plan' && disableBulkActions ? [
     {
       content: 'Unspam selected reviews',
-      onAction: () => unSpamReview(),
+      onAction: () => { unSpamReview() },
       disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
     },
     {
@@ -515,18 +518,37 @@ export default function Product() {
       disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
     },
     {
-      content: 'delete selected reviews',
+      content: 'Delete selected reviews',
       onAction: () => deleteReview(),
       disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
     },
-    activePlan==='Basic Plan' && disableBulkActions ?
     {
-      content : <Badge tone="attention" size="small" icon={LockIcon} >PRO</Badge>,
+      content: <Badge tone="attention" size="small" icon={LockIcon} >PRO</Badge>,
     }
-    :{}
-  ];
-
-  //conditional statements
+  ]
+  :
+  [
+    {
+      content: 'Unspam selected reviews',
+      onAction: () => { unSpamReview() },
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
+    },
+    {
+      content: 'Publish selected reviews',
+      onAction: () => publishReview(),
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
+    },
+    {
+      content: 'Unpublish selected reviews',
+      onAction: () => unpublishReview(),
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
+    },
+    {
+      content: 'Delete selected reviews',
+      onAction: () => deleteReview(),
+      disabled: activePlan === 'Pro Plan' ? false : disableBulkActions
+    }
+  ]
 
   if (accountStatus && !isEmpty(accountStatus)) {
     const key = 'accountStatus';
@@ -645,6 +667,7 @@ export default function Product() {
               setMode={setMode}
               loading={Loading}
               filteringAccessibilityTooltip='Search'
+              hideFilters
 
             />
             <IndexTable

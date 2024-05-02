@@ -15,6 +15,7 @@ import solidStar from '../assets/star-solid.svg'
 import '../css/index.css';
 import { hide } from "@shopify/app-bridge/actions/ContextualSaveBar";
 import { disable } from "@shopify/app-bridge/actions/LeaveConfirmation";
+// import errorLogs from '../'
 
 
 export default function HomePage() {
@@ -189,23 +190,23 @@ export default function HomePage() {
   async function createAllTables() {
     await fetch(`api/table/createReviewTable`)
       .then((res) => res.json())
-      .then((data) => console.log(data))
+      .then((data) => (data))
       .catch(error => console.error(error));
 
 
     await fetch(`api/table/createDetailTable`)
       .then((res) => res.json())
-      .then((data) => console.log(data))
+      .then((data) => (data))
       .catch(error => console.error(error));
 
     await fetch(`api/table/createDeletedReviewsTable`)
       .then((res) => res.json())
-      .then((data) => { console.log(data) })
+      .then((data) => { (data) })
       .catch(error => console.error(error));
 
     await fetch(`api/settings/addSettingsData`)
       .then((res) => res.json())
-      .then((data) => { console.log(data), getAllReviews() })
+      .then((data) => {  getAllReviews() })
       .catch(error => console.error(error));
 
   }
@@ -296,7 +297,6 @@ export default function HomePage() {
             IdArr.push(pid.slice(22))
           }
           else {
-
             productHandle.splice(ind, 1)
             review.splice(ind, 1)
             setImportLoading(false)
@@ -323,16 +323,24 @@ export default function HomePage() {
         },
         body: JSON.stringify({ review, handle, pidArr }),
       })
-        .then(res => res.json())
-        .then(data => {
-          setImportLoading(false),
+        .then(res => {
+          if(res.status === 200){
+            setImportLoading(false),
+                setFileStatus(''),
+                show(` ${review?.length <=1 ? `${review?.length} Review imported` : `${review?.length} Reviews imported`} `, { duration: 2000 }),
+                getAllReviews()
+          }
+          else{
+            setImportLoading(false),
             setFileStatus(''),
-            show(' Reviews imported.', { duration: 2000 }),
+            show(' Error importing reviews.', { duration: 2000 }),
             getAllReviews()
+          }
         })
         .catch((err) => {
-          console.log('error :', err)
+          setImportErrors(err)
           show(' Error importing reviews.', { duration: 2000 })
+          
         })
       :
       show(' Error importing reviews.', { duration: 2000 })
@@ -372,6 +380,7 @@ export default function HomePage() {
     fetch('/api/review/exportReviews')
       .then(res => res.json())
       .then(jsonData => {
+      
         // Convert JSON data to CSV
         if (jsonData.length <= 0 || !jsonData) {
           showToast('No reviews to export')
@@ -399,7 +408,7 @@ export default function HomePage() {
     csv += headers.join(',') + '\n';
     // Add the data
     jsonData.forEach(function (row) {
-      let data = headers.map(header => JSON.stringify(row[header])).join(','); // Add JSON.stringify statement
+      let data = headers.map(header => (row[header])).join(','); // Add JSON.stringify statement
       csv += data + '\n';
     });
     return csv;
@@ -447,13 +456,13 @@ export default function HomePage() {
     const productid = data?.productid;
     fetch(`/api/table/updateMetafields/${selectedResources}/${productid}/${productHandle}`)
       .then(res => res.json())
-      .then(data => { console.log(data) })
+      .then(data => { (data) })
       .catch(error => console.error(error));
   }
   const createTable = () => {
     fetch('/api/table/createDetailTable')
       .then(res => res.json())
-      .then(data => console.log(data))
+      .then(data => (data))
       .catch(error => console.error(error));
   }
 
@@ -554,10 +563,10 @@ export default function HomePage() {
   );
 
   const sortOptions = [
-    { label: 'Rating', value: 'starRating asc', directionLabel: 'Ascending' },
-    { label: 'Rating', value: 'starRating desc', directionLabel: 'Descending' },
-    { label: 'Date', value: 'datePosted asc', directionLabel: 'A-Z' },
-    { label: 'Date', value: 'datePosted desc', directionLabel: 'Z-A' },
+    { label: 'Rating', value: 'starRating asc', directionLabel: 'Low - High' },
+    { label: 'Rating', value: 'starRating desc', directionLabel: 'High - Low' },
+    { label: 'Date', value: 'datePosted asc', directionLabel: 'Oldest - Newest' },
+    { label: 'Date', value: 'datePosted desc', directionLabel: 'Newest - Oldest' },
     { label: 'Status', value: 'reviewStatus asc', directionLabel: 'A-Z' },
     { label: 'Status', value: 'reviewStatus desc', directionLabel: 'Z-A' },
   ];

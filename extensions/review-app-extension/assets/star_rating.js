@@ -1,4 +1,4 @@
-const myUrl = `https://iv-glasgow-cheers-ko.trycloudflare.com`
+const myUrl = `https://coordinated-inherited-inc-thereof.trycloudflare.com`
 
 function test(shop, handle, avgRating, count) {
 
@@ -12,7 +12,6 @@ function getColor(shop) {
     .then(res => res.json())
     .then(tableExists => {
       if (tableExists === true) {
-        console.log('table exists ..')
         fetch(`${myUrl}/api/starColor/${JSON.stringify(shop)}`)
           .then(res => res.json())
           .then(data => { setColor(data) })
@@ -21,8 +20,6 @@ function getColor(shop) {
         setColor('#FFFF00')
       }
     })
-
-
 }
 
 function setColor(data) {
@@ -34,7 +31,6 @@ function setColor(data) {
   for (var i = 0; i < activeStars.length; i++) {
     activeStars[i].style.color = color;
   }
-
 }
 
 function setData(shop, avgRating, count , handle) {
@@ -55,7 +51,13 @@ function setData(shop, avgRating, count , handle) {
   }).join('')
 
   document.getElementById('review-list').innerHTML = Html;
-  document.getElementById('rating-count-block').innerHTML = `${avgRating}`;
+  let fixedAvg = Math.trunc(Number(avgRating));
+  if(Number(avgRating) === fixedAvg){
+    document.getElementById('rating-count-block').innerHTML = `${fixedAvg}`;
+  }
+  else{
+    document.getElementById('rating-count-block').innerHTML = `${avgRating}`;
+  }
 
   fetch(`${URL}/api/checkTableExists/${JSON.stringify(shop)}`)
     .then(res => res.json())
@@ -74,7 +76,6 @@ function setData(shop, avgRating, count , handle) {
             else{
               document.getElementById('review-count-block').innerHTML = reviewsBadge.replaceAll("${count}", count);
             }
-            
           }
           )
       }

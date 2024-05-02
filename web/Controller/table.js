@@ -96,12 +96,25 @@ const checkPlanTableExists = (req, res) => {
 const addBasicPlan = (req, res) => {
    const shopName = req.shopname;
    const PlanTable = shopName + '_pricing_plan';
- 
+   const session = res.locals.shopify.session;
+   const client = new shopify.api.clients.Graphql({session});
+   var validId;
 
    const CheckPlanQuery = `SELECT * FROM ${PlanTable} WHERE shop ='${shopName}' `;
    const InsertPlanQuery  = `INSERT INTO ${PlanTable} (planName , shop) VALUES ('Basic Plan' , '${shopName}');`
    const UpdatePlanQuery  = `UPDATE  ${PlanTable} SET chargeId = Null , planName = 'Basic Plan' WHERE shop = '${shopName}' `
-
+  
+   const subscriptionCancelQuery = `mutation appSubscriptionCancel{
+    appSubscriptionCancel(id: ${validId}) {
+      appSubscription {
+        id
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }`
 
    con.query(CheckPlanQuery, async function (err, result) {
     if (err) {
@@ -112,11 +125,62 @@ const addBasicPlan = (req, res) => {
        await  InsertPlan()
       }
       else{
-        await UpdatePlan()
+        await getSubscriptionId()
       }
    
     }
   });
+
+  async function getSubscriptionId(){
+    try{
+      const response = await client.query({
+        data: ` query {currentAppInstallation {
+            activeSubscriptions {
+              id
+            }
+         }
+        }`
+    });
+     validId=(response?.body?.data?.currentAppInstallation?.activeSubscriptions[0]?.id)
+     if(validId=== undefined || validId=== '' || !validId){
+      await UpdatePlan()
+     }
+     else{
+       await cancelSubscription()
+     }
+    }
+    catch(error){
+        return res.status(400).send(JSON.stringify({'error checking charge id for basic plan' : error}))
+      
+    }
+  }
+
+  async function cancelSubscription(){
+    try{
+
+     const Response = await client.query({
+      data: {
+        query: `
+          mutation {
+            appSubscriptionCancel(id: "${validId}") {
+              appSubscription {
+                id
+              }
+              userErrors {
+                field
+                message
+              }
+            }
+          }
+        `
+      }
+    });
+    await UpdatePlan()
+    }
+    catch(error){
+      return res.status(400).send(JSON.stringify({'error canceling subscription' : error}))
+    }
+  }
 
 async function InsertPlan(){
   con.query(InsertPlanQuery, function (err, result) {
@@ -154,7 +218,7 @@ const createSubscription = async(req , res) =>{
     {
       "plan":{
         "appRecurringPricingDetails": {
-          "interval": "ANNUAL",
+          "interval": "EVERY_30_DAYS",
           "price": {
             "amount": "9",
             "currencyCode": "USD"
@@ -233,12 +297,20 @@ const addProPlan = async(req, res) => {
        }
       }`
   });
-  validId=((response?.body?.data?.currentAppInstallation?.activeSubscriptions[0].id)).slice(30)
+  let responseId =response?.body?.data?.currentAppInstallation?.activeSubscriptions[0]?.id;
+  if(responseId){
+    validId=(responseId).slice(30)
+  }
+  else{
+    validId = null
+  }
+  if(validId===undefined || validId === null || !validId){
+    return res.status(404).send(JSON.stringify({'error':'susbcription not done'}))
+  }
   await addData(validId)
   }
   catch(error){
-      console.log(error)
-      return res.status(400).send(JSON.stringify({'error checking charge id' : error}))
+      return res.status(400).send(JSON.stringify({'error checking charge id for pro plan' : error}))
     
   }
 
@@ -276,7 +348,6 @@ const addProPlan = async(req, res) => {
 async function InsertProPlan(){
   con.query(InsertPlanQuery, function (err, result) {
     if (err) {
-      console.log(err)
       return res.status(400).send(JSON.stringify({ 'error updating plan ': err.message }))
     }
     else {

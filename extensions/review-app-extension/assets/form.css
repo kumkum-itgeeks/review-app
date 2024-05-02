@@ -176,16 +176,16 @@ h2 , h3 , h4 {
   .pagination-btn{
     height:40px;
     width:100px;
-    margin: 0 20px 0 20px;
+    margin: 40px 0px 0 20px;
     outline:none;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-weight: bold;
   }
 
-  #review-listing{
+  /* #review-listing{
     min-height: 600px;
-  }
+  } */
 
   #common-err{
     display: none;

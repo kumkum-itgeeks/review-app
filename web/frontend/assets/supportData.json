@@ -1,0 +1,33 @@
+[
+    {
+        "title" : "Help Guide",
+        "description" : "Access our comprehensive help guide for clear instructions and valuable resources to resolve your queries.",
+        "buttonText" : "View Help Guide",
+        "img" : "../assets/support-images/Help guide.svg"
+    },
+    {
+        "title" : "Email Support",
+        "description" : "Reach out to us via email for reliable and efficient support tailored to your needs. Response Time: 24-48 hours",
+        "buttonText" : "Send an email",
+        "img" : "../assets/support-images/Email.svg"
+    },
+    {
+        "title" : "Schedule a Meeting",
+        "description" : "Let's hop on a call and let our Experts Team assist you with the app setup.",
+        "buttonText" : "Schedule a Meeting",
+        "img" : "../assets/support-images/Success.svg"
+    },
+    {
+        "title" : "FAQ's",
+        "description" : "Answers to Your Frequently Asked Questions: Everything You Need to Know About ITGeeks Reviews App",
+        "buttonText" : "View FAQ's",
+        "img" : "../assets/support-images/FAQ.svg"
+    },
+    {
+        "title" : "Raise Issue / Feedback",
+        "description" : "Facing any issues with the app or have a feedback for us? Do let us know!",
+        "buttonText" : "Raise Issue / Send Feedback",
+        "img" : "../assets/support-images/Feedback.svg"
+    }
+    
+]

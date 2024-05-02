@@ -13,4 +13,6 @@ router.post('/saveSettings',settingController.ModifySettings);
 
 router.get('/setAutoPublish',settingController.setAutoPublish);
 
+router.get('/sendMail',settingController.sendMail);
+
 export default router;
