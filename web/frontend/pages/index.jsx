@@ -785,6 +785,7 @@ export default function HomePage() {
                 { title: 'Status' },
                 { title: '' },
               ]}
+
             >
               {rowMarkup}
             </IndexTable>

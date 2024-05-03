@@ -15,6 +15,7 @@ import settingsRoute from './Routes/settings.js'
 import { GraphQLClient } from 'graphql-request'
 import nodemailer from 'nodemailer'
 import bodyParser from "body-parser";
+import 'dotenv/config'
 
 
 export const con = sql.createConnection({
@@ -122,7 +123,7 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
   async function sendMail(){
     //reset all settings
-  
+    
     const checkMailSetting = `Select settings FROM ${settingsTable} Where type='emailSettings'`;
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",

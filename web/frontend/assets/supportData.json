@@ -22,12 +22,6 @@
         "description" : "Answers to Your Frequently Asked Questions: Everything You Need to Know About ITGeeks Reviews App",
         "buttonText" : "View FAQ's",
         "img" : "../assets/support-images/FAQ.svg"
-    },
-    {
-        "title" : "Raise Issue / Feedback",
-        "description" : "Facing any issues with the app or have a feedback for us? Do let us know!",
-        "buttonText" : "Raise Issue / Send Feedback",
-        "img" : "../assets/support-images/Feedback.svg"
     }
     
 ]

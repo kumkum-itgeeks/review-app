@@ -1,4 +1,4 @@
-const myUrl = `https://coordinated-inherited-inc-thereof.trycloudflare.com`
+const myUrl = `https://votes-routing-cornell-guided.trycloudflare.com`
 
 function test(shop, handle, avgRating, count) {
 

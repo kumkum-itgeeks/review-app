@@ -2,7 +2,7 @@
 
 client_id = "c8b76d8cdccd39ae45b847901d4b4fb3"
 name = "reviews"
-application_url = "https://coordinated-inherited-inc-thereof.trycloudflare.com"
+application_url = "https://votes-routing-cornell-guided.trycloudflare.com"
 embedded = true
 
 [build]
@@ -16,9 +16,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://coordinated-inherited-inc-thereof.trycloudflare.com/auth/callback",
-  "https://coordinated-inherited-inc-thereof.trycloudflare.com/auth/shopify/callback",
-  "https://coordinated-inherited-inc-thereof.trycloudflare.com/api/auth/callback"
+  "https://votes-routing-cornell-guided.trycloudflare.com/auth/callback",
+  "https://votes-routing-cornell-guided.trycloudflare.com/auth/shopify/callback",
+  "https://votes-routing-cornell-guided.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

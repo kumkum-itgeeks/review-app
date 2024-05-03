@@ -6,7 +6,7 @@ var isthisLastPage;
 var starsettingColor = "#FFFF00";
 var shopName;
 let PageNumber = document.getElementById('page-number-display').value;
-const URL = `https://coordinated-inherited-inc-thereof.trycloudflare.com`
+const URL = `https://votes-routing-cornell-guided.trycloudflare.com`
 
 const defaultData = {
   averageRating: 0,
