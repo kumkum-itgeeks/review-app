@@ -19,10 +19,10 @@ import 'dotenv/config'
 
 
 export const con = sql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "reviews",
+  host: process.env.HOST_NAME,
+  user: process.env.USER,
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE,
   multipleStatements: true
 });
 
@@ -123,7 +123,7 @@ app.get("/api/addReviews/:obj/:shop/:handle/:id", async (_req, res) => {
 
   async function sendMail(){
     //reset all settings
-    
+
     const checkMailSetting = `Select settings FROM ${settingsTable} Where type='emailSettings'`;
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
